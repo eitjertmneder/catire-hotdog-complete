@@ -146,10 +146,10 @@ export class CreateOrderItemDTO {
   @Min(0, { message: 'base_price: El precio debe ser >= 0' })
   base_price!: number;
 
-  @IsNotEmpty({
-    message: 'features: Las caracteristicas son requeridas.',
-  })
+  @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => FeaturesDTO)
   features!: FeaturesDTO[];
 }
+
+

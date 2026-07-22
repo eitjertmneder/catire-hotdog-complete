@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+﻿import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UserService } from 'src/user/user.service';
@@ -7,6 +7,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { PermissionGuard } from './permission.guard';
+import { SecurityModule } from '../security/security.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { PermissionGuard } from './permission.guard';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '2hrs' },
     }),
+    SecurityModule,
   ],
   controllers: [AuthController],
   providers: [

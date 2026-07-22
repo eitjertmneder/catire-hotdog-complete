@@ -16,6 +16,13 @@ export const AdminScreen = () => {
     { title: 'Delivery', icon: '??', route: 'DeliveryPartners' },
     { title: 'Proveedores', icon: '??', route: 'Suppliers' },
     { title: 'Gamificación', icon: '??', route: 'Gamification' },
+    { title: 'Pagos', icon: '??', route: 'Payments' },
+    { title: 'Reportes PDF', icon: '??', route: 'PDFReports' },
+    { title: '2FA Seguridad', icon: '??', route: 'TwoFA' },
+    { title: 'Sesiones', icon: '???', route: 'Sessions' },
+    { title: 'Auditoría', icon: '??', route: 'AuditLogs' },
+    { title: 'Email Templates', icon: '??', route: 'EmailTemplates' },
+    { title: 'Mapa', icon: '???', route: 'GoogleMaps' },
     { title: 'Usuarios', icon: '??', route: 'UsersAdmin' },
     { title: 'Cajeros', icon: '?????', route: 'CreateCajero' },
     { title: 'Sucursales', icon: '??', route: 'BranchAdmin' },
@@ -82,6 +89,11 @@ export const AdminScreen = () => {
     </SafeAreaView>
   );
 };
+
+
+
+
+
 
 
 

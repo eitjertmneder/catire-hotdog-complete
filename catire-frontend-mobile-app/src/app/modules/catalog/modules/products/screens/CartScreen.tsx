@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, TextInput, Switch, Alert, Modal, ActivityIndicator, Image, ScrollView
 } from 'react-native';
@@ -8,7 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useCartStore } from '../../../../../shared/store/cart.store';
 import { useOrdersStore } from '../../../../orders/store/orders.store';
 import { useAuthStore } from '../../../../../shared/store/auth.store';
-import { useCurrencyStore } from '../../../../../shared/store/currency.store';
+import { useExchangeRateStore } from '../../../../../shared/store/exchange-rate.store';
 import financeApi from '../../../../finance/api/finance.api';
 import { styles } from '../styles/cart.styles';
 import { CartItemAccordion } from '../components/CartItemAccordion';
@@ -19,7 +19,7 @@ export const CartScreen = () => {
   const { items, updateQuantity, removeItem, getTotalPrice, clearCart, branchId } = useCartStore();
   const { addOrder, actionLoading, clearOrdersError } = useOrdersStore();
   const { token } = useAuthStore();
-  const { rates, fetchRates, formatAllPrices } = useCurrencyStore();
+  const { rates, fetchRates, convert, formatCurrency, lastUpdated, isLoading } = useExchangeRateStore();
 
   const [isDelivery, setIsDelivery] = useState(false);
   const [notes, setNotes] = useState('');
@@ -35,7 +35,7 @@ export const CartScreen = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
-    fetchRates();
+    fetchRates(); // Fetch real-time exchange rates
     loadPaymentConfig();
   }, []);
 
@@ -150,6 +150,10 @@ export const CartScreen = () => {
   };
 
   const totalPrice = getTotalPrice();
+  
+  // Convertir precios a otras monedas usando tasas en tiempo real
+  const priceVES = convert(totalPrice, 'USD', 'VES');
+  const priceCOP = convert(totalPrice, 'USD', 'COP');
 
   return (
     <SafeAreaView style={styles.container}>
@@ -171,16 +175,34 @@ export const CartScreen = () => {
 
       {items.length > 0 && (
         <ScrollView style={styles.checkoutSection}>
-          {/* Total en 3 monedas */}
+          {/* Total en 3 monedas con tasas en tiempo real */}
           <View style={{
             backgroundColor: '#F0F9FF', borderRadius: 12, padding: 16, marginBottom: 12,
             borderWidth: 1, borderColor: '#BAE6FD',
           }}>
-            <Text style={{ fontSize: 14, fontWeight: '700', color: '#0369A1', marginBottom: 8 }}>💰 Total a Pagar</Text>
-            <Text style={{ fontSize: 24, fontWeight: '800', color: '#0C4A6E' }}>${totalPrice.toFixed(2)} USD</Text>
-            <Text style={{ fontSize: 14, color: '#0369A1', marginTop: 4 }}>
-              🇻🇪 Bs. {(totalPrice * rates.rate_bs).toFixed(0)} | 🇨🇴 ${(totalPrice * rates.rate_cop).toFixed(0)} COP
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <Text style={{ fontSize: 14, fontWeight: '700', color: '#0369A1' }}>💰 Total a Pagar</Text>
+              {isLoading && <ActivityIndicator size="small" color="#0369A1" />}
+            </View>
+            
+            <Text style={{ fontSize: 28, fontWeight: '800', color: '#0C4A6E' }}>
+              {formatCurrency(totalPrice, 'USD')}
             </Text>
+            
+            <View style={{ flexDirection: 'row', gap: 16, marginTop: 8 }}>
+              <Text style={{ fontSize: 14, color: '#0369A1' }}>
+                🇻🇪 Bs. {formatCurrency(priceVES, 'VES').replace('$', '')}
+              </Text>
+              <Text style={{ fontSize: 14, color: '#0369A1' }}>
+                🇨🇴 {formatCurrency(priceCOP, 'COP')} COP
+              </Text>
+            </View>
+            
+            {lastUpdated && (
+              <Text style={{ fontSize: 11, color: '#94A3B8', marginTop: 8 }}>
+                📅 Tasas actualizadas: {new Date(lastUpdated).toLocaleString()}
+              </Text>
+            )}
           </View>
 
           <View style={styles.switchContainer}>
@@ -251,7 +273,7 @@ export const CartScreen = () => {
 
                 <View style={{ marginTop: 12, padding: 10, backgroundColor: '#FEE2E2', borderRadius: 8 }}>
                   <Text style={{ fontSize: 13, color: '#991B1B', fontWeight: '600' }}>
-                    💰 Monto: ${totalPrice.toFixed(2)} USD | Bs. {(totalPrice * rates.rate_bs).toFixed(0)}
+                    💰 Monto: {formatCurrency(totalPrice, 'USD')} | Bs. {formatCurrency(priceVES, 'VES').replace('$', '')}
                   </Text>
                 </View>
 
@@ -301,7 +323,7 @@ export const CartScreen = () => {
                   Pagarás en efectivo al recoger tu pedido en la sucursal.
                 </Text>
                 <Text style={{ fontSize: 13, color: '#047857', marginTop: 8, fontWeight: '600' }}>
-                  💰 Monto: ${totalPrice.toFixed(2)} USD | Bs. {(totalPrice * rates.rate_bs).toFixed(0)} | ${(totalPrice * rates.rate_cop).toFixed(0)} COP
+                  💰 Monto: {formatCurrency(totalPrice, 'USD')} | Bs. {formatCurrency(priceVES, 'VES').replace('$', '')} | {formatCurrency(priceCOP, 'COP')} COP
                 </Text>
               </View>
             )}

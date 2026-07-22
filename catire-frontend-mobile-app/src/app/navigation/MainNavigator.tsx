@@ -56,6 +56,7 @@ import { TableManagementScreen } from '../modules/inventory/screens/TableManagem
 import { DeliveryPartnersScreen } from '../shared/screens/DeliveryPartnersScreen';
 import { SupplierScreen } from '../shared/screens/SupplierScreen';
 import { GamificationScreen } from '../shared/screens/GamificationScreen';
+import { TwoFAScreen } from '../shared/screens/TwoFAScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -131,6 +132,7 @@ export default function MainNavigator() {
                   <Stack.Screen name="DeliveryPartners" component={DeliveryPartnersScreen} />
                   <Stack.Screen name="Suppliers" component={SupplierScreen} />
                   <Stack.Screen name="Gamification" component={GamificationScreen} />
+                  <Stack.Screen name="TwoFA" component={TwoFAScreen} />
                   <Stack.Screen name="Settings" component={SettingsScreen} />
                   <Stack.Screen name="Referrals" component={ReferralsScreen} />
                   <Stack.Screen name="CurrencyRates" component={CurrencyRatesScreen} />
@@ -171,6 +173,9 @@ export default function MainNavigator() {
     </NavigationContainer>
   );
 }
+
+
+
 
 
 

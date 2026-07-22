@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+﻿import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
@@ -13,9 +13,12 @@ import { useOrdersStore } from '../../../../orders/store/orders.store';
 import { useFinanceStore } from '../../../../finance/store/finance.store';
 import { useAuthStore } from '../../../../../shared/store/auth.store';
 import { authenticate, checkBiometricsAvailability } from '../../../api/auth.local';
+import ScrollInfinitoSuave from '../../../../../shared/components/ScrollInfinitoSuave';
 
 const Logo = require('@assets/logo.png');
 const BiometricLogo = require('@assets/huella.png');
+
+const { width, height } = Dimensions.get('window');
 
 export default function AuthScreen() {
   const [isLogin, setIsLogin] = useState(true);
@@ -55,29 +58,101 @@ export default function AuthScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
         
-        <View style={styles.headerContainer}>
-          <View style={styles.logoPlaceholder}>
-            <Image source={Logo} style={{ width: 120, height: 120 }} />
+        {/* Header con Logo y Scroll Infinito */}
+        <View style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 20,
+          paddingTop: 20,
+          paddingBottom: 10,
+        }}>
+          {/* Logo a la izquierda */}
+          <View style={{ flex: 1, alignItems: 'center' }}>
+            <View style={{
+              width: 100,
+              height: 100,
+              borderRadius: 50,
+              backgroundColor: '#D32F2F',
+              justifyContent: 'center',
+              alignItems: 'center',
+              shadowColor: '#D32F2F',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 5,
+            }}>
+              <Image source={Logo} style={{ width: 80, height: 80 }} />
+            </View>
+            <Text style={{
+              fontSize: 12,
+              color: '#D32F2F',
+              fontWeight: '700',
+              marginTop: 8,
+              letterSpacing: 2,
+            }}>DESDE 2003</Text>
           </View>
-          <Text style={styles.subtitle}>DESDE 2003</Text>
+
+          {/* Scroll Infinito a la derecha */}
+          <View style={{
+            width: 120,
+            height: 200,
+            overflow: 'hidden',
+            borderRadius: 20,
+          }}>
+            <ScrollInfinitoSuave 
+              scrollDirection="down" 
+              iconSet="set1"
+            />
+          </View>
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.title}>
+        {/* Título */}
+        <View style={{
+          alignItems: 'center',
+          marginVertical: 20,
+        }}>
+          <Text style={{
+            fontSize: 28,
+            fontWeight: '800',
+            color: '#212121',
+            textAlign: 'center',
+          }}>
             {isLogin ? 'BIENVENIDO DE VUELTA!' : 'UNETE A LA FAMILIA!'}
           </Text>
+          <Text style={{
+            fontSize: 14,
+            color: '#757575',
+            textAlign: 'center',
+            marginTop: 8,
+          }}>
+            {isLogin ? 'Inicia sesión para continuar' : 'Crea tu cuenta para empezar'}
+          </Text>
+        </View>
 
+        {/* Formulario */}
+        <View style={{
+          backgroundColor: '#fff',
+          borderRadius: 20,
+          padding: 24,
+          marginHorizontal: 20,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.1,
+          shadowRadius: 12,
+          elevation: 5,
+        }}>
           {isLogin ? <LoginForm /> : <RegisterForm />}
 
           {isLogin && canUseBiometrics && (
             <View style={{ marginTop: 25, alignItems: 'center' }}>
               <Text style={{ marginBottom: 10, color: '#888', fontSize: 12 }}>
-                O usa tu huella para acceder rapido:
+                O usa tu huella para acceder rápido:
               </Text>
               <TouchableOpacity
                 style={{
-                  padding: 10,
-                  backgroundColor: '#f0f0f0',
+                  padding: 12,
+                  backgroundColor: '#FEE2E2',
                   borderRadius: 50,
                   opacity: loading ? 0.7 : 1
                 }}
@@ -89,16 +164,38 @@ export default function AuthScreen() {
             </View>
           )}
 
-          <View style={styles.toggleContainer}>
-            <Text style={styles.toggleText}>
-              {isLogin ? 'No tienes cuenta?' : 'Ya tienes cuenta?'}
+          <View style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginTop: 20,
+          }}>
+            <Text style={{ color: '#757575', fontSize: 14 }}>
+              {isLogin ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
             </Text>
             <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-              <Text style={styles.toggleLink}>
-                {isLogin ? 'Registrate aqui' : 'Inicia sesion'}
+              <Text style={{
+                color: '#D32F2F',
+                fontSize: 14,
+                fontWeight: '700',
+              }}>
+                {isLogin ? 'Regístrate aquí' : 'Inicia sesión'}
               </Text>
             </TouchableOpacity>
           </View>
+        </View>
+
+        {/* Footer */}
+        <View style={{
+          alignItems: 'center',
+          marginTop: 30,
+          paddingBottom: 20,
+        }}>
+          <Text style={{
+            fontSize: 12,
+            color: '#9E9E9E',
+          }}>
+            🌭 Catire Hot Dog © 2026
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>

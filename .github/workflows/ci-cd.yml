@@ -1,0 +1,141 @@
+﻿name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install backend dependencies
+        run: |
+          cd catire-backend-services/auth-service
+          npm ci
+          cd ../catalog-service
+          npm ci
+          cd ../order-service
+          npm ci
+          cd ../finance-config-service
+          npm ci
+      
+      - name: Run backend tests
+        run: |
+          cd catire-backend-services/auth-service
+          npm test
+          cd ../catalog-service
+          npm test
+          cd ../order-service
+          npm test
+          cd ../finance-config-service
+          npm test
+      
+      - name: Install frontend dependencies
+        run: |
+          cd catire-frontend-mobile-app
+          npm ci
+      
+      - name: Run frontend tests
+        run: |
+          cd catire-frontend-mobile-app
+          npm test
+      
+      - name: TypeScript check
+        run: |
+          cd catire-frontend-mobile-app
+          npx tsc --noEmit
+
+  build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Build and push auth-service
+        uses: docker/build-push-action@v4
+        with:
+          context: ./catire-backend-services/auth-service
+          file: ./catire-backend-services/Dockerfile.dev
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/catire-auth-service:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Build and push catalog-service
+        uses: docker/build-push-action@v4
+        with:
+          context: ./catire-backend-services/catalog-service
+          file: ./catire-backend-services/Dockerfile.dev
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/catire-catalog-service:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Build and push order-service
+        uses: docker/build-push-action@v4
+        with:
+          context: ./catire-backend-services/order-service
+          file: ./catire-backend-services/Dockerfile.dev
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/catire-order-service:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Build and push finance-config-service
+        uses: docker/build-push-action@v4
+        with:
+          context: ./catire-backend-services/finance-config-service
+          file: ./catire-backend-services/Dockerfile.dev
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/catire-finance-service:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /var/www/catire-hotdog
+            git pull origin main
+            docker-compose down
+            docker-compose pull
+            docker-compose up -d
+            echo "Deployment completed successfully!"

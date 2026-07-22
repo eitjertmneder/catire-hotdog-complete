@@ -26,7 +26,7 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
     private prisma: PrismaService,
-  , private securityService: SecurityService) {}
+  private securityService: SecurityService) {}
 
   private getLockoutInfo(email: string): { locked: boolean; remainingSeconds: number } {
     const record = loginAttempts.get(email);
@@ -244,4 +244,6 @@ export class AuthService {
     return locked;
   }
 }
+
+
 

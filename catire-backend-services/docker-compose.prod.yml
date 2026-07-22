@@ -1,0 +1,142 @@
+﻿version: '3.8'
+
+services:
+  # Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: catire_postgres_prod
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: catire_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - catire_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Auth Service
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile.prod
+    container_name: catire_auth_prod
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/catire_auth_db
+      - JWT_SECRET=${JWT_SECRET}
+      - NODE_ENV=production
+    ports:
+      - "3001:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - catire_network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Catalog Service
+  catalog-service:
+    build:
+      context: ./catalog-service
+      dockerfile: Dockerfile.prod
+    container_name: catire_catalog_prod
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/catire_catalog_db
+      - AUTH_SERVICE_URL=http://auth-service:3000
+      - NODE_ENV=production
+    ports:
+      - "3002:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - catire_network
+
+  # Order Service
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile.prod
+    container_name: catire_order_prod
+    restart: always
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/catire_orders
+      - AUTH_SERVICE_URL=http://auth-service:3000
+      - CATALOG_SERVICE_URL=http://catalog-service:3000
+      - NODE_ENV=production
+    ports:
+      - "3003:3000"
+    depends_on:
+      - mongo
+    networks:
+      - catire_network
+
+  # Finance Service
+  finance-service:
+    build:
+      context: ./finance-config-service
+      dockerfile: Dockerfile.prod
+    container_name: catire_finance_prod
+    restart: always
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/catire_finance
+      - AUTH_SERVICE_URL=http://auth-service:3000
+      - NODE_ENV=production
+    ports:
+      - "3004:3000"
+    depends_on:
+      - mongo
+    networks:
+      - catire_network
+
+  # MongoDB
+  mongo:
+    image: mongo:6-jammy
+    container_name: catire_mongo_prod
+    restart: always
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - catire_network
+
+  # Nginx
+  nginx:
+    image: nginx:alpine
+    container_name: catire_nginx_prod
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - auth-service
+      - catalog-service
+      - order-service
+      - finance-service
+    networks:
+      - catire_network
+
+volumes:
+  postgres_data:
+  mongo_data:
+
+networks:
+  catire_network:
+    driver: bridge

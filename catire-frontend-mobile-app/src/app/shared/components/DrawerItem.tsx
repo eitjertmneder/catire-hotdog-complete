@@ -1,66 +1,43 @@
-import React from 'react';
-import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
-import { theme } from '../styles/theme';
+﻿import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
-interface Props {
+interface DrawerItemProps {
+  icon: string;
   label: string;
-  badgeCount?: number;
   onPress: () => void;
-  isLogout?: boolean;
+  active?: boolean;
 }
 
-export const DrawerItem = ({ label, badgeCount = 0, onPress, isLogout = false }: Props) => (
-  <TouchableOpacity 
-    style={[styles.item, isLogout && styles.logoutItem]} 
-    onPress={onPress}
-    activeOpacity={0.7}
-  >
-    <Text style={[styles.label, isLogout && styles.logoutText]}>{label}</Text>
-    {badgeCount > 0 && (
-      <View style={styles.badge}>
-        <Text style={styles.badgeText}>{badgeCount}</Text>
-      </View>
-    )}
-  </TouchableOpacity>
-);
+export const DrawerItem: React.FC<DrawerItemProps> = ({ icon, label, onPress, active }) => {
+  return (
+    <TouchableOpacity style={[styles.container, active && styles.active]} onPress={onPress}>
+      <Text style={styles.icon}>{icon}</Text>
+      <Text style={[styles.label, active && styles.activeLabel]}>{label}</Text>
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
-  item: {
+  container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
   },
-  label: { 
-    fontSize: 15, 
-    color: theme.colors.textPrimary, 
-    flex: 1,
-    fontWeight: '500',
+  active: {
+    backgroundColor: '#FEE2E2',
   },
-  badge: {
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    minWidth: 22,
-    alignItems: 'center',
+  icon: {
+    fontSize: 20,
+    marginRight: 12,
   },
-  badgeText: { 
-    color: theme.colors.white, 
-    fontWeight: '700', 
-    fontSize: 11,
+  label: {
+    fontSize: 16,
+    color: '#212121',
   },
-  logoutItem: { 
-    borderBottomWidth: 0, 
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-  },
-  logoutText: { 
-    color: theme.colors.error, 
+  activeLabel: {
+    color: '#D32F2F',
     fontWeight: '600',
   },
 });
