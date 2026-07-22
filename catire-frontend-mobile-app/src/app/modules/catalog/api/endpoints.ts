@@ -1,0 +1,1 @@
+export type CatalogEndpoints = 'branches' | 'menus' | 'products' | 'products/report' | 'ingredients' | `ingredients/${string}` | `ingredients/available?branch_id=${number}` | `nightly-closure/${string}` | `nightly-closure/theoretical?branch_id=${number}&date=${string}`;

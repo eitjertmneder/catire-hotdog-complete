@@ -1,0 +1,51 @@
+datasource db {
+  provider  = "mongodb"
+  url       = env("MONGO_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
+}
+
+model Purchase {
+  id                  String @id @default(auto()) @map("_id") @db.ObjectId
+  order_id            String @db.ObjectId
+  user_id             Int
+  purchase_base       Float
+  purchase_additional Float @default(0)
+  purchase_total      Float
+  notes               String?
+  invoice_number      String?
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+  deleted_at          DateTime?
+
+  @@map ("purchases")
+}
+
+model CurrencyRate {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  rate_usd      Float
+  rate_cop      Float
+  rate_bs       Float
+  last_updated  DateTime @updatedAt
+  created_at    DateTime @default(now())
+  deleted_at    DateTime?
+
+  @@map ("currency_rates")
+}
+
+model PaymentConfig {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  holder_name   String
+  holder_dni    String
+  phone         String
+  bank          String
+  is_active     Boolean @default(true)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  deleted_at    DateTime?
+
+  @@map ("payment_configs")
+}

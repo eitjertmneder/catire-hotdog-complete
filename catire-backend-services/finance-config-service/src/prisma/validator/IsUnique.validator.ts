@@ -1,0 +1,31 @@
+import { Injectable } from '@nestjs/common';
+import {
+  ValidationArguments,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
+import { PrismaService } from '../prisma.service';
+
+@ValidatorConstraint({
+  name: 'IsUnique',
+  async: true,
+})
+@Injectable()
+export class IsUnique implements ValidatorConstraintInterface {
+  constructor(private prisma: PrismaService) {}
+
+  async validate(
+    value: string | number,
+    validationArguments?: ValidationArguments,
+  ): Promise<boolean> {
+    const [model, field] = validationArguments?.constraints as [string, string];
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const obj = await this.prisma[model].findFirst({
+      where: { [field]: value },
+      select: { [field]: true },
+    });
+
+    return !obj;
+  }
+}

@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Branch {
+  id               Int    @id @default(autoincrement())
+  name             String @unique
+  coordinates_long Float @unique
+  coordinates_lat  Float @unique
+  menus            Menu[]
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+  deleted_at       DateTime?
+
+  @@map("branches")
+}
+
+model Menu {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  branch_id Int
+  branch    Branch    @relation(fields: [branch_id], references: [id])
+  products  Product[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+
+  @@map("menus")
+}
+
+model Category {
+  id       Int        @id @default(autoincrement())
+  name     String     @unique
+  products Product[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+
+  @@map("categories")
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  menu_id     Int
+  name        String    @unique
+  img_src     String
+  base_price  Float?
+  category_id Int
+  category    Category  @relation(fields: [category_id], references: [id])
+  menu        Menu      @relation(fields: [menu_id], references: [id])
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  deleted_at DateTime?
+
+  @@map("products")
+}
+
+model Ingredient {
+  id           Int      @id @default(autoincrement())
+  name         String
+  name_tag     String?
+  category     String
+  stock        Int      @default(0)
+  branch_id    Int?
+  feature_tag  String?
+  feature_value String?
+  extra_price  Float?
+  unit         String   @default("unidades") // unidades, gramos, litros
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  deleted_at   DateTime?
+
+  @@unique([name, branch_id])
+  @@map("ingredients")
+}
+
+// Receta: conecta un item del menú con los ingredientes que consume
+model Recipe {
+  id              Int      @id @default(autoincrement())
+  product_name    String   // Nombre del producto del menú (ej: "Perro Normal")
+  ingredient_id   Int      // ID del ingrediente
+  quantity_needed Float    // Cantidad necesaria (ej: 1 unidad, 150 gramos)
+  notes           String?  // Notas adicionales
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  deleted_at      DateTime?
+
+  @@map("recipes")
+}
+
+// Disponibilidad de ingredientes por sucursal
+model IngredientAvailability {
+  id              Int      @id @default(autoincrement())
+  ingredient_id   Int
+  branch_id       Int
+  available       Boolean  @default(true)
+  stock_override  Int?     // NULL = usar stock del ingrediente
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  @@unique([ingredient_id, branch_id])
+  @@map("ingredient_availability")
+}
+
+// Cierre de noche: registro diario del inventario
+model NightlyClosure {
+  id              Int      @id @default(autoincrement())
+  branch_id       Int
+  ingredient_id   Int
+  date            DateTime
+  opening_stock   Float    // Stock al abrir (del cierre anterior)
+  theoretical     Float    // Stock teórico (apertura - ventas)
+  physical        Float    // Stock físico contado
+  difference      Float    // Diferencia (merma)
+  closed_by       Int?     // ID del usuario que cerró
+  notes           String?
+  created_at      DateTime @default(now())
+
+  @@unique([branch_id, ingredient_id, date])
+  @@map("nightly_closures")
+}

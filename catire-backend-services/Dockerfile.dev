@@ -1,0 +1,16 @@
+FROM node:20-alpine
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+COPY prisma ./prisma
+
+RUN npm install
+
+# Generate Prisma client during image build so node_modules/.prisma is available
+RUN npx prisma generate || echo "prisma generate failed during build (may require env vars); continuing"
+
+COPY . .
+
+CMD ["sh", "-c", "npx prisma generate || true && npm run start:dev"]

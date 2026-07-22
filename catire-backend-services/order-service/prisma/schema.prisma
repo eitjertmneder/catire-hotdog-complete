@@ -1,0 +1,74 @@
+datasource db {
+  provider  = "mongodb"
+  url       = env("MONGO_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
+}
+
+model Order {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  user_id      Int
+  branch_id    Int?
+  is_delivery  Boolean
+  notes        String?
+  address      Json?
+  payment_method String?
+  payment_proof  String?
+  cancel_reason String?
+  items        OrderDetails[]
+  status       OrderStatusType? @default(PENDING)
+  created_at   DateTime    @default(now())
+  updated_at   DateTime    @updatedAt
+  deleted_at   DateTime?
+
+  @@map ("orders")
+}
+
+model OrderDetails {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  order_id      String   @db.ObjectId
+  product_id    Int
+  quantity      Int
+  base_price    Float
+  features      Json[]
+  order         Order    @relation(fields: [order_id], references: [id])
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  deleted_at    DateTime?
+
+  @@map ("order_details")
+}
+
+model UserAccess {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  user_id        Int
+  device_ip      String
+  access_error   String?
+  accessed_since DateTime @default(now())
+  created_at     DateTime @default(now())
+  deleted_at     DateTime?
+
+  @@map ("user_access")
+}
+
+enum OrderStatusType {
+  PENDING
+  PAID
+  PREPARING
+  READY
+  ON_THE_WAY
+  DELIVERED
+  CANCELLED
+}
+
+enum NameTag {
+  SIZE
+  TOPPINGS
+  TYPE_MEAT
+  TYPE_SAUSAGE
+  SAUCE
+  SODA
+}

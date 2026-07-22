@@ -1,0 +1,171 @@
+﻿import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  requirement: number;
+  current_progress: number;
+  unlocked: boolean;
+  unlocked_at?: Date;
+  reward_points: number;
+}
+
+export interface Challenge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  type: 'orders' | 'spend' | 'visit' | 'review' | 'referral';
+  target: number;
+  progress: number;
+  reward_points: number;
+  valid_until: Date;
+  completed: boolean;
+}
+
+export interface LeaderboardEntry {
+  user_id: number;
+  user_name: string;
+  points: number;
+  level: number;
+  rank: number;
+}
+
+type GamificationState = {
+  achievements: Achievement[];
+  challenges: Challenge[];
+  leaderboard: LeaderboardEntry[];
+  user_level: number;
+  user_xp: number;
+  xp_to_next_level: number;
+  addXP: (amount: number) => void;
+  checkAchievements: () => Achievement[];
+  updateChallengeProgress: (challengeId: string, increment: number) => void;
+  getActiveChallenges: () => Challenge[];
+  getLevelBenefits: () => string[];
+  calculateLevel: (xp: number) => number;
+};
+
+export const useGamificationStore = create<GamificationState>()(
+  persist(
+    (set, get) => ({
+      achievements: [
+        { id: 'first_order', name: 'Primer Pedido', description: 'Realiza tu primer pedido', icon: '🎉', requirement: 1, current_progress: 0, unlocked: false, reward_points: 50 },
+        { id: 'order_10', name: 'Cliente Frecuente', description: 'Realiza 10 pedidos', icon: '🔄', requirement: 10, current_progress: 0, unlocked: false, reward_points: 100 },
+        { id: 'order_50', name: 'Cliente VIP', description: 'Realiza 50 pedidos', icon: '👑', requirement: 50, current_progress: 0, unlocked: false, reward_points: 500 },
+        { id: 'spend_100', name: 'Gran Gastador', description: 'Gasta $100 en total', icon: '💰', requirement: 100, current_progress: 0, unlocked: false, reward_points: 200 },
+        { id: 'review_5', name: 'Crítico', description: 'Escribe 5 reseñas', icon: '⭐', requirement: 5, current_progress: 0, unlocked: false, reward_points: 150 },
+        { id: 'referral_3', name: 'Embajador', description: 'Refiere 3 amigos', icon: '👥', requirement: 3, current_progress: 0, unlocked: false, reward_points: 300 },
+        { id: 'early_bird', name: 'Madrugador', description: 'Ordena antes de las 9am', icon: '🌅', requirement: 1, current_progress: 0, unlocked: false, reward_points: 25 },
+        { id: 'night_owl', name: 'Búho Nocturno', description: 'Ordena después de las 9pm', icon: '🦉', requirement: 1, current_progress: 0, unlocked: false, reward_points: 25 },
+      ],
+      challenges: [
+        { id: 'weekly_3', name: 'Reto Semanal', description: 'Haz 3 pedidos esta semana', icon: '📅', type: 'orders', target: 3, progress: 0, reward_points: 75, valid_until: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), completed: false },
+        { id: 'spend_50', name: 'Reto de Gasto', description: 'Gasta $50 esta semana', icon: '💵', type: 'spend', target: 50, progress: 0, reward_points: 100, valid_until: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), completed: false },
+        { id: 'visit_2', name: 'Reto de Visita', description: 'Visita 2 sucursales diferentes', icon: '🏪', type: 'visit', target: 2, progress: 0, reward_points: 50, valid_until: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), completed: false },
+      ],
+      leaderboard: [],
+      user_level: 1,
+      user_xp: 0,
+      xp_to_next_level: 100,
+
+      addXP: (amount) => {
+        set((state) => {
+          let newXp = state.user_xp + amount;
+          let newLevel = state.user_level;
+          let xpNeeded = state.xp_to_next_level;
+
+          while (newXp >= xpNeeded) {
+            newXp -= xpNeeded;
+            newLevel++;
+            xpNeeded = Math.floor(xpNeeded * 1.5);
+          }
+
+          return {
+            user_xp: newXp,
+            user_level: newLevel,
+            xp_to_next_level: xpNeeded,
+          };
+        });
+      },
+
+      checkAchievements: () => {
+        const { achievements } = get();
+        const unlockedAchievements: Achievement[] = [];
+
+        achievements.forEach((ach) => {
+          if (!ach.unlocked && ach.current_progress >= ach.requirement) {
+            const updated = { ...ach, unlocked: true, unlocked_at: new Date() };
+            unlockedAchievements.push(updated);
+          }
+        });
+
+        if (unlockedAchievements.length > 0) {
+          set((state) => ({
+            achievements: state.achievements.map((ach) => {
+              const unlocked = unlockedAchievements.find((u) => u.id === ach.id);
+              return unlocked || ach;
+            }),
+          }));
+        }
+
+        return unlockedAchievements;
+      },
+
+      updateChallengeProgress: (challengeId, increment) => {
+        set((state) => ({
+          challenges: state.challenges.map((c) => {
+            if (c.id !== challengeId) return c;
+            const newProgress = Math.min(c.progress + increment, c.target);
+            return {
+              ...c,
+              progress: newProgress,
+              completed: newProgress >= c.target,
+            };
+          }),
+        }));
+      },
+
+      getActiveChallenges: () => {
+        const { challenges } = get();
+        const now = new Date();
+        return challenges.filter((c) => !c.completed && new Date(c.valid_until) > now);
+      },
+
+      getLevelBenefits: () => {
+        const { user_level } = get();
+        const benefits: string[] = [];
+
+        if (user_level >= 2) benefits.push('5% de descuento en pedidos');
+        if (user_level >= 5) benefits.push('Delivery gratis en pedidos > $20');
+        if (user_level >= 10) benefits.push('10% de descuento permanente');
+        if (user_level >= 15) benefits.push('Acceso a menú exclusivo');
+        if (user_level >= 20) benefits.push('15% de descuento + Delivery gratis');
+
+        return benefits;
+      },
+
+      calculateLevel: (xp) => {
+        let level = 1;
+        let xpNeeded = 100;
+        let remainingXp = xp;
+
+        while (remainingXp >= xpNeeded) {
+          remainingXp -= xpNeeded;
+          level++;
+          xpNeeded = Math.floor(xpNeeded * 1.5);
+        }
+
+        return level;
+      },
+    }),
+    {
+      name: 'gamification-storage',
+      storage: createJSONStorage(() => AsyncStorage),
+    }
+  )
+);

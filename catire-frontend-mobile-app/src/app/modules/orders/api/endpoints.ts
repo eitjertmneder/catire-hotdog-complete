@@ -1,0 +1,1 @@
+export type OrderEndpoints = 'orders' | 'orders/report' | `orders/reports/daily?date=${string}`;

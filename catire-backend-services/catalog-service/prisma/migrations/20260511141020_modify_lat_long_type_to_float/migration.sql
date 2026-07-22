@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "branches" ALTER COLUMN "coordinates_long" SET DATA TYPE DOUBLE PRECISION,
+ALTER COLUMN "coordinates_lat" SET DATA TYPE DOUBLE PRECISION;

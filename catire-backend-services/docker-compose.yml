@@ -1,0 +1,185 @@
+services:
+  # --- BASES DE DATOS ---
+  catire_postgres_db:
+    image: postgres:15-alpine
+    container_name: catire_postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: catire_core_db
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./init_db:/docker-entrypoint-initdb.d
+    networks:
+      - t4_network
+
+  # --- MONGODB ---
+  catire_audit_db:
+    image: mongo:6-jammy
+    container_name: catire_audit_db
+    restart: always
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - audit_mongo_data:/data/db
+    networks:
+      - t4_network
+    healthcheck:
+      test: echo 'rs.status().ok' | mongosh --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  catire_config_db:
+    image: mongo:6-jammy
+    container_name: catire_config_db
+    restart: always
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    volumes:
+      - config_mongo_data:/data/db
+    networks:
+      - t4_network
+    healthcheck:
+      test: echo 'rs.status().ok' | mongosh --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --- MONGO REPLICA SET INIT ---
+  mongo-init:
+    image: mongo:6-jammy
+    container_name: mongo-init
+    depends_on:
+      catire_audit_db:
+        condition: service_healthy
+      catire_config_db:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - t4_network
+    entrypoint: >
+      sh -c '
+        echo "Initializing replica sets..."
+        mongosh --host catire_audit_db:27017 --eval "rs.initiate({_id: \"rs0\", members: [{_id: 0, host: \"catire_audit_db:27017\"}]})"
+        mongosh --host catire_config_db:27017 --eval "rs.initiate({_id: \"rs0\", members: [{_id: 0, host: \"catire_config_db:27017\"}]})"
+        echo "Done!"
+      '
+
+  # --- MICROSERVICIOS ---
+  auth-service:
+    container_name: auth-service
+    hostname: auth-service
+    build:
+      context: ./auth-service
+      dockerfile: ../Dockerfile.dev
+    init: true
+    restart: always
+    volumes:
+      - ./auth-service:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@catire_postgres_db:5432/catire_auth_db
+      - JWT_SECRET=${JWT_SECRET}
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    depends_on:
+      - catire_postgres_db
+    networks:
+      - t4_network
+
+  catalog-service:
+    container_name: catalog-service
+    hostname: catalog-service
+    build:
+      context: ./catalog-service
+      dockerfile: ../Dockerfile.dev
+    init: true
+    restart: always
+    volumes:
+      - ./catalog-service:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@catire_postgres_db:5432/catire_catalog_db
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - AUTH_SERVICE_URL=http://auth-service:3000
+    depends_on:
+      - catire_postgres_db
+    networks:
+      - t4_network
+
+  order-service:
+    container_name: order-service
+    hostname: order-service
+    build:
+      context: ./order-service
+      dockerfile: ../Dockerfile.dev
+    init: true
+    restart: always
+    volumes:
+      - ./order-service:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - MONGO_URL=mongodb://catire_audit_db:27017/catire_order_db?replicaSet=rs0
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - AUTH_SERVICE_URL=http://auth-service:3000
+      - CATALOG_SERVICE_URL=http://catalog-service:3000
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
+    networks:
+      - t4_network
+
+  finance-config-service:
+    container_name: finance-config-service
+    hostname: finance-config-service
+    build:
+      context: ./finance-config-service
+      dockerfile: ../Dockerfile.dev
+    init: true
+    restart: always
+    volumes:
+      - ./finance-config-service:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - MONGO_URL=mongodb://catire_config_db:27017/catire_finance_config_db?replicaSet=rs0
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - AUTH_SERVICE_URL=http://auth-service:3000
+      - CATALOG_SERVICE_URL=http://catalog-service:3000
+      - ORDER_SERVICE_URL=http://order-service:3000
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
+    networks:
+      - t4_network
+
+  api-gateway:
+    image: nginx:alpine
+    container_name: api_gateway_nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - auth-service
+      - catalog-service
+      - order-service
+      - finance-config-service
+    networks:
+      - t4_network
+
+networks:
+  t4_network:
+    driver: bridge
+
+volumes:
+  pg_data:
+  audit_mongo_data:
+  config_mongo_data:
