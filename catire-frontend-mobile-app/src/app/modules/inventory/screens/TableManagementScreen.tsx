@@ -52,13 +52,13 @@ export const TableManagementScreen = () => {
 
     updateTableStatus(selectedTable.id, 'occupied', undefined, customerName);
     setShowModal(false);
-    Alert.alert('Éxito', `Mesa ${selectedTable.number} ocupada por ${customerName}`);
+    Alert.alert('ï¿½xito', `Mesa ${selectedTable.number} ocupada por ${customerName}`);
   };
 
   const handleFree = (table: Table) => {
     Alert.alert(
       'Liberar Mesa',
-      `¿Liberar la mesa ${table.number}?`,
+      `ï¿½Liberar la mesa ${table.number}?`,
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -84,10 +84,10 @@ export const TableManagementScreen = () => {
         borderBottomWidth: 1, borderBottomColor: theme.colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>? Volver</Text>
+          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
         </TouchableOpacity>
         <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
-          ?? Gestión de Mesas
+          Gesti\u00f3n de Mesas
         </Text>
       </View>
 
@@ -121,7 +121,7 @@ export const TableManagementScreen = () => {
           <Text style={{ fontSize: 28, fontWeight: '700', color: '#F59E0B' }}>
             {utilization.percentage.toFixed(0)}%
           </Text>
-          <Text style={{ fontSize: 12, color: theme.colors.textMuted }}>Ocupación</Text>
+          <Text style={{ fontSize: 12, color: theme.colors.textMuted }}>Ocupaciï¿½n</Text>
         </View>
       </View>
 
@@ -168,7 +168,7 @@ export const TableManagementScreen = () => {
                 }
               }}
             >
-              <Text style={{ fontSize: 24, marginBottom: 8 }}>??</Text>
+              <Text style={{ fontSize: 24, marginBottom: 8 }}>{'\u{1F37D}'}</Text>
               <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary }}>
                 Mesa {table.number}
               </Text>
@@ -197,7 +197,7 @@ export const TableManagementScreen = () => {
 
         {branchTables.length === 0 && (
           <View style={{ alignItems: 'center', paddingTop: 60 }}>
-            <Text style={{ fontSize: 64, marginBottom: 16 }}>??</Text>
+            <Text style={{ fontSize: 64, marginBottom: 16 }}>{'\u{1F5FA}'}</Text>
             <Text style={{ fontSize: 16, color: theme.colors.textMuted }}>
               No hay mesas configuradas
             </Text>
@@ -229,7 +229,7 @@ export const TableManagementScreen = () => {
               onChangeText={setCustomerName}
             />
 
-            <Text style={{ fontSize: 12, color: theme.colors.textMuted, marginBottom: 4 }}>TAMAÑO DEL GRUPO</Text>
+            <Text style={{ fontSize: 12, color: theme.colors.textMuted, marginBottom: 4 }}>TAMAï¿½O DEL GRUPO</Text>
             <TextInput
               style={{
                 borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8,

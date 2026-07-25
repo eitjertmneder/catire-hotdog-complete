@@ -7,13 +7,29 @@ import { theme } from '../../../shared/styles/theme';
 
 const { width } = Dimensions.get('window');
 
+const EMOJI = {
+  kitchen: '\u{1F373}',
+  delivery: '\u{1F695}',
+  takeout: '\u{1F4E6}',
+  done: '\u{2705}',
+  clock: '\u{23F0}',
+  rush: '\u{1F525}',
+  back: '\u{2190}',
+  chart: '\u{1F4CA}',
+  note: '\u{1F4DD}',
+  empty: '\u{1F4ED}',
+  waiting: '\u{23F3}',
+  check: '\u{2705}',
+  fire: '\u{1F525}',
+} as const;
+
 export const KitchenDisplayScreen = () => {
   const navigation = useNavigation();
   const { orders, updateItemStatus, completeOrder, setPriority, getBacklogCount, getAveragePrepTime } = useKitchenStore();
   const [selectedTab, setSelectedTab] = useState<'all' | 'pending' | 'preparing' | 'ready'>('all');
 
-  const filteredOrders = selectedTab === 'all' 
-    ? orders 
+  const filteredOrders = selectedTab === 'all'
+    ? orders
     : orders.filter(o => {
         if (selectedTab === 'pending') return o.items.some(i => i.status === 'pending');
         if (selectedTab === 'preparing') return o.items.some(i => i.status === 'preparing');
@@ -50,14 +66,13 @@ export const KitchenDisplayScreen = () => {
       <View style={{
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+        backgroundColor: '#EC3137',
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>? Volver</Text>
+          <Text style={{ fontSize: 20, color: '#fff', fontWeight: '600' }}>{EMOJI.back} Volver</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
-          ?? Pantalla de Cocina
+        <Text style={{ fontSize: 18, fontWeight: '700', color: '#fff', marginLeft: 12 }}>
+          {EMOJI.kitchen} Pantalla de Cocina
         </Text>
       </View>
 
@@ -72,15 +87,15 @@ export const KitchenDisplayScreen = () => {
       }}>
         <View style={{ flex: 1, alignItems: 'center' }}>
           <Text style={{ fontSize: 20, fontWeight: '700', color: '#F59E0B' }}>{getBacklogCount()}</Text>
-          <Text style={{ fontSize: 10, color: theme.colors.textMuted }}>Pendientes</Text>
+          <Text style={{ fontSize: 10, color: theme.colors.textMuted }}>{EMOJI.clock} Pendientes</Text>
         </View>
         <View style={{ flex: 1, alignItems: 'center', borderLeftWidth: 1, borderRightWidth: 1, borderColor: theme.colors.border }}>
           <Text style={{ fontSize: 20, fontWeight: '700', color: theme.colors.primary }}>{orders.length}</Text>
-          <Text style={{ fontSize: 10, color: theme.colors.textMuted }}>En Cola</Text>
+          <Text style={{ fontSize: 10, color: theme.colors.textMuted }}>{EMOJI.chart} En Cola</Text>
         </View>
         <View style={{ flex: 1, alignItems: 'center' }}>
           <Text style={{ fontSize: 20, fontWeight: '700', color: '#10B981' }}>{getAveragePrepTime()}m</Text>
-          <Text style={{ fontSize: 10, color: theme.colors.textMuted }}>Promedio</Text>
+          <Text style={{ fontSize: 10, color: theme.colors.textMuted }}>{EMOJI.clock} Promedio</Text>
         </View>
       </View>
 
@@ -144,7 +159,7 @@ export const KitchenDisplayScreen = () => {
                   #{order.order_number}
                 </Text>
                 <Text style={{ fontSize: 12, color: '#fff', fontWeight: '600' }}>
-                  {getTimeElapsed(order.created_at)}m
+                  {EMOJI.clock} {getTimeElapsed(order.created_at)}m
                 </Text>
               </View>
 
@@ -152,11 +167,15 @@ export const KitchenDisplayScreen = () => {
               <View style={{ padding: 10 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
                   <Text style={{ fontSize: 12, color: theme.colors.textMuted }}>
-                    {order.order_type === 'dine_in' ? `Mesa ${order.table_number}` : order.order_type === 'delivery' ? '?? Delivery' : '?? Para llevar'}
+                    {order.order_type === 'dine_in'
+                      ? `Mesa ${order.table_number}`
+                      : order.order_type === 'delivery'
+                        ? `${EMOJI.delivery} Delivery`
+                        : `${EMOJI.takeout} Para llevar`}
                   </Text>
                   {order.priority !== 'normal' && (
                     <Text style={{ fontSize: 10, color: getPriorityColor(order.priority), fontWeight: '700' }}>
-                      {order.priority.toUpperCase()}
+                      {order.priority === 'rush' ? `${EMOJI.rush} ` : ''}{order.priority.toUpperCase()}
                     </Text>
                   )}
                 </View>
@@ -174,7 +193,7 @@ export const KitchenDisplayScreen = () => {
                       }}
                     >
                       <Text style={{ fontSize: 12 }}>
-                        {item.status === 'pending' ? '?????' : item.status === 'preparing' ? '?' : '?'}
+                        {item.status === 'pending' ? EMOJI.waiting : item.status === 'preparing' ? EMOJI.kitchen : EMOJI.done}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -182,7 +201,7 @@ export const KitchenDisplayScreen = () => {
 
                 {order.items.length > 4 && (
                   <Text style={{ fontSize: 11, color: theme.colors.textMuted }}>
-                    +{order.items.length - 4} m·s...
+                    +{order.items.length - 4} m√°s...
                   </Text>
                 )}
 
@@ -190,7 +209,7 @@ export const KitchenDisplayScreen = () => {
                 {order.items.some(i => i.notes) && (
                   <View style={{ marginTop: 8, padding: 6, backgroundColor: '#FEF3C7', borderRadius: 6 }}>
                     <Text style={{ fontSize: 11, color: '#92400E' }}>
-                      ?? {order.items.find(i => i.notes)?.notes}
+                      {EMOJI.note} {order.items.find(i => i.notes)?.notes}
                     </Text>
                   </View>
                 )}
@@ -216,7 +235,7 @@ export const KitchenDisplayScreen = () => {
                       fontWeight: '600',
                       color: order.items.every(i => i.status === 'ready') ? '#fff' : theme.colors.textMuted,
                     }}>
-                      {order.items.every(i => i.status === 'ready') ? '? Entregar' : 'Esperando...'}
+                      {order.items.every(i => i.status === 'ready') ? `${EMOJI.done} Entregar` : 'Esperando...'}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -231,7 +250,7 @@ export const KitchenDisplayScreen = () => {
                       setPriority(order.id, newPriority);
                     }}
                   >
-                    <Text style={{ fontSize: 14 }}>??</Text>
+                    <Text style={{ fontSize: 14 }}>{EMOJI.rush}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -241,7 +260,7 @@ export const KitchenDisplayScreen = () => {
 
         {filteredOrders.length === 0 && (
           <View style={{ alignItems: 'center', paddingTop: 60 }}>
-            <Text style={{ fontSize: 64, marginBottom: 16 }}>??</Text>
+            <Text style={{ fontSize: 64, marginBottom: 16 }}>{EMOJI.empty}</Text>
             <Text style={{ fontSize: 16, color: theme.colors.textMuted }}>
               No hay pedidos en cola
             </Text>
@@ -251,4 +270,3 @@ export const KitchenDisplayScreen = () => {
     </SafeAreaView>
   );
 };
-

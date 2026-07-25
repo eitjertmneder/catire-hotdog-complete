@@ -7,12 +7,12 @@ import { useChatStore } from '../../../shared/store/chat.store';
 import { theme } from '../../../shared/styles/theme';
 
 const statusSteps = [
-  { key: 'PENDING', label: 'Pendiente', icon: '?', description: 'Esperando confirmación' },
-  { key: 'PAID', label: 'Pagado', icon: '??', description: 'Pago confirmado' },
-  { key: 'PREPARING', label: 'Preparando', icon: '?????', description: 'Tu pedido se está preparando' },
-  { key: 'READY', label: 'Listo', icon: '?', description: 'Tu pedido está listo' },
-  { key: 'ON_THE_WAY', label: 'En Camino', icon: '??', description: 'Tu pedido va en camino' },
-  { key: 'DELIVERED', label: 'Entregado', icon: '??', description: 'Pedido entregado' },
+  { key: 'PENDING', label: 'Pendiente', icon: '\u231B', description: 'Esperando confirmaci\u00f3n' },
+  { key: 'PAID', label: 'Pagado', icon: '\u{1F4B0}', description: 'Pago confirmado' },
+  { key: 'PREPARING', label: 'Preparando', icon: '\u{1F525}', description: 'Tu pedido se est\u00e1 preparando' },
+  { key: 'READY', label: 'Listo', icon: '\u{1F4E6}', description: 'Tu pedido est\u00e1 listo' },
+  { key: 'ON_THE_WAY', label: 'En Camino', icon: '\u{1F680}', description: 'Tu pedido va en camino' },
+  { key: 'DELIVERED', label: 'Entregado', icon: '\u2705', description: 'Pedido entregado' },
 ];
 
 export const OrderTrackingScreen = () => {
@@ -52,10 +52,10 @@ export const OrderTrackingScreen = () => {
         borderBottomWidth: 1, borderBottomColor: theme.colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>? Volver</Text>
+          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
         </TouchableOpacity>
         <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
-          ?? Seguimiento - #{orderId.slice(0, 8)}
+          Seguimiento - #{orderId.slice(0, 8)}
         </Text>
       </View>
 
@@ -80,7 +80,7 @@ export const OrderTrackingScreen = () => {
             
             <View style={{ flexDirection: 'row', gap: 16, marginTop: 12 }}>
               <View>
-                <Text style={{ fontSize: 12, color: '#fff', opacity: 0.8 }}>Preparación</Text>
+                <Text style={{ fontSize: 12, color: '#fff', opacity: 0.8 }}>PreparaciÃ³n</Text>
                 <Text style={{ fontSize: 16, fontWeight: '700', color: '#fff' }}>{eta.preparation_time} min</Text>
               </View>
               {isDelivery && (
@@ -121,7 +121,7 @@ export const OrderTrackingScreen = () => {
                     borderColor: isCurrent ? '#D1FAE5' : 'transparent',
                   }}>
                     <Text style={{ fontSize: 16 }}>
-                      {isCompleted ? '?' : step.icon}
+                      {isCompleted ? '\u2714' : step.icon}
                     </Text>
                   </View>
                   {index < statusSteps.length - 1 && (
@@ -153,7 +153,7 @@ export const OrderTrackingScreen = () => {
 
                 {/* Time indicator */}
                 {isCompleted && index < currentStepIndex && (
-                  <Text style={{ fontSize: 12, color: '#9CA3AF' }}>?</Text>
+                  <Text style={{ fontSize: 12, color: '#9CA3AF' }}>{'\u23F1\uFE0F'}</Text>
                 )}
                 {isCurrent && (
                   <View style={{
@@ -181,7 +181,7 @@ export const OrderTrackingScreen = () => {
             borderColor: '#FECACA',
           }}>
             <Text style={{ fontSize: 14, fontWeight: '600', color: '#991B1B' }}>
-              ? Este pedido fue cancelado
+              Este pedido fue cancelado
             </Text>
           </View>
         )}
@@ -199,7 +199,7 @@ export const OrderTrackingScreen = () => {
           onPress={() => navigation.navigate('Chat' as any, { orderId })}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={{ fontSize: 24, marginRight: 12 }}>??</Text>
+            <Text style={{ fontSize: 24, marginRight: 12 }}>{'\u{1F4AC}'}</Text>
             <View>
               <Text style={{ fontSize: 16, fontWeight: '600', color: theme.colors.textPrimary }}>
                 Chat con {isDelivery ? 'Repartidor' : 'Trabajador'}
@@ -209,7 +209,7 @@ export const OrderTrackingScreen = () => {
               </Text>
             </View>
           </View>
-          <Text style={{ fontSize: 20 }}>?</Text>
+          <Text style={{ fontSize: 20 }}>{'\u27A1'}</Text>
         </TouchableOpacity>
 
         {/* Rate Button (only for delivered orders) */}
@@ -227,17 +227,17 @@ export const OrderTrackingScreen = () => {
             onPress={() => navigation.navigate('Review' as any, { orderId })}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ fontSize: 24, marginRight: 12 }}>?</Text>
+              <Text style={{ fontSize: 24, marginRight: 12 }}>{'\u{1F3B5}'}</Text>
               <View>
                 <Text style={{ fontSize: 16, fontWeight: '600', color: '#92400E' }}>
                   Calificar Pedido
                 </Text>
                 <Text style={{ fontSize: 13, color: '#78350F' }}>
-                  Cuéntanos tu experiencia
+                  CuÃ©ntanos tu experiencia
                 </Text>
               </View>
             </View>
-            <Text style={{ fontSize: 20 }}>?</Text>
+            <Text style={{ fontSize: 20 }}>{'\u27A1'}</Text>
           </TouchableOpacity>
         )}
       </ScrollView>

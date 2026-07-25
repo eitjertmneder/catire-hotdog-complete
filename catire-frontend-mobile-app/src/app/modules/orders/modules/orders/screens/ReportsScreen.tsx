@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../../../../shared/store/auth.store';
@@ -45,6 +45,20 @@ export const ReportsScreen = () => {
   useEffect(() => {
     fetchReport();
   }, [period]);
+
+  const shareViaWhatsApp = () => {
+    const periodLabel = period === 'today' ? 'Hoy' : period === 'week' ? 'Semana' : 'Mes';
+    const text = [
+      `*Reporte Catire Hot Dog*`,
+      `Periodo: ${periodLabel}`,
+      ``,
+      `Total de órdenes: ${report?.totalOrders || 0}`,
+      `Ingresos totales: $${(report?.totalRevenue || 0).toFixed(2)}`,
+      `Orden promedio: $${(report?.averageOrder || 0).toFixed(2)}`,
+    ].join('\n');
+    const url = `https://wa.me/584127995855?text=${encodeURIComponent(text)}`;
+    Linking.openURL(url).catch(() => {});
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -114,6 +128,21 @@ export const ReportsScreen = () => {
                 <Text style={{ color: theme.colors.textSecondary }}>Orden promedio:</Text>
                 <Text style={{ fontWeight: '700', color: theme.colors.textPrimary }}>${(report.averageOrder || 0).toFixed(2)}</Text>
               </View>
+
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#25D366',
+                  marginTop: 16,
+                  paddingVertical: 14,
+                  borderRadius: 12,
+                  alignItems: 'center',
+                }}
+                onPress={shareViaWhatsApp}
+              >
+                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>
+                  Enviar por WhatsApp
+                </Text>
+              </TouchableOpacity>
             </View>
           ) : (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 40 }}>

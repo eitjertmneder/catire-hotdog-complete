@@ -21,19 +21,19 @@ export const ReviewScreen = () => {
 
   const handleSubmit = () => {
     if (rating === 0) {
-      Alert.alert('Error', 'Selecciona una calificación');
+      Alert.alert('Error', 'Selecciona una calificaciÃ³n');
       return;
     }
 
     addReview({
       order_id: orderId,
       user_id: user?.id || 0,
-      user_name: user?.full_name || 'Anónimo',
+      user_name: user?.full_name || 'AnÃ³nimo',
       rating,
       comment: comment.trim(),
     });
 
-    Alert.alert('Gracias', 'Tu reseña ha sido guardada', [
+    Alert.alert('Gracias', 'Tu reseÃ±a ha sido guardada', [
       { text: 'OK', onPress: () => navigation.goBack() }
     ]);
   };
@@ -48,7 +48,7 @@ export const ReviewScreen = () => {
             disabled={!interactive}
           >
             <Text style={{ fontSize: 28 }}>
-              {star <= count ? '?' : '?'}
+              {star <= count ? '\u2605' : '\u2606'}
             </Text>
           </TouchableOpacity>
         ))}
@@ -66,10 +66,10 @@ export const ReviewScreen = () => {
         borderBottomWidth: 1, borderBottomColor: theme.colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>? Volver</Text>
+          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
         </TouchableOpacity>
         <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
-          ? Reseñas - Pedido #{orderId.slice(0, 8)}
+          ReseÃ±as - Pedido #{orderId.slice(0, 8)}
         </Text>
       </View>
 
@@ -104,7 +104,7 @@ export const ReviewScreen = () => {
                   textAlignVertical: 'top',
                   backgroundColor: theme.colors.background,
                 }}
-                placeholder="Cuéntanos sobre tu experiencia (opcional)"
+                placeholder="CuÃ©ntanos sobre tu experiencia (opcional)"
                 placeholderTextColor={theme.colors.textMuted}
                 value={comment}
                 onChangeText={setComment}
@@ -121,7 +121,7 @@ export const ReviewScreen = () => {
                 }}
                 onPress={handleSubmit}
               >
-                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Enviar Reseña</Text>
+                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Enviar ReseÃ±a</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -134,7 +134,7 @@ export const ReviewScreen = () => {
               borderColor: '#6EE7B7',
             }}>
               <Text style={{ fontSize: 14, fontWeight: '600', color: '#065F46' }}>
-                ? Ya calificaste este pedido
+                {'\u2705'} Ya calificaste este pedido
               </Text>
             </View>
           )
@@ -164,8 +164,8 @@ export const ReviewScreen = () => {
         )}
         ListEmptyComponent={
           <View style={{ alignItems: 'center', paddingTop: 40 }}>
-            <Text style={{ fontSize: 48, marginBottom: 12 }}>?</Text>
-            <Text style={{ fontSize: 14, color: theme.colors.textMuted }}>No hay reseñas aún</Text>
+            <Text style={{ fontSize: 48, marginBottom: 12 }}>{'\u{1F4DD}'}</Text>
+            <Text style={{ fontSize: 14, color: theme.colors.textMuted }}>No hay reseÃ±as aÃºn</Text>
           </View>
         }
       />

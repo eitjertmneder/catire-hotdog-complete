@@ -21,16 +21,16 @@ export const ReferralsScreen = () => {
 
   const handleApplyCode = () => {
     if (!inputCode.trim()) {
-      Alert.alert('Error', 'Ingresa un c骴igo de referido');
+      Alert.alert('Error', 'Ingresa un c贸digo de referido');
       return;
     }
     
     const success = applyReferralCode(inputCode.trim());
     if (success) {
-      Alert.alert('蓌ito', '骴igo aplicado! Ganaste 100 puntos');
+      Alert.alert('脡xito', '隆C贸digo aplicado! Ganaste 100 puntos');
       setInputCode('');
     } else {
-      Alert.alert('Error', 'C骴igo inv醠ido o ya utilizado');
+      Alert.alert('Error', 'C贸digo inv谩lido o ya utilizado');
     }
   };
 
@@ -44,10 +44,10 @@ export const ReferralsScreen = () => {
         borderBottomWidth: 1, borderBottomColor: theme.colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>? Volver</Text>
+          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
         </TouchableOpacity>
         <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
-          ?? Referidos
+          Referidos
         </Text>
       </View>
 
@@ -64,7 +64,7 @@ export const ReferralsScreen = () => {
               marginBottom: 20,
             }}>
               <Text style={{ fontSize: 14, color: '#fff', opacity: 0.9, marginBottom: 8 }}>
-                Tu C骴igo de Referido
+                Tu C贸digo de Referido
               </Text>
               <Text style={{ fontSize: 28, fontWeight: '800', color: '#fff', letterSpacing: 2 }}>
                 {referralCode || 'Generando...'}
@@ -80,7 +80,7 @@ export const ReferralsScreen = () => {
                 onPress={shareApp}
               >
                 <Text style={{ fontSize: 16, fontWeight: '700', color: theme.colors.primary }}>
-                  ?? Compartir App
+                  {'\u{1F4E4}'} Compartir App
                 </Text>
               </TouchableOpacity>
             </View>
@@ -93,7 +93,7 @@ export const ReferralsScreen = () => {
               marginBottom: 16,
             }}>
               <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
-                ?? Tus Estad韘ticas
+                Tus Estad铆sticas
               </Text>
               <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
                 <View style={{ alignItems: 'center' }}>
@@ -123,7 +123,7 @@ export const ReferralsScreen = () => {
               marginBottom: 16,
             }}>
               <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
-                ?? Tener un C骴igo
+                Tener un C贸digo
               </Text>
               <TextInput
                 style={{
@@ -135,7 +135,7 @@ export const ReferralsScreen = () => {
                   marginBottom: 12,
                   backgroundColor: theme.colors.background,
                 }}
-                placeholder="Ingresa c骴igo de referido"
+                placeholder="Ingresa c贸digo de referido"
                 value={inputCode}
                 onChangeText={setInputCode}
                 autoCapitalize="characters"
@@ -149,7 +149,7 @@ export const ReferralsScreen = () => {
                 }}
                 onPress={handleApplyCode}
               >
-                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Aplicar C骴igo</Text>
+                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Aplicar C贸digo</Text>
               </TouchableOpacity>
             </View>
 
@@ -160,24 +160,24 @@ export const ReferralsScreen = () => {
               padding: 16,
             }}>
               <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
-                緾髆o funciona?
+                驴C贸mo funciona?
               </Text>
               <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 }}>
-                <Text style={{ fontSize: 20, marginRight: 12 }}>1??</Text>
+                <Text style={{ fontSize: 20, marginRight: 12 }}>1.</Text>
                 <Text style={{ fontSize: 14, color: theme.colors.textSecondary, flex: 1 }}>
-                  Comparte tu c骴igo con amigos
+                  Comparte tu c贸digo con amigos
                 </Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 }}>
-                <Text style={{ fontSize: 20, marginRight: 12 }}>2??</Text>
+                <Text style={{ fontSize: 20, marginRight: 12 }}>2.</Text>
                 <Text style={{ fontSize: 14, color: theme.colors.textSecondary, flex: 1 }}>
-                  Ellos usan tu c骴igo al registrarse
+                  Ellos usan tu c贸digo al registrarse
                 </Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-                <Text style={{ fontSize: 20, marginRight: 12 }}>3??</Text>
+                <Text style={{ fontSize: 20, marginRight: 12 }}>3.</Text>
                 <Text style={{ fontSize: 14, color: theme.colors.textSecondary, flex: 1 }}>
-                  mbos ganan 100 puntos de fidelidad!
+                  隆Ambos ganan 100 puntos de fidelidad!
                 </Text>
               </View>
             </View>

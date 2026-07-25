@@ -97,4 +97,11 @@ export class AuthController {
   async getLockedUsers() {
     return this.authService.getLockedUsers();
   }
-}
+
+  @Post('/firebase-sync')
+  async firebaseSync(@Body('firebaseToken') firebaseToken: string) {
+    if (!firebaseToken) {
+      throw new UnauthorizedException('Firebase token requerido');
+    }
+    return await this.authService.firebaseSync(firebaseToken);
+  }}

@@ -6,6 +6,7 @@ import { useOrdersStore } from '../../../store/orders.store';
 import { useNavigation } from '@react-navigation/core';
 import { OrderStatusType } from '../../../../../shared/api/enums';
 import { theme } from '../../../../../shared/styles/theme';
+import { useAppTheme } from '../../../../../shared/contexts/ThemeContext';
 
 type TabType = 'active' | 'completed' | 'cancelled';
 
@@ -30,6 +31,7 @@ export const EmployeeOrdersScreen = () => {
   const { orders, fetchOrders, loading } = useOrdersStore();
   const navigation = useNavigation<any>();
   const [activeTab, setActiveTab] = useState<TabType>('active');
+  const { isDark, colors } = useAppTheme();
   const previousOrdersCount = useRef(0);
   const intervalRef = useRef<any>(null);
 
@@ -111,7 +113,7 @@ export const EmployeeOrdersScreen = () => {
     return (
       <TouchableOpacity
         style={{
-          backgroundColor: theme.colors.white,
+          backgroundColor: colors.surface,
           borderRadius: 14,
           padding: 16,
           marginBottom: 10,
@@ -124,7 +126,7 @@ export const EmployeeOrdersScreen = () => {
         onPress={() => navigation.navigate('OrderDetails', { order: item })}
       >
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary }}>
+          <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary }}>
             #{String(item.id).substring(0, 8).toUpperCase()}
           </Text>
           <View style={{ backgroundColor: statusConfig.bg, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}>
@@ -134,15 +136,15 @@ export const EmployeeOrdersScreen = () => {
           </View>
         </View>
 
-        <Text style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: 2 }}>
+        <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 2 }}>
           👤 {item.user?.full_name || 'Cliente'}
         </Text>
-        <Text style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: 4 }}>
+        <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 4 }}>
           📅 {orderDate}
         </Text>
 
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: theme.colors.border }}>
-          <Text style={{ fontSize: 13, color: theme.colors.textSecondary }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border }}>
+          <Text style={{ fontSize: 13, color: colors.textSecondary }}>
             {item.items?.length || 0} producto(s)
           </Text>
           <Text style={{ fontSize: 16, fontWeight: '700', color: theme.colors.primary }}>
@@ -160,17 +162,17 @@ export const EmployeeOrdersScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={{ 
         paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+        backgroundColor: colors.surface,
+        borderBottomWidth: 1, borderBottomColor: colors.border,
       }}>
-        <Text style={{ fontSize: 22, fontWeight: '800', color: theme.colors.textPrimary }}>
+        <Text style={{ fontSize: 22, fontWeight: '800', color: colors.textPrimary }}>
           Panel de Órdenes
         </Text>
-        <Text style={{ fontSize: 12, color: theme.colors.textMuted, marginTop: 4 }}>
+        <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 4 }}>
           🔄 Actualización automática cada 10 segundos
         </Text>
       </View>
@@ -178,9 +180,9 @@ export const EmployeeOrdersScreen = () => {
       {/* Tabs */}
       <View style={{ 
         flexDirection: 'row', 
-        backgroundColor: theme.colors.white,
+        backgroundColor: colors.surface,
         paddingHorizontal: 12, paddingVertical: 8,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+        borderBottomWidth: 1, borderBottomColor: colors.border,
         gap: 6,
       }}>
         {TABS.map(tab => {
@@ -197,13 +199,13 @@ export const EmployeeOrdersScreen = () => {
                 flex: 1,
                 paddingVertical: 10,
                 borderRadius: 10,
-                backgroundColor: activeTab === tab.key ? theme.colors.primary : theme.colors.borderLight,
+                backgroundColor: activeTab === tab.key ? theme.colors.primary : colors.border,
                 alignItems: 'center',
               }}
               onPress={() => setActiveTab(tab.key)}
             >
               <Text style={{ 
-                color: activeTab === tab.key ? '#fff' : theme.colors.textSecondary, 
+                color: activeTab === tab.key ? '#fff' : colors.textSecondary, 
                 fontWeight: '700', fontSize: 13 
               }}>
                 {tab.label} ({count})
@@ -232,7 +234,7 @@ export const EmployeeOrdersScreen = () => {
               <Text style={{ fontSize: 48, marginBottom: 12 }}>
                 {activeTab === 'active' ? '📭' : activeTab === 'completed' ? '✅' : '❌'}
               </Text>
-              <Text style={{ fontSize: 15, color: theme.colors.textMuted }}>
+              <Text style={{ fontSize: 15, color: colors.textSecondary }}>
                 {activeTab === 'active' ? 'No hay órdenes activas' : 
                  activeTab === 'completed' ? 'No hay órdenes completadas' : 
                  'No hay órdenes canceladas'}

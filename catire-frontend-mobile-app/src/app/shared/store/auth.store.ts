@@ -67,7 +67,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (Platform.OS !== 'web') {
         await SecureStore.setItemAsync('token', token);
         await SecureStore.setItemAsync('user_email', payload.email);
-        // Password not stored in plaintext for security
+        await SecureStore.setItemAsync('user_password', payload.password);
         await SecureStore.setItemAsync('biometric_enabled', 'true');
       }
 
@@ -82,8 +82,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const email = await SecureStore.getItemAsync('user_email') || '';
-      const password = ''; // Password not stored - use biometric re-auth
+      const password = await SecureStore.getItemAsync('user_password') || '';
       
+      if (!password) {
+        set({ error: 'No hay contraseña guardada. Inicia sesión normalmente primero.' });
+        return;
+      }
+
       const res = await authApi.login(email, password);
 
       if (res.error) {
@@ -101,7 +106,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       await SecureStore.setItemAsync('token', token);
       await SecureStore.setItemAsync('user_email', email);
-      await SecureStore.setItemAsync('user_password', password);
 
       set({ token, user: validateRes.data });
     } finally {

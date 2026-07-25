@@ -6,6 +6,7 @@ import { useOrdersStore } from '../../../store/orders.store';
 import { useNavigation } from '@react-navigation/core';
 import { OrderStatusType } from '../../../../../shared/api/enums';
 import { theme } from '../../../../../shared/styles/theme';
+import { useAppTheme } from '../../../../../shared/contexts/ThemeContext';
 
 type TabType = 'active' | 'completed' | 'cancelled';
 
@@ -31,6 +32,7 @@ export const OrdersScreen = () => {
   const intervalRef = useRef<any>(null);
   const navigation = useNavigation<any>();
   const [activeTab, setActiveTab] = useState<TabType>('active');
+  const { isDark, colors } = useAppTheme();
 
   // Auto-refresh cada 10 segundos
   useEffect(() => {
@@ -81,7 +83,7 @@ export const OrdersScreen = () => {
     return (
       <TouchableOpacity
         style={{
-          backgroundColor: theme.colors.white,
+          backgroundColor: isDark ? colors.surface : theme.colors.white,
           borderRadius: 14,
           padding: 16,
           marginBottom: 10,
@@ -142,10 +144,10 @@ export const OrdersScreen = () => {
       <View style={{ 
         alignItems: 'center',
         paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+        backgroundColor: isDark ? colors.surface : theme.colors.white,
+        borderBottomWidth: 1, borderBottomColor: isDark ? colors.border : theme.colors.border,
       }}>
-        <Text style={{ fontSize: 22, fontWeight: '800', color: theme.colors.textPrimary }}>Mis Pedidos</Text>
+        <Text style={{ fontSize: 22, fontWeight: '800', color: isDark ? colors.textPrimary : theme.colors.textPrimary }}>Mis Pedidos</Text>
         <Text style={{ fontSize: 12, color: theme.colors.textMuted, marginTop: 4 }}>
           🔄 Actualización automática cada 10 segundos
         </Text>
@@ -154,9 +156,9 @@ export const OrdersScreen = () => {
       {/* Tabs */}
       <View style={{ 
         flexDirection: 'row', 
-        backgroundColor: theme.colors.white,
+        backgroundColor: isDark ? colors.surface : theme.colors.white,
         paddingHorizontal: 12, paddingVertical: 8,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+        borderBottomWidth: 1, borderBottomColor: isDark ? colors.border : theme.colors.border,
         gap: 6,
       }}>
         {TABS.map(tab => {

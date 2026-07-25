@@ -37,12 +37,12 @@ export const UserCard = ({ user, onEdit, onDelete }: UserCardProps) => {
         <View style={{ flexDirection: 'row', gap: 8 }}>
           {onEdit && (
             <TouchableOpacity onPress={onEdit} style={{ padding: 8 }}>
-              <Text>✏️</Text>
+              <Text>Editar</Text>
             </TouchableOpacity>
           )}
           {onDelete && (
             <TouchableOpacity onPress={onDelete} style={{ padding: 8 }}>
-              <Text>🗑️</Text>
+              <Text>Eliminar</Text>
             </TouchableOpacity>
           )}
         </View>

@@ -1,22 +1,13 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { SecurityService } from '../security/security.service';
 import { UserService } from 'src/user/user.service';
-import { SecurityService } from '../security/security.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { SecurityService } from '../security/security.service';
 import { JwtService } from '@nestjs/jwt';
-import { SecurityService } from '../security/security.service';
 import { TokenPairDTO } from './dto/jwt.dto';
-import { SecurityService } from '../security/security.service';
 import { User } from '@prisma/client';
-import { SecurityService } from '../security/security.service';
 import { Payload } from './strategy/jwt.strategy';
-import { SecurityService } from '../security/security.service';
 import { UserRole } from 'src/types/user';
-import { SecurityService } from '../security/security.service';
 import axios from 'axios';
-import { SecurityService } from '../security/security.service';
-
 // In-memory lockout tracker
 const loginAttempts = new Map<string, { count: number; lockedUntil: number }>();
 
@@ -243,7 +234,45 @@ export class AuthService {
     });
     return locked;
   }
-}
+
+  async firebaseSync(firebaseToken: string) {
+    // Verify Firebase token via Google's tokeninfo endpoint
+    const response = await fetch(https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=);
+    if (!response.ok) {
+      throw new UnauthorizedException('Token de Firebase invalido');
+    }
+    const payload = await response.json();
+    const email = payload.email;
+    const name = payload.name || email.split('@')[0];
+    const firebaseUid = payload.sub;
+
+    // Find or create user
+    let user = await this.prisma.user.findFirst({ where: { email } });
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: {
+          email,
+          full_name: name,
+          password: '',
+          role_id: 4, // client role
+          provider: 'firebase',
+          firebase_uid: firebaseUid,
+          avatar_url: payload.picture || null,
+        },
+      });
+    } else if (!user.firebase_uid) {
+      // Link existing user to Firebase
+      user = await this.prisma.user.update({
+        where: { id: user.id },
+        data: { firebase_uid: firebaseUid, provider: 'firebase' },
+      });
+    }
+
+    // Generate our own JWT
+    const tokens = await this.generateTokens(user.id, user.email, user.role_id);
+    return { access_token: tokens.accessToken, user };
+  }}
+
 
 
 

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, TextInput, Switch, Alert, Modal, ActivityIndicator, Image, ScrollView
 } from 'react-native';
@@ -12,6 +12,7 @@ import { useExchangeRateStore } from '../../../../../shared/store/exchange-rate.
 import financeApi from '../../../../finance/api/finance.api';
 import { styles } from '../styles/cart.styles';
 import { CartItemAccordion } from '../components/CartItemAccordion';
+import { useAppTheme } from '../../../../../shared/contexts/ThemeContext';
 
 export const CartScreen = () => {
   const navigation = useNavigation<any>();
@@ -22,6 +23,7 @@ export const CartScreen = () => {
   const { rates, fetchRates, convert, formatCurrency, lastUpdated, isLoading } = useExchangeRateStore();
 
   const [isDelivery, setIsDelivery] = useState(false);
+  const { isDark, colors } = useAppTheme();
   const [notes, setNotes] = useState('');
   const [address, setAddress] = useState({
     street: '', avenue: '', house_number: '', reference: ''
@@ -177,8 +179,8 @@ export const CartScreen = () => {
         <ScrollView style={styles.checkoutSection}>
           {/* Total en 3 monedas con tasas en tiempo real */}
           <View style={{
-            backgroundColor: '#F0F9FF', borderRadius: 12, padding: 16, marginBottom: 12,
-            borderWidth: 1, borderColor: '#BAE6FD',
+            backgroundColor: isDark ? colors.surface : '#F0F9FF', borderRadius: 12, padding: 16, marginBottom: 12,
+            borderWidth: 1, borderColor: isDark ? colors.border : '#BAE6FD',
           }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <Text style={{ fontSize: 14, fontWeight: '700', color: '#0369A1' }}>💰 Total a Pagar</Text>
@@ -223,39 +225,39 @@ export const CartScreen = () => {
 
           {/* Método de Pago */}
           <View style={{ marginTop: 16 }}>
-            <Text style={{ fontSize: 15, fontWeight: '700', color: '#212121', marginBottom: 10 }}>💳 Método de Pago</Text>
+            <Text style={{ fontSize: 15, fontWeight: '700', color: colors.textPrimary, marginBottom: 10 }}>💳 Método de Pago</Text>
             
             <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
               <TouchableOpacity
                 style={{
                   flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center',
-                  backgroundColor: paymentMethod === 'pago_movil' ? '#D32F2F' : '#fff',
+                  backgroundColor: paymentMethod === 'pago_movil' ? '#D32F2F' : colors.surface,
                   borderWidth: 2, borderColor: paymentMethod === 'pago_movil' ? '#D32F2F' : '#E0E0E0',
                 }}
                 onPress={() => setPaymentMethod('pago_movil')}
               >
                 <Text style={{ fontSize: 20, marginBottom: 4 }}>📱</Text>
-                <Text style={{ fontWeight: '700', color: paymentMethod === 'pago_movil' ? '#fff' : '#212121' }}>Pago Móvil</Text>
+                <Text style={{ fontWeight: '700', color: paymentMethod === 'pago_movil' ? '#fff' : colors.textPrimary }}>Pago Móvil</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={{
                   flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center',
-                  backgroundColor: paymentMethod === 'efectivo' ? '#10B981' : '#fff',
+                  backgroundColor: paymentMethod === 'efectivo' ? '#10B981' : colors.surface,
                   borderWidth: 2, borderColor: paymentMethod === 'efectivo' ? '#10B981' : '#E0E0E0',
                 }}
                 onPress={() => setPaymentMethod('efectivo')}
               >
                 <Text style={{ fontSize: 20, marginBottom: 4 }}>💵</Text>
-                <Text style={{ fontWeight: '700', color: paymentMethod === 'efectivo' ? '#fff' : '#212121' }}>Efectivo</Text>
+                <Text style={{ fontWeight: '700', color: paymentMethod === 'efectivo' ? '#fff' : colors.textPrimary }}>Efectivo</Text>
               </TouchableOpacity>
             </View>
 
             {/* Pago Móvil - Datos bancarios y comprobante */}
             {paymentMethod === 'pago_movil' && (
               <View style={{
-                backgroundColor: '#FEF3C7', borderRadius: 12, padding: 16, marginBottom: 12,
-                borderWidth: 1, borderColor: '#FCD34D',
+                backgroundColor: isDark ? colors.surface : '#FEF3C7', borderRadius: 12, padding: 16, marginBottom: 12,
+                borderWidth: 1, borderColor: isDark ? colors.border : '#FCD34D',
               }}>
                 <Text style={{ fontSize: 14, fontWeight: '700', color: '#92400E', marginBottom: 10 }}>
                   📋 Datos para Transferencia
@@ -293,16 +295,16 @@ export const CartScreen = () => {
                   ) : (
                     <View style={{ flexDirection: 'row', gap: 10 }}>
                       <TouchableOpacity
-                        style={{ flex: 1, padding: 12, backgroundColor: '#fff', borderRadius: 8, alignItems: 'center', borderWidth: 1, borderColor: '#E0E0E0' }}
+                        style={{ flex: 1, padding: 12, backgroundColor: colors.surface, borderRadius: 8, alignItems: 'center', borderWidth: 1, borderColor: '#E0E0E0' }}
                         onPress={takePhoto}
                       >
-                        <Text style={{ fontSize: 13, fontWeight: '600', color: '#212121' }}>📷 Tomar Foto</Text>
+                        <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary }}>📷 Tomar Foto</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
-                        style={{ flex: 1, padding: 12, backgroundColor: '#fff', borderRadius: 8, alignItems: 'center', borderWidth: 1, borderColor: '#E0E0E0' }}
+                        style={{ flex: 1, padding: 12, backgroundColor: colors.surface, borderRadius: 8, alignItems: 'center', borderWidth: 1, borderColor: '#E0E0E0' }}
                         onPress={pickImage}
                       >
-                        <Text style={{ fontSize: 13, fontWeight: '600', color: '#212121' }}>🖼️ Galería</Text>
+                        <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary }}>🖼️ Galería</Text>
                       </TouchableOpacity>
                     </View>
                   )}
@@ -313,8 +315,8 @@ export const CartScreen = () => {
             {/* Efectivo - Mensaje */}
             {paymentMethod === 'efectivo' && (
               <View style={{
-                backgroundColor: '#D1FAE5', borderRadius: 12, padding: 16, marginBottom: 12,
-                borderWidth: 1, borderColor: '#6EE7B7',
+                backgroundColor: isDark ? colors.surface : '#D1FAE5', borderRadius: 12, padding: 16, marginBottom: 12,
+                borderWidth: 1, borderColor: isDark ? colors.border : '#6EE7B7',
               }}>
                 <Text style={{ fontSize: 14, fontWeight: '700', color: '#065F46', marginBottom: 4 }}>
                   💵 Pago en Efectivo

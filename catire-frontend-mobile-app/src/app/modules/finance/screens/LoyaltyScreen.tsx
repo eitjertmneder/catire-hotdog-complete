@@ -17,11 +17,11 @@ export const LoyaltyScreen = () => {
 
   // Niveles de fidelidad
   const getLevel = (pts: number) => {
-    if (pts >= 1000) return { name: 'Diamante', color: '#8B5CF6', emoji: '??' };
-    if (pts >= 500) return { name: 'Oro', color: '#F59E0B', emoji: '??' };
-    if (pts >= 200) return { name: 'Plata', color: '#9CA3AF', emoji: '??' };
-    if (pts >= 50) return { name: 'Bronce', color: '#D97706', emoji: '??' };
-    return { name: 'Nuevo', color: '#6B7280', emoji: '?' };
+    if (pts >= 1000) return { name: 'Diamante', color: '#8B5CF6', emoji: '\u{1F48E}' };
+    if (pts >= 500) return { name: 'Oro', color: '#F59E0B', emoji: '\u{1F451}' };
+    if (pts >= 200) return { name: 'Plata', color: '#9CA3AF', emoji: '\u{1F948}' };
+    if (pts >= 50) return { name: 'Bronce', color: '#D97706', emoji: '\u{1F949}' };
+    return { name: 'Nuevo', color: '#6B7280', emoji: '\u2B50' };
   };
 
   const level = getLevel(points);
@@ -36,10 +36,10 @@ export const LoyaltyScreen = () => {
         borderBottomWidth: 1, borderBottomColor: theme.colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>? Volver</Text>
+          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
         </TouchableOpacity>
         <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
-          ? Puntos de Fidelidad
+          Puntos de Fidelidad
         </Text>
       </View>
 
@@ -84,22 +84,22 @@ export const LoyaltyScreen = () => {
               marginBottom: 16,
             }}>
               <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
-                ¿Cómo funciona?
+                Â¿CÃ³mo funciona?
               </Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                <Text style={{ fontSize: 20, marginRight: 10 }}>??</Text>
+                <Text style={{ fontSize: 20, marginRight: 10 }}>{'\u{1F4B0}'}</Text>
                 <Text style={{ fontSize: 13, color: theme.colors.textSecondary, flex: 1 }}>
                   Gana 1 punto por cada $1 en compras
                 </Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                <Text style={{ fontSize: 20, marginRight: 10 }}>??</Text>
+                <Text style={{ fontSize: 20, marginRight: 10 }}>{'\u{1F3AF}'}</Text>
                 <Text style={{ fontSize: 13, color: theme.colors.textSecondary, flex: 1 }}>
                   Acumula puntos y sube de nivel
                 </Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={{ fontSize: 20, marginRight: 10 }}>??</Text>
+                <Text style={{ fontSize: 20, marginRight: 10 }}>{'\u{1F381}'}</Text>
                 <Text style={{ fontSize: 13, color: theme.colors.textSecondary, flex: 1 }}>
                   Canjea por descuentos especiales
                 </Text>
@@ -117,11 +117,11 @@ export const LoyaltyScreen = () => {
                 Niveles
               </Text>
               {[
-                { name: 'Nuevo', points: '0+', emoji: '?' },
-                { name: 'Bronce', points: '50+', emoji: '??' },
-                { name: 'Plata', points: '200+', emoji: '??' },
-                { name: 'Oro', points: '500+', emoji: '??' },
-                { name: 'Diamante', points: '1000+', emoji: '??' },
+                { name: 'Nuevo', points: '0+', emoji: '\u2B50' },
+                { name: 'Bronce', points: '50+', emoji: '\u{1F949}' },
+                { name: 'Plata', points: '200+', emoji: '\u{1F948}' },
+                { name: 'Oro', points: '500+', emoji: '\u{1F451}' },
+                { name: 'Diamante', points: '1000+', emoji: '\u{1F48E}' },
               ].map((lvl, index) => (
                 <View key={index} style={{
                   flexDirection: 'row',
@@ -145,7 +145,7 @@ export const LoyaltyScreen = () => {
         }
         ListEmptyComponent={
           <View style={{ alignItems: 'center', paddingTop: 20 }}>
-            <Text style={{ fontSize: 14, color: theme.colors.textMuted }}>Sin transacciones aún</Text>
+            <Text style={{ fontSize: 14, color: theme.colors.textMuted }}>Sin transacciones aÃºn</Text>
           </View>
         }
         renderItem={({ item }) => (
@@ -163,7 +163,7 @@ export const LoyaltyScreen = () => {
               justifyContent: 'center', alignItems: 'center',
               marginRight: 12,
             }}>
-              <Text style={{ fontSize: 18 }}>{item.type === 'earned' ? '?' : '?'}</Text>
+              <Text style={{ fontSize: 18 }}>{item.type === 'earned' ? '\u2B06' : '\u2B07'}</Text>
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 14, fontWeight: '600', color: theme.colors.textPrimary }}>

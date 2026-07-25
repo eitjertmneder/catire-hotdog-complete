@@ -12,17 +12,17 @@ export const AdvancedReportsScreen = () => {
   const [dateRange, setDateRange] = useState<'week' | 'month' | 'quarter'>('week');
 
   const reportTypes: { type: Report['type']; label: string; icon: string }[] = [
-    { type: 'sales', label: 'Ventas', icon: '??' },
-    { type: 'inventory', label: 'Inventario', icon: '??' },
-    { type: 'orders', label: 'Pedidos', icon: '??' },
-    { type: 'products', label: 'Productos', icon: '??' },
-    { type: 'employees', label: 'Empleados', icon: '??' },
+    { type: 'sales', label: 'Ventas', icon: '\u{1F4CA}' },
+    { type: 'inventory', label: 'Inventario', icon: '\u{1F4E6}' },
+    { type: 'orders', label: 'Pedidos', icon: '\u{1F6D2}' },
+    { type: 'products', label: 'Productos', icon: '\u{1F354}' },
+    { type: 'employees', label: 'Empleados', icon: '\u{1F465}' },
   ];
 
   const getDateRange = () => {
     const now = new Date();
     const from = new Date();
-    
+
     switch (dateRange) {
       case 'week':
         from.setDate(now.getDate() - 7);
@@ -34,35 +34,32 @@ export const AdvancedReportsScreen = () => {
         from.setMonth(now.getMonth() - 3);
         break;
     }
-    
+
     return { from, to: now };
   };
 
   const handleGenerate = async () => {
     const { from, to } = getDateRange();
     const report = await generateReport(selectedType, from, to);
-    Alert.alert('Éxito', `Reporte "${report.title}" generado`);
+    Alert.alert('Ã‰xito', `Reporte "${report.title}" generado`);
   };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      {/* Header */}
       <View style={{
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+        backgroundColor: '#EC3137',
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>? Volver</Text>
+          <Text style={{ fontSize: 16, color: '#fff', fontWeight: '600' }}>{'\u{2190}'} Volver</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
-          ?? Reportes Avanzados
+        <Text style={{ fontSize: 18, fontWeight: '700', color: '#fff', marginLeft: 12 }}>
+          {'\u{1F4CA}'} Reportes Avanzados
         </Text>
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-        {/* Report Type Selector */}
         <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
           Tipo de Reporte
         </Text>
@@ -91,9 +88,8 @@ export const AdvancedReportsScreen = () => {
           ))}
         </View>
 
-        {/* Date Range Selector */}
         <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
-          Período
+          PerÃ­odo
         </Text>
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
           {(['week', 'month', 'quarter'] as const).map((range) => (
@@ -115,13 +111,12 @@ export const AdvancedReportsScreen = () => {
                 fontWeight: '600',
                 color: dateRange === range ? '#fff' : theme.colors.textPrimary,
               }}>
-                {range === 'week' ? 'Última Semana' : range === 'month' ? 'Último Mes' : 'Último Trimestre'}
+                {range === 'week' ? 'Ãšltima Semana' : range === 'month' ? 'Ãšltimo Mes' : 'Ãšltimo Trimestre'}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* Generate Button */}
         <TouchableOpacity
           style={{
             backgroundColor: theme.colors.primary,
@@ -132,17 +127,16 @@ export const AdvancedReportsScreen = () => {
           }}
           onPress={handleGenerate}
         >
-          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>?? Generar Reporte</Text>
+          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>{'\u{1F50D}'} Generar Reporte</Text>
         </TouchableOpacity>
 
-        {/* Previous Reports */}
         <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
           Reportes Generados
         </Text>
-        
+
         {reports.length === 0 ? (
           <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-            <Text style={{ fontSize: 48, marginBottom: 12 }}>??</Text>
+            <Text style={{ fontSize: 48, marginBottom: 12 }}>{'\u{1F4CB}'}</Text>
             <Text style={{ fontSize: 14, color: theme.colors.textMuted }}>No hay reportes generados</Text>
           </View>
         ) : (
@@ -165,7 +159,7 @@ export const AdvancedReportsScreen = () => {
                 marginRight: 12,
               }}>
                 <Text style={{ fontSize: 20 }}>
-                  {reportTypes.find(rt => rt.type === report.type)?.icon || '??'}
+                  {reportTypes.find(rt => rt.type === report.type)?.icon || '\u{1F4C4}'}
                 </Text>
               </View>
               <View style={{ flex: 1 }}>
@@ -181,24 +175,24 @@ export const AdvancedReportsScreen = () => {
                   style={{ padding: 8 }}
                   onPress={() => Alert.alert('Exportar', 'PDF export functionality')}
                 >
-                  <Text>??</Text>
+                  <Text>{'\u{1F4C4}'}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={{ padding: 8 }}
                   onPress={() => Alert.alert('Exportar', 'CSV export functionality')}
                 >
-                  <Text>??</Text>
+                  <Text>{'\u{1F4E5}'}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={{ padding: 8 }}
                   onPress={() => {
-                    Alert.alert('Eliminar', '¿Eliminar este reporte?', [
+                    Alert.alert('Eliminar', 'Â¿Eliminar este reporte?', [
                       { text: 'Cancelar', style: 'cancel' },
                       { text: 'Eliminar', style: 'destructive', onPress: () => deleteReport(report.id) },
                     ]);
                   }}
                 >
-                  <Text>???</Text>
+                  <Text>{'\u{1F5D1}\uFE0F'}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -208,4 +202,3 @@ export const AdvancedReportsScreen = () => {
     </SafeAreaView>
   );
 };
-

@@ -1,110 +1,75 @@
-﻿import React, { useEffect, useState, useRef } from 'react';
-import { ScrollView, View, Text, StyleSheet, Animated, Easing } from 'react-native';
-import { Image } from 'expo-image';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 
-interface IconItem {
-  color: string;
-  isImage?: boolean;
-  image?: any;
-  emoji?: string;
-}
+const foodItems = [
+  { emoji: '🌭', color: '#FFEBEE' },
+  { emoji: '🍔', color: '#FFF3E0' },
+  { emoji: '🍟', color: '#FFFDE7' },
+  { emoji: '🥤', color: '#E8F5E9' },
+  { emoji: '🍕', color: '#F3E5F5' },
+];
 
-const iconDataSets: Record<"set1" | "set2" | "set3", IconItem[]> = {
-  set1: [
-    { emoji: '🌭', color: '#FFEBEE' },
-    { emoji: '🍔', color: '#FFF3E0' },
-    { emoji: '🍟', color: '#FFFDE7' },
-    { emoji: '🥤', color: '#E8F5E9' },
-    { emoji: '🍕', color: '#F3E5F5' },
-  ],
-  set2: [
-    { emoji: '🌮', color: '#E3F2FD' },
-    { emoji: '🌯', color: '#FCE4EC' },
-    { emoji: '🥪', color: '#E8EAF6' },
-    { emoji: '🥗', color: '#F1F8E9' },
-    { emoji: '🍝', color: '#FFF8E1' },
-  ],
-  set3: [
-    { emoji: '🍦', color: '#F3E5F5' },
-    { emoji: '🍩', color: '#FFF3E0' },
-    { emoji: '🧁', color: '#FCE4EC' },
-    { emoji: '🍰', color: '#FFFDE7' },
-    { emoji: '🎂', color: '#E8F5E9' },
-  ],
-};
+const ITEM_HEIGHT = 80;
+const VISIBLE_ITEMS = 2;
 
-const ITEM_HEIGHT = 160;
-const SCROLL_SPEED = 20;
-
-interface ScrollInfinitoSuaveProps {
-  scrollDirection?: "up" | "down";
-  iconSet?: "set1" | "set2" | "set3";
-}
-
-const ScrollInfinitoSuave = ({
-  scrollDirection = "down",
-  iconSet = "set1",
-}: ScrollInfinitoSuaveProps) => {
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const scrollRef = useRef<ScrollView>(null);
-  const [offset, setOffset] = useState(0);
-
-  const iconData = iconDataSets[iconSet];
-  const items = [...iconData, ...iconData];
+const ScrollInfinitoSuave = ({ scrollDirection = 'down' as 'up' | 'down' }) => {
+  const scrollAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const startScroll = () => {
-      Animated.loop(
-        Animated.timing(scrollY, {
-          toValue: scrollDirection === 'down' ? -1000 : 1000,
-          duration: 50000,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        })
-      ).start();
-    };
+    const totalHeight = foodItems.length * (ITEM_HEIGHT + 8);
+    const startVal = scrollDirection === 'down' ? 0 : -totalHeight;
+    const endVal = scrollDirection === 'down' ? -totalHeight : 0;
 
-    startScroll();
-  }, [scrollDirection]);
+    scrollAnim.setValue(startVal);
+
+    Animated.loop(
+      Animated.timing(scrollAnim, {
+        toValue: endVal,
+        duration: foodItems.length * 2000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    ).start();
+  }, []);
+
+  const items = [...foodItems, ...foodItems, ...foodItems];
 
   return (
-    <Animated.View style={{ overflow: 'hidden', height: 200 }}>
-      <Animated.ScrollView
-        ref={scrollRef}
-        contentContainerStyle={styles.container}
-        scrollEnabled={false}
-        showsVerticalScrollIndicator={false}
-      >
-        {items.map((item, idx) => (
-          <View
-            key={idx}
-            style={[styles.iconContainer, { backgroundColor: item.color }]}
-          >
-            <Text style={{ fontSize: 40 }}>{item.emoji}</Text>
-          </View>
-        ))}
-      </Animated.ScrollView>
-    </Animated.View>
+    <View style={styles.container}>
+      <View style={styles.clipContainer}>
+        <Animated.View style={{ transform: [{ translateY: scrollAnim }] }}>
+          {items.map((item, idx) => (
+            <View key={idx} style={[styles.itemCard, { backgroundColor: item.color }]}>
+              <Text style={styles.emoji}>{item.emoji}</Text>
+            </View>
+          ))}
+        </Animated.View>
+      </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    gap: 10,
-    paddingVertical: 20,
+    height: ITEM_HEIGHT * VISIBLE_ITEMS + 16,
+    width: 80,
+    overflow: 'hidden',
+    borderRadius: 16,
   },
-  iconContainer: {
-    width: 160,
+  clipContainer: {
+    flex: 1,
+    overflow: 'hidden',
+  },
+  itemCard: {
+    width: 80,
     height: ITEM_HEIGHT,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 20,
-    marginHorizontal: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 16,
+    marginBottom: 8,
+  },
+  emoji: {
+    fontSize: 36,
   },
 });
 

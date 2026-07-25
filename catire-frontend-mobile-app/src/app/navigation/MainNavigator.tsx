@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AuthScreen from '../modules/auth/modules/auth/screens/AuthScreen';
+import { FirebaseLoginScreen } from '../modules/auth/modules/auth/screens/FirebaseLoginScreen';
 import BranchList from '../modules/catalog/modules/branches/screens/BranchList';
 import { OrdersScreen } from '../modules/orders/modules/orders/screens/OrdersScreen';
 import BranchesMap from '../modules/catalog/modules/branches/screens/BranchesMap';
@@ -52,11 +53,17 @@ import { OrderTrackingScreen } from '../modules/orders/screens/OrderTrackingScre
 import { FeedbackAnalyticsScreen } from '../shared/screens/FeedbackAnalyticsScreen';
 import { TransferScreen } from '../modules/inventory/screens/TransferScreen';
 import { KitchenDisplayScreen } from '../modules/orders/screens/KitchenDisplayScreen';
-import { TableManagementScreen } from '../modules/inventory/screens/TableManagementScreen';
 import { DeliveryPartnersScreen } from '../shared/screens/DeliveryPartnersScreen';
 import { SupplierScreen } from '../shared/screens/SupplierScreen';
 import { GamificationScreen } from '../shared/screens/GamificationScreen';
 import { TwoFAScreen } from '../shared/screens/TwoFAScreen';
+
+import { EmailTemplatesScreen } from '../shared/screens/EmailTemplatesScreen';
+import { SessionsScreen } from '../shared/screens/SessionsScreen';
+import { AuditDashboardScreen } from '../shared/screens/AuditDashboardScreen';
+import { PDFReportsScreen } from '../shared/screens/PDFReportsScreen';
+import { GoogleMapsScreen } from '../shared/screens/GoogleMapsScreen';
+import { PaymentsScreen } from '../shared/screens/PaymentsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -71,6 +78,7 @@ export default function MainNavigator() {
           <>
             <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Login" component={AuthScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="FirebaseLogin" component={FirebaseLoginScreen} options={{ headerShown: false }} />
           </>
         ) : (
           <Stack.Group screenOptions={{ header: () => <Navbar /> }}>
@@ -110,6 +118,7 @@ export default function MainNavigator() {
                   <Stack.Screen name="AdminScreen" component={AdminScreen} />
 
                   <Stack.Screen name="EmployeeMenuAdmin" component={MenuAdmin} />
+                  <Stack.Screen name="MenuAdmin" component={MenuAdmin} />
                   <Stack.Screen name="BranchAdmin" component={BranchAdmin} />
                   <Stack.Screen name="ProductsAdmin" component={ProductsAdmin} />
                   <Stack.Screen name="OrdersAdmin" component={OrdersAdmin} />
@@ -128,7 +137,6 @@ export default function MainNavigator() {
                   <Stack.Screen name="FeedbackAnalytics" component={FeedbackAnalyticsScreen} />
                   <Stack.Screen name="Transfers" component={TransferScreen} />
                   <Stack.Screen name="KitchenDisplay" component={KitchenDisplayScreen} />
-                  <Stack.Screen name="TableManagement" component={TableManagementScreen} />
                   <Stack.Screen name="DeliveryPartners" component={DeliveryPartnersScreen} />
                   <Stack.Screen name="Suppliers" component={SupplierScreen} />
                   <Stack.Screen name="Gamification" component={GamificationScreen} />
@@ -137,6 +145,13 @@ export default function MainNavigator() {
                   <Stack.Screen name="Referrals" component={ReferralsScreen} />
                   <Stack.Screen name="CurrencyRates" component={CurrencyRatesScreen} />
                   <Stack.Screen name="PaymentConfig" component={PaymentConfigScreen} />
+        <Stack.Screen name="EmailTemplates" component={EmailTemplatesScreen} />
+        <Stack.Screen name="Sessions" component={SessionsScreen} />
+        <Stack.Screen name="AuditLogs" component={AuditDashboardScreen} />
+        <Stack.Screen name="PDFReports" component={PDFReportsScreen} />
+        <Stack.Screen name="GoogleMaps" component={GoogleMapsScreen} />
+        <Stack.Screen name="Payments" component={PaymentsScreen} />
+
 
                   <Stack.Screen name="MenuForm" component={MenuForm} />
                   <Stack.Screen name="BranchForm" component={BranchForm} />
@@ -154,8 +169,10 @@ export default function MainNavigator() {
                   <Stack.Screen name="Branches" component={BranchList} />
                   <Stack.Screen name="Home" component={HomeScreen} />
                   <Stack.Screen name="Menu" component={MenuScreen} />
+                  <Stack.Screen name="BuildOrder" component={BuildOrderScreen} />
                   <Stack.Screen name="MenuList" component={MenuList} />
                   <Stack.Screen name="ProductDetails" component={ProductDetails} />
+                  <Stack.Screen name="Cart" component={CartScreen} />
                 </>
               )
             }

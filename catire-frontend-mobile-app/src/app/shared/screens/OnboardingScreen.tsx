@@ -94,7 +94,7 @@ export const OnboardingScreen = () => {
       {/* Next Button */}
       <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
         <Text style={styles.nextText}>
-          {currentIndex === onboardingSteps.length - 1 ? '¡Empezar!' : 'Siguiente'}
+          {currentIndex === onboardingSteps.length - 1 ? 'Empezar!' : 'Siguiente'}
         </Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   emoji: {
-    fontSize: 120,
+    fontSize: 36, fontWeight: '900', color: '#fff', letterSpacing: 2,
     marginBottom: 30,
   },
   title: {

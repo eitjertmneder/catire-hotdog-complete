@@ -17,6 +17,7 @@ model User {
   password        String
   provider        String? @default("local")
   google_id       String? @unique
+  firebase_uid   String?    @unique
   avatar_url      String?
   branch_id       Int?
   role            Role @relation(fields: [role_id], references: [id])

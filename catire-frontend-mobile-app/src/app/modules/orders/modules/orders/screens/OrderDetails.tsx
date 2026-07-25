@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal, ActivityIndicator, TextInput, Linking, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,6 +6,7 @@ import { useAuthStore } from '../../../../../shared/store/auth.store';
 import { useOrdersStore } from '../../../store/orders.store';
 import { OrderStatusType } from '../../../../../shared/api/enums';
 import { theme } from '../../../../../shared/styles/theme';
+import { useAppTheme } from '../../../../../shared/contexts/ThemeContext';
 
 const BRANCHES = [
   { id: 1, name: 'Barrio Sucre' },
@@ -35,6 +36,7 @@ export const OrderDetails = ({ route }: any) => {
   const { updateOrderStatus, actionLoading } = useOrdersStore();
 
   const [confirmModal, setConfirmModal] = useState(false);
+  const { isDark, colors } = useAppTheme();
   const [cancelModal, setCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [cancelError, setCancelError] = useState('');
@@ -46,12 +48,12 @@ export const OrderDetails = ({ route }: any) => {
 
   if (!order) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.white }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.surface }}>
         <View style={{ padding: 20 }}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Text style={{ fontSize: 16, color: theme.colors.primary }}>â† Volver</Text>
           </TouchableOpacity>
-          <Text style={{ marginTop: 20, fontSize: 16, color: theme.colors.textSecondary }}>No se encontró la orden.</Text>
+          <Text style={{ marginTop: 20, fontSize: 16, color: colors.textSecondary }}>No se encontró la orden.</Text>
         </View>
       </SafeAreaView>
     );
@@ -120,53 +122,53 @@ export const OrderDetails = ({ route }: any) => {
   const nextStatus = getNextStatus(order.status);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={{ 
         flexDirection: 'row', alignItems: 'center', padding: 16, 
-        backgroundColor: theme.colors.white, borderBottomWidth: 1, borderBottomColor: theme.colors.border 
+        backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border 
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 12 }}>
           <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>â† Volver</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: '700', flex: 1, color: theme.colors.textPrimary }}>Detalle de Orden</Text>
+        <Text style={{ fontSize: 18, fontWeight: '700', flex: 1, color: colors.textPrimary }}>Detalle de Orden</Text>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
         {/* Status Card */}
         <View style={{ 
-          backgroundColor: theme.colors.white, borderRadius: 16, padding: 20, marginBottom: 12,
+          backgroundColor: colors.surface, borderRadius: 16, padding: 20, marginBottom: 12,
           shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 
         }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <Text style={{ fontSize: 15, fontWeight: '700', color: theme.colors.textPrimary }}>
+            <Text style={{ fontSize: 15, fontWeight: '700', color: colors.textPrimary }}>
               #{String(order.id).substring(0, 8).toUpperCase()}
             </Text>
             <View style={{ backgroundColor: statusInfo.bg, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10 }}>
               <Text style={{ color: statusInfo.color, fontWeight: '600', fontSize: 13 }}>{statusInfo.icon} {statusInfo.text}</Text>
             </View>
           </View>
-          <Text style={{ color: theme.colors.textSecondary, marginBottom: 4, fontSize: 13 }}>ðŸ“… {orderDate}</Text>
+          <Text style={{ color: colors.textSecondary, marginBottom: 4, fontSize: 13 }}>ðŸ“… {orderDate}</Text>
           {isEmployee && order.user && (
-            <Text style={{ color: theme.colors.textSecondary, marginBottom: 4, fontSize: 13 }}>ðŸ‘¤ {order.user.full_name}</Text>
+            <Text style={{ color: colors.textSecondary, marginBottom: 4, fontSize: 13 }}>ðŸ‘¤ {order.user.full_name}</Text>
           )}
-          <Text style={{ color: theme.colors.textSecondary, fontSize: 13 }}>
+          <Text style={{ color: colors.textSecondary, fontSize: 13 }}>
             ðŸšš {order.is_delivery ? 'Delivery' : 'Retiro en Local'}
           </Text>
           {order.branch_id && (
-            <Text style={{ color: theme.colors.textSecondary, fontSize: 13, marginTop: 4 }}>
+            <Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 4 }}>
               ðŸ“ Sucursal: {BRANCHES.find(b => b.id === order.branch_id)?.name || `Sucursal ${order.branch_id}`}
             </Text>
           )}
           {order.is_delivery && order.address && (
-            <View style={{ marginTop: 10, padding: 12, backgroundColor: theme.colors.background, borderRadius: 10 }}>
-              <Text style={{ fontWeight: '600', marginBottom: 4, color: theme.colors.textPrimary }}>ðŸ“ Dirección:</Text>
-              <Text style={{ color: theme.colors.textSecondary, fontSize: 13 }}>Calle {order.address.street}, Carrera {order.address.avenue}</Text>
-              <Text style={{ color: theme.colors.textSecondary, fontSize: 13 }}>Nro: {order.address.house_number}</Text>
-              {order.address.reference && <Text style={{ color: theme.colors.textSecondary, fontSize: 13 }}>Ref: {order.address.reference}</Text>}
+            <View style={{ marginTop: 10, padding: 12, backgroundColor: colors.background, borderRadius: 10 }}>
+              <Text style={{ fontWeight: '600', marginBottom: 4, color: colors.textPrimary }}>ðŸ“ Dirección:</Text>
+              <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Calle {order.address.street}, Carrera {order.address.avenue}</Text>
+              <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Nro: {order.address.house_number}</Text>
+              {order.address.reference && <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Ref: {order.address.reference}</Text>}
             </View>
           )}
-          {order.notes && <Text style={{ color: theme.colors.textMuted, marginTop: 8, fontSize: 13 }}>ðŸ“ {order.notes}</Text>}
+          {order.notes && <Text style={{ color: colors.textSecondary, marginTop: 8, fontSize: 13 }}>ðŸ“ {order.notes}</Text>}
           {order.cancel_reason && (
             <View style={{ marginTop: 10, padding: 10, backgroundColor: '#FEE2E2', borderRadius: 8 }}>
               <Text style={{ fontWeight: '600', color: theme.colors.error, fontSize: 12 }}>Motivo de cancelación:</Text>
@@ -175,10 +177,10 @@ export const OrderDetails = ({ route }: any) => {
           )}
           {order.payment_proof && order.payment_proof.startsWith('data:image') && (
             <View style={{ marginTop: 12 }}>
-              <Text style={{ fontWeight: '600', color: theme.colors.textPrimary, fontSize: 13, marginBottom: 8 }}>Comprobante de Pago:</Text>
+              <Text style={{ fontWeight: '600', color: colors.textPrimary, fontSize: 13, marginBottom: 8 }}>Comprobante de Pago:</Text>
               <Image 
                 source={{ uri: order.payment_proof }} 
-                style={{ width: '100%', height: 200, borderRadius: 10, backgroundColor: theme.colors.borderLight }}
+                style={{ width: '100%', height: 200, borderRadius: 10, backgroundColor: colors.border }}
                 resizeMode="contain"
               />
             </View>
@@ -186,14 +188,14 @@ export const OrderDetails = ({ route }: any) => {
         </View>
 
         {/* Products */}
-        <Text style={{ fontSize: 15, fontWeight: '700', marginBottom: 8, color: theme.colors.textPrimary }}>Productos</Text>
+        <Text style={{ fontSize: 15, fontWeight: '700', marginBottom: 8, color: colors.textPrimary }}>Productos</Text>
         {order.items?.map((item: any, index: number) => (
           <View key={item.id || index} style={{ 
-            backgroundColor: theme.colors.white, borderRadius: 12, padding: 14, marginBottom: 8,
+            backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 8,
             shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 
           }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={{ fontWeight: '600', fontSize: 14, color: theme.colors.textPrimary, flex: 1 }}>
+              <Text style={{ fontWeight: '600', fontSize: 14, color: colors.textPrimary, flex: 1 }}>
                 {item.quantity}x {item.product?.name || `Producto #${item.product_id}`}
               </Text>
               <Text style={{ fontWeight: '700', color: theme.colors.primary, fontSize: 14 }}>
@@ -206,8 +208,8 @@ export const OrderDetails = ({ route }: any) => {
                   if (!feature.value) return null;
                   const options = feature.value.split(',');
                   return options.map((opt: string, oidx: number) => (
-                    <View key={`${idx}-${oidx}`} style={{ backgroundColor: theme.colors.borderLight, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 }}>
-                      <Text style={{ fontSize: 11, color: theme.colors.textSecondary }}>{opt.trim()}</Text>
+                    <View key={`${idx}-${oidx}`} style={{ backgroundColor: colors.border, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 }}>
+                      <Text style={{ fontSize: 11, color: colors.textSecondary }}>{opt.trim()}</Text>
                     </View>
                   ));
                 })}
@@ -220,12 +222,12 @@ export const OrderDetails = ({ route }: any) => {
       {/* Footer */}
       <View style={{ 
         position: 'absolute', bottom: 0, left: 0, right: 0, 
-        backgroundColor: theme.colors.white, padding: 16, 
-        borderTopWidth: 1, borderTopColor: theme.colors.border,
+        backgroundColor: colors.surface, padding: 16, 
+        borderTopWidth: 1, borderTopColor: colors.border,
         shadowColor: '#000', shadowOffset: { width: 0, height: -2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 5 
       }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-          <Text style={{ fontSize: 15, fontWeight: '600', color: theme.colors.textSecondary }}>Total:</Text>
+          <Text style={{ fontSize: 15, fontWeight: '600', color: colors.textSecondary }}>Total:</Text>
           <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.primary }}>${totalOrderPrice.toFixed(2)}</Text>
         </View>
 
@@ -263,15 +265,15 @@ export const OrderDetails = ({ route }: any) => {
       <Modal visible={confirmModal} transparent animationType="fade">
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
           <View style={{ backgroundColor: 'white', padding: 24, borderRadius: 16, width: '85%' }}>
-            <Text style={{ fontSize: 17, fontWeight: '700', marginBottom: 12, textAlign: 'center', color: theme.colors.textPrimary }}>
+            <Text style={{ fontSize: 17, fontWeight: '700', marginBottom: 12, textAlign: 'center', color: colors.textPrimary }}>
               {nextStatus ? `Cambiar a: ${STATUS_MAP[nextStatus]?.text}` : ''}
             </Text>
-            <Text style={{ color: theme.colors.textSecondary, textAlign: 'center', marginBottom: 20, fontSize: 14 }}>
+            <Text style={{ color: colors.textSecondary, textAlign: 'center', marginBottom: 20, fontSize: 14 }}>
               ¿Confirmar cambio de estado?
             </Text>
             <View style={{ flexDirection: 'row', gap: 10 }}>
-              <TouchableOpacity style={{ flex: 1, padding: 12, borderRadius: 10, backgroundColor: theme.colors.borderLight, alignItems: 'center' }} onPress={() => setConfirmModal(false)}>
-                <Text style={{ color: theme.colors.textSecondary, fontWeight: '600' }}>Cancelar</Text>
+              <TouchableOpacity style={{ flex: 1, padding: 12, borderRadius: 10, backgroundColor: colors.border, alignItems: 'center' }} onPress={() => setConfirmModal(false)}>
+                <Text style={{ color: colors.textSecondary, fontWeight: '600' }}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{ flex: 1, padding: 12, borderRadius: 10, backgroundColor: theme.colors.success, alignItems: 'center' }}
@@ -292,20 +294,20 @@ export const OrderDetails = ({ route }: any) => {
             <Text style={{ fontSize: 17, fontWeight: '700', marginBottom: 8, color: theme.colors.error, textAlign: 'center' }}>
               âŒ Cancelar Orden
             </Text>
-            <Text style={{ color: theme.colors.textSecondary, textAlign: 'center', marginBottom: 16, fontSize: 13 }}>
+            <Text style={{ color: colors.textSecondary, textAlign: 'center', marginBottom: 16, fontSize: 13 }}>
               Debes indicar el motivo de la cancelación
             </Text>
             <TextInput
               style={{
                 borderWidth: 1,
-                borderColor: cancelError ? theme.colors.error : theme.colors.border,
+                borderColor: cancelError ? theme.colors.error : colors.border,
                 borderRadius: 10,
                 padding: 12,
                 minHeight: 80,
                 textAlignVertical: 'top',
                 fontSize: 14,
-                color: theme.colors.textPrimary,
-                backgroundColor: theme.colors.background,
+                color: colors.textPrimary,
+                backgroundColor: colors.background,
               }}
               placeholder="Escribe el motivo de la cancelación (mín. 10 caracteres)"
               value={cancelReason}
@@ -314,8 +316,8 @@ export const OrderDetails = ({ route }: any) => {
             />
             {cancelError ? <Text style={{ color: theme.colors.error, fontSize: 12, marginTop: 4, fontWeight: '600' }}>{cancelError}</Text> : null}
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
-              <TouchableOpacity style={{ flex: 1, padding: 12, borderRadius: 10, backgroundColor: theme.colors.borderLight, alignItems: 'center' }} onPress={() => { setCancelModal(false); setCancelReason(''); setCancelError(''); }}>
-                <Text style={{ color: theme.colors.textSecondary, fontWeight: '600' }}>Volver</Text>
+              <TouchableOpacity style={{ flex: 1, padding: 12, borderRadius: 10, backgroundColor: colors.border, alignItems: 'center' }} onPress={() => { setCancelModal(false); setCancelReason(''); setCancelError(''); }}>
+                <Text style={{ color: colors.textSecondary, fontWeight: '600' }}>Volver</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{ flex: 1, padding: 12, borderRadius: 10, backgroundColor: theme.colors.error, alignItems: 'center' }}
@@ -333,19 +335,19 @@ export const OrderDetails = ({ route }: any) => {
       <Modal visible={messageModal} transparent animationType="fade">
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
           <View style={{ backgroundColor: 'white', padding: 24, borderRadius: 16, width: '85%' }}>
-            <Text style={{ fontSize: 17, fontWeight: '700', marginBottom: 12, textAlign: 'center', color: theme.colors.textPrimary }}>
+            <Text style={{ fontSize: 17, fontWeight: '700', marginBottom: 12, textAlign: 'center', color: colors.textPrimary }}>
               ðŸ“± Mensaje al Cliente
             </Text>
             <TextInput
-              style={{ borderWidth: 1, borderColor: theme.colors.border, borderRadius: 10, padding: 12, marginBottom: 16, minHeight: 80, textAlignVertical: 'top', fontSize: 14 }}
+              style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 10, padding: 12, marginBottom: 16, minHeight: 80, textAlignVertical: 'top', fontSize: 14 }}
               placeholder="Ej: Su pedido va en camino, repartidor: Juan Tlf: 0412-1234567"
               value={deliveryMessage}
               onChangeText={setDeliveryMessage}
               multiline
             />
             <View style={{ flexDirection: 'row', gap: 10 }}>
-              <TouchableOpacity style={{ flex: 1, padding: 12, borderRadius: 10, backgroundColor: theme.colors.borderLight, alignItems: 'center' }} onPress={() => setMessageModal(false)}>
-                <Text style={{ color: theme.colors.textSecondary, fontWeight: '600' }}>Cancelar</Text>
+              <TouchableOpacity style={{ flex: 1, padding: 12, borderRadius: 10, backgroundColor: colors.border, alignItems: 'center' }} onPress={() => setMessageModal(false)}>
+                <Text style={{ color: colors.textSecondary, fontWeight: '600' }}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{ flex: 1, padding: 12, borderRadius: 10, backgroundColor: '#25D366', alignItems: 'center' }}

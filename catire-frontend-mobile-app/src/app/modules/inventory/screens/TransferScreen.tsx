@@ -6,10 +6,22 @@ import { useAuthStore } from '../../../shared/store/auth.store';
 import { useBranchSyncStore, TransferRequest } from '../../../shared/store/branch-sync.store';
 import { theme } from '../../../shared/styles/theme';
 
+const EMOJI = {
+  box: '\u{1F4E6}',
+  transfer: '\u{1F504}',
+  approved: '\u{2705}',
+  pending: '\u{23F3}',
+  rejected: '\u{274C}',
+  back: '\u{2190}',
+  add: '\u{2795}',
+  remove: '\u{2796}',
+  empty: '\u{1F4ED}',
+} as const;
+
 const BRANCHES = [
   { id: 1, name: 'Barrio Sucre' },
   { id: 2, name: 'Carabobo' },
-  { id: 3, name: 'El Malecón' },
+  { id: 3, name: 'El MalecÃ³n' },
   { id: 4, name: 'Prados del Este' },
   { id: 11, name: 'Barrio Obrero' },
   { id: 12, name: 'La Asogata' },
@@ -22,7 +34,7 @@ export const TransferScreen = () => {
   const navigation = useNavigation();
   const { user } = useAuthStore();
   const { transferRequests, createTransferRequest, approveTransfer, completeTransfer, rejectTransfer, getTransferRequests } = useBranchSyncStore();
-  
+
   const [showModal, setShowModal] = useState(false);
   const [fromBranch, setFromBranch] = useState(BRANCHES[0]);
   const [toBranch, setToBranch] = useState(BRANCHES[1]);
@@ -52,7 +64,7 @@ export const TransferScreen = () => {
 
     setShowModal(false);
     setItems([{ name: '', quantity: '' }]);
-    Alert.alert('Éxito', 'Solicitud de transferencia creada');
+    Alert.alert('\u00C9xito', 'Solicitud de transferencia creada');
   };
 
   const getStatusColor = (status: string) => {
@@ -67,10 +79,10 @@ export const TransferScreen = () => {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'pending': return '? Pendiente';
-      case 'approved': return '? Aprobado';
-      case 'completed': return '?? Completado';
-      case 'rejected': return '? Rechazado';
+      case 'pending': return `${EMOJI.pending} Pendiente`;
+      case 'approved': return `${EMOJI.approved} Aprobado`;
+      case 'completed': return `${EMOJI.approved} Completado`;
+      case 'rejected': return `${EMOJI.rejected} Rechazado`;
       default: return status;
     }
   };
@@ -81,14 +93,13 @@ export const TransferScreen = () => {
       <View style={{
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+        backgroundColor: '#EC3137',
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>? Volver</Text>
+          <Text style={{ fontSize: 20, color: '#fff', fontWeight: '600' }}>{EMOJI.back} Volver</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
-          ?? Transferencias
+        <Text style={{ fontSize: 18, fontWeight: '700', color: '#fff', marginLeft: 12 }}>
+          {EMOJI.transfer} Transferencias
         </Text>
       </View>
 
@@ -128,7 +139,7 @@ export const TransferScreen = () => {
         }}
         onPress={() => setShowModal(true)}
       >
-        <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>+ Nueva Transferencia</Text>
+        <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>{EMOJI.add} Nueva Transferencia</Text>
       </TouchableOpacity>
 
       {/* Transfer Requests List */}
@@ -138,7 +149,7 @@ export const TransferScreen = () => {
         contentContainerStyle={{ padding: 16 }}
         ListEmptyComponent={
           <View style={{ alignItems: 'center', paddingTop: 60 }}>
-            <Text style={{ fontSize: 48, marginBottom: 12 }}>??</Text>
+            <Text style={{ fontSize: 48, marginBottom: 12 }}>{EMOJI.empty}</Text>
             <Text style={{ fontSize: 16, color: theme.colors.textMuted }}>No hay transferencias</Text>
           </View>
         }
@@ -171,26 +182,26 @@ export const TransferScreen = () => {
               Hacia: {BRANCHES.find(b => b.id === item.to_branch_id)?.name || `Sucursal ${item.to_branch_id}`}
             </Text>
             <Text style={{ fontSize: 12, color: theme.colors.textMuted }}>
-              {item.items.length} items • {new Date(item.created_at).toLocaleDateString()}
+              {item.items.length} items \u2022 {new Date(item.created_at).toLocaleDateString()}
             </Text>
-            
+
             {item.status === 'pending' && user?.role?.name === 'admin' && (
               <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
                 <TouchableOpacity
                   style={{ flex: 1, paddingVertical: 10, borderRadius: 8, backgroundColor: '#D1FAE5', alignItems: 'center' }}
                   onPress={() => approveTransfer(item.id, user?.id || 0)}
                 >
-                  <Text style={{ color: '#065F46', fontWeight: '600', fontSize: 13 }}>Aprobar</Text>
+                  <Text style={{ color: '#065F46', fontWeight: '600', fontSize: 13 }}>{EMOJI.approved} Aprobar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={{ flex: 1, paddingVertical: 10, borderRadius: 8, backgroundColor: '#FEE2E2', alignItems: 'center' }}
                   onPress={() => rejectTransfer(item.id)}
                 >
-                  <Text style={{ color: '#991B1B', fontWeight: '600', fontSize: 13 }}>Rechazar</Text>
+                  <Text style={{ color: '#991B1B', fontWeight: '600', fontSize: 13 }}>{EMOJI.rejected} Rechazar</Text>
                 </TouchableOpacity>
               </View>
             )}
-            
+
             {item.status === 'approved' && (
               <TouchableOpacity
                 style={{
@@ -202,7 +213,7 @@ export const TransferScreen = () => {
                 }}
                 onPress={() => completeTransfer(item.id)}
               >
-                <Text style={{ color: '#fff', fontWeight: '600', fontSize: 13 }}>Marcar Completado</Text>
+                <Text style={{ color: '#fff', fontWeight: '600', fontSize: 13 }}>{EMOJI.approved} Marcar Completado</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -218,8 +229,8 @@ export const TransferScreen = () => {
             borderTopRightRadius: 20,
             padding: 20,
           }}>
-            <Text style={{ fontSize: 18, fontWeight: '700', marginBottom: 16 }}>Nueva Transferencia</Text>
-            
+            <Text style={{ fontSize: 18, fontWeight: '700', marginBottom: 16 }}>{EMOJI.transfer} Nueva Transferencia</Text>
+
             <Text style={{ fontSize: 12, color: theme.colors.textMuted, marginBottom: 4 }}>DESDE SUCURSAL</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
               {BRANCHES.slice(0, 5).map((b) => (
@@ -263,7 +274,7 @@ export const TransferScreen = () => {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
               <Text style={{ fontSize: 14, fontWeight: '600' }}>ITEMS</Text>
               <TouchableOpacity onPress={() => setItems([...items, { name: '', quantity: '' }])}>
-                <Text style={{ color: theme.colors.primary, fontWeight: '600' }}>+ Agregar</Text>
+                <Text style={{ color: theme.colors.primary, fontWeight: '600' }}>{EMOJI.add} Agregar</Text>
               </TouchableOpacity>
             </View>
 
@@ -294,7 +305,7 @@ export const TransferScreen = () => {
                   <TouchableOpacity
                     onPress={() => setItems(items.filter((_, i) => i !== index))}
                   >
-                    <Text style={{ fontSize: 18 }}>?</Text>
+                    <Text style={{ fontSize: 18 }}>{EMOJI.rejected}</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -320,4 +331,3 @@ export const TransferScreen = () => {
     </SafeAreaView>
   );
 };
-

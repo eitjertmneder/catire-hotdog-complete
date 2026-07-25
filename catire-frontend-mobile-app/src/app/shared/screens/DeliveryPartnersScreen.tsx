@@ -1,110 +1,346 @@
-﻿import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState } from 'react';
+import {
+  SafeAreaView,
+  ScrollView,
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  TextInput,
+  Switch,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useDeliveryIntegrationStore } from '../store/delivery-integration.store';
-import { theme } from '../styles/theme';
+
+interface DeliveryPartner {
+  id: string;
+  name: string;
+  commissionRate: number; // percentage
+  estimatedDeliveryTime: number; // minutes
+  active: boolean;
+}
+
+const initialPartners: DeliveryPartner[] = [
+  {
+    id: 'rappi',
+    name: 'Rappi',
+    commissionRate: 15,
+    estimatedDeliveryTime: 30,
+    active: true,
+  },
+  {
+    id: 'pedidosya',
+    name: 'PedidosYa',
+    commissionRate: 12,
+    estimatedDeliveryTime: 25,
+    active: true,
+  },
+  {
+    id: 'ubereats',
+    name: 'Uber Eats',
+    commissionRate: 18,
+    estimatedDeliveryTime: 35,
+    active: true,
+  },
+  {
+    id: 'didifood',
+    name: 'Didi Food',
+    commissionRate: 10,
+    estimatedDeliveryTime: 40,
+    active: false,
+  },
+];
 
 export const DeliveryPartnersScreen = () => {
   const navigation = useNavigation();
-  const { partners, togglePartner, getPartnerStats } = useDeliveryIntegrationStore();
+  const [partners, setPartners] = useState<DeliveryPartner[]>(initialPartners);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editingPartner, setEditingPartner] = useState<DeliveryPartner | null>(null);
 
-  const partnerIcons: Record<string, string> = {
-    'ubereats': '🛵',
-    'rappi': '🛵',
-    'pedidosya': '🛵',
+  // Form state for editing
+  const [serviceName, setServiceName] = useState('');
+  const [commissionRate, setCommissionRate] = useState('');
+  const [estimatedDeliveryTime, setEstimatedDeliveryTime] = useState('');
+  const [active, setActive] = useState(false);
+
+  const openEditModal = (partner: DeliveryPartner) => {
+    setEditingPartner(partner);
+    setServiceName(partner.name);
+    setCommissionRate(String(partner.commissionRate));
+    setEstimatedDeliveryTime(String(partner.estimatedDeliveryTime));
+    setActive(partner.active);
+    setEditModalVisible(true);
+  };
+
+  const savePartner = () => {
+    if (!editingPartner) return;
+
+    const updatedPartners = partners.map((partner) => {
+      if (partner.id === editingPartner.id) {
+        return {
+          ...partner,
+          name: serviceName,
+          commissionRate: parseFloat(commissionRate) || partner.commissionRate,
+          estimatedDeliveryTime: parseInt(estimatedDeliveryTime, 10) || partner.estimatedDeliveryTime,
+          active,
+        };
+      }
+      return partner;
+    });
+
+    setPartners(updatedPartners);
+    setEditModalVisible(false);
+    setEditingPartner(null);
+  };
+
+  const togglePartnerActive = (id: string) => {
+    setPartners((prev) =>
+      prev.map((partner) =>
+        partner.id === id ? { ...partner, active: !partner.active } : partner
+      )
+    );
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F5F5' }}>
       {/* Header */}
-      <View style={{
-        flexDirection: 'row', alignItems: 'center',
-        paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
-      }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: 16,
+          paddingVertical: 16,
+          backgroundColor: '#EC3137',
+        }}
+      >
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>← Volver</Text>
+          <Text style={{ fontSize: 20, color: '#FFFFFF', fontWeight: '600' }}>
+            {'\u2190'} Volver
+          </Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
-          🛵 Apps de Delivery
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: '700',
+            color: '#FFFFFF',
+            marginLeft: 12,
+          }}
+        >
+          {'\uD83D\uDE95'} Apps de Delivery
         </Text>
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-        {partners.map((partner) => {
-          const stats = getPartnerStats(partner.id);
-          return (
-            <View
+        {partners.length === 0 ? (
+          <View style={{ alignItems: 'center', marginTop: 40 }}>
+            <Text style={{ fontSize: 16, color: '#888888' }}>
+              No hay apps de delivery configuradas.
+            </Text>
+          </View>
+        ) : (
+          partners.map((partner) => (
+            <TouchableOpacity
               key={partner.id}
+              onPress={() => openEditModal(partner)}
               style={{
-                backgroundColor: theme.colors.white,
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 16,
-                borderWidth: 2,
-                borderColor: partner.active ? '#10B981' : theme.colors.border,
+                backgroundColor: '#FFFFFF',
+                borderRadius: 12,
+                padding: 16,
+                marginBottom: 12,
+                borderWidth: 1,
+                borderColor: partner.active ? '#10B981' : '#E0E0E0',
               }}
             >
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={{ fontSize: 32, marginRight: 12 }}>
-                    {partnerIcons[partner.id] || '🛵'}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: '700',
+                      color: '#333333',
+                      marginBottom: 4,
+                    }}
+                  >
+                    {partner.name}
                   </Text>
-                  <View>
-                    <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary }}>
-                      {partner.name}
-                    </Text>
-                    <Text style={{ fontSize: 13, color: theme.colors.textMuted }}>
-                      Comisión: {(partner.commission_rate * 100).toFixed(0)}%
-                    </Text>
-                  </View>
+                  <Text style={{ fontSize: 13, color: '#666666' }}>
+                    Comisi\u00F3n: {partner.commissionRate}%
+                  </Text>
+                  <Text style={{ fontSize: 13, color: '#666666' }}>
+                    Tiempo estimado: {partner.estimatedDeliveryTime} min
+                  </Text>
                 </View>
                 <Switch
                   value={partner.active}
-                  onValueChange={() => togglePartner(partner.id)}
+                  onValueChange={() => togglePartnerActive(partner.id)}
                   trackColor={{ false: '#E0E0E0', true: '#D1FAE5' }}
                   thumbColor={partner.active ? '#10B981' : '#f4f3f4'}
+                  style={{ marginRight: 12 }}
                 />
-              </View>
-
-              <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                paddingVertical: 12,
-                borderTopWidth: 1,
-                borderTopColor: theme.colors.border,
-              }}>
-                <View style={{ alignItems: 'center' }}>
-                  <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.primary }}>
-                    {stats.orders}
+                <TouchableOpacity
+                  onPress={() => openEditModal(partner)}
+                  style={{
+                    backgroundColor: '#EC3137',
+                    borderRadius: 8,
+                    paddingVertical: 6,
+                    paddingHorizontal: 12,
+                  }}
+                >
+                  <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '600' }}>
+                    {'\u270F\uFE0F'} Editar
                   </Text>
-                  <Text style={{ fontSize: 11, color: theme.colors.textMuted }}>Pedidos</Text>
-                </View>
-                <View style={{ alignItems: 'center' }}>
-                  <Text style={{ fontSize: 18, fontWeight: '700', color: '#10B981' }}>
-                    ${stats.revenue.toFixed(0)}
-                  </Text>
-                  <Text style={{ fontSize: 11, color: theme.colors.textMuted }}>Ingresos</Text>
-                </View>
-                <View style={{ alignItems: 'center' }}>
-                  <Text style={{ fontSize: 18, fontWeight: '700', color: '#EF4444' }}>
-                    ${stats.commission.toFixed(0)}
-                  </Text>
-                  <Text style={{ fontSize: 11, color: theme.colors.textMuted }}>Comisión</Text>
-                </View>
+                </TouchableOpacity>
               </View>
-
-              <View style={{ marginTop: 12 }}>
-                <Text style={{ fontSize: 12, color: theme.colors.textMuted }}>
-                  Tiempo estimado: {partner.estimated_delivery_time} min
-                </Text>
-              </View>
-            </View>
-          );
-        })}
+            </TouchableOpacity>
+          ))
+        )}
       </ScrollView>
+
+      {/* Edit Modal */}
+      <Modal
+        visible={editModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+          }}
+        >
+          <View
+            style={{
+              width: '85%',
+              backgroundColor: '#FFFFFF',
+              borderRadius: 16,
+              padding: 20,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: '700',
+                color: '#333333',
+                marginBottom: 16,
+                textAlign: 'center',
+              }}
+            >
+              Editar {editingPartner?.name}
+            </Text>
+
+            <Text style={{ fontSize: 14, color: '#666666', marginBottom: 4 }}>
+              Nombre del servicio
+            </Text>
+            <TextInput
+              style={{
+                borderWidth: 1,
+                borderColor: '#E0E0E0',
+                borderRadius: 8,
+                padding: 10,
+                fontSize: 16,
+                marginBottom: 12,
+              }}
+              value={serviceName}
+              onChangeText={setServiceName}
+              placeholder="Nombre del servicio"
+            />
+
+            <Text style={{ fontSize: 14, color: '#666666', marginBottom: 4 }}>
+              Comisi\u00F3n (%)
+            </Text>
+            <TextInput
+              style={{
+                borderWidth: 1,
+                borderColor: '#E0E0E0',
+                borderRadius: 8,
+                padding: 10,
+                fontSize: 16,
+                marginBottom: 12,
+              }}
+              value={commissionRate}
+              onChangeText={setCommissionRate}
+              placeholder="15"
+              keyboardType="numeric"
+            />
+
+            <Text style={{ fontSize: 14, color: '#666666', marginBottom: 4 }}>
+              Tiempo estimado (minutos)
+            </Text>
+            <TextInput
+              style={{
+                borderWidth: 1,
+                borderColor: '#E0E0E0',
+                borderRadius: 8,
+                padding: 10,
+                fontSize: 16,
+                marginBottom: 12,
+              }}
+              value={estimatedDeliveryTime}
+              onChangeText={setEstimatedDeliveryTime}
+              placeholder="30"
+              keyboardType="numeric"
+            />
+
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 20,
+              }}
+            >
+              <Text style={{ fontSize: 14, color: '#666666' }}>Activo</Text>
+              <Switch
+                value={active}
+                onValueChange={setActive}
+                trackColor={{ false: '#E0E0E0', true: '#D1FAE5' }}
+                thumbColor={active ? '#10B981' : '#f4f3f4'}
+              />
+            </View>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <TouchableOpacity
+                onPress={() => setEditModalVisible(false)}
+                style={{
+                  flex: 1,
+                  backgroundColor: '#E0E0E0',
+                  borderRadius: 8,
+                  paddingVertical: 12,
+                  alignItems: 'center',
+                  marginRight: 8,
+                }}
+              >
+                <Text style={{ fontSize: 16, color: '#333333', fontWeight: '600' }}>
+                  Cancelar
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={savePartner}
+                style={{
+                  flex: 1,
+                  backgroundColor: '#EC3137',
+                  borderRadius: 8,
+                  paddingVertical: 12,
+                  alignItems: 'center',
+                  marginLeft: 8,
+                }}
+              >
+                <Text style={{ fontSize: 16, color: '#FFFFFF', fontWeight: '600' }}>
+                  Guardar
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };

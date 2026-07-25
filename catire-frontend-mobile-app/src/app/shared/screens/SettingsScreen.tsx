@@ -1,194 +1,98 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Switch, ScrollView, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import * as SecureStore from 'expo-secure-store';
 import { useAuthStore } from '../store/auth.store';
-import { useThemeStore, lightTheme, darkTheme } from '../store/theme.store';
-import { useFavoritesStore } from '../store/favorites.store';
-import * as LocalAuthentication from 'expo-local-authentication';
-import { theme } from '../styles/theme';
+import { useAppTheme } from '../contexts/ThemeContext';
 
 export const SettingsScreen = () => {
   const navigation = useNavigation<any>();
-  const { user, logout, toggleBiometric } = useAuthStore();
-  const { isDark, toggleTheme } = useThemeStore();
-  const { favorites, clearFavorites } = useFavoritesStore();
-  const colors = isDark ? darkTheme : lightTheme;
+  const { user, logout } = useAuthStore();
+  const { isDark, colors, toggleTheme } = useAppTheme();
+  const [biometric, setBiometric] = useState(false);
 
-  const handleBiometricToggle = async (enabled: boolean) => {
-    if (enabled) {
-      const hasHardware = await LocalAuthentication.hasHardwareAsync();
-      if (!hasHardware) {
-        Alert.alert('Error', 'Tu dispositivo no soporta autenticación biométrica');
-        return;
+  useEffect(() => {
+    (async () => {
+      try {
+        const enabled = await SecureStore.getItemAsync('biometric_enabled');
+        setBiometric(enabled === 'true');
+      } catch {}
+    })();
+  }, []);
+
+  const handleToggleBiometric = async (value: boolean) => {
+    setBiometric(value);
+    try {
+      if (value) {
+        await SecureStore.setItemAsync('biometric_enabled', 'true');
+      } else {
+        await SecureStore.setItemAsync('biometric_enabled', 'false');
       }
-      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-      if (!isEnrolled) {
-        Alert.alert('Error', 'No hay datos biométricos configurados en tu dispositivo');
-        return;
-      }
-    }
-    await toggleBiometric(enabled);
+    } catch {}
+  };
+
+  const handleLogout = () => {
+    Alert.alert('Cerrar Sesion', 'Estas seguro?', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Cerrar Sesion', style: 'destructive', onPress: () => logout?.() },
+    ]);
   };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      {/* Header */}
-      <View style={{
-        flexDirection: 'row', alignItems: 'center',
-        paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: colors.surface,
-        borderBottomWidth: 1, borderBottomColor: colors.border,
-      }}>
+      <View style={{ padding: 16, backgroundColor: colors.primary, flexDirection: 'row', alignItems: 'center' }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: colors.primary, fontWeight: '600' }}>? Volver</Text>
+          <Text style={{ fontSize: 16, color: '#fff', fontWeight: '600' }}>{'<'} Volver</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text, marginLeft: 12 }}>
-          ?? Configuración
-        </Text>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: '#fff', marginLeft: 12 }}>{'\u2699\uFE0F'} Configuracion</Text>
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-        {/* User Info */}
-        <View style={{
-          backgroundColor: colors.surface,
-          borderRadius: 12,
-          padding: 16,
-          marginBottom: 16,
-        }}>
-          <Text style={{ fontSize: 14, color: colors.textMuted, marginBottom: 4 }}>MI CUENTA</Text>
-          <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text }}>{user?.full_name}</Text>
-          <Text style={{ fontSize: 14, color: colors.textSecondary }}>{user?.email}</Text>
-          <Text style={{ fontSize: 12, color: colors.textMuted, marginTop: 4 }}>
-            Rol: {user?.role?.name === 'admin' ? 'Administrador' : user?.role?.name === 'employee' ? 'Trabajador' : 'Cliente'}
-          </Text>
-        </View>
-
-        {/* Appearance */}
-        <View style={{
-          backgroundColor: colors.surface,
-          borderRadius: 12,
-          padding: 16,
-          marginBottom: 16,
-        }}>
-          <Text style={{ fontSize: 14, color: colors.textMuted, marginBottom: 12 }}>APARIENCIA</Text>
-          
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ fontSize: 20, marginRight: 12 }}>??</Text>
-              <Text style={{ fontSize: 16, color: colors.text }}>Modo Oscuro</Text>
-            </View>
-            <Switch
-              value={isDark}
-              onValueChange={toggleTheme}
-              trackColor={{ false: '#E0E0E0', true: colors.primaryLight }}
-              thumbColor={isDark ? colors.primary : '#f4f3f4'}
-            />
+        {/* User info */}
+        <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 20, marginBottom: 16 }}>
+          <Text style={{ fontSize: 18, fontWeight: '800', color: colors.textPrimary }}>{user?.full_name || 'Usuario'}</Text>
+          <Text style={{ fontSize: 13, color: colors.textSecondary, marginTop: 4 }}>{user?.email || 'email@correo.com'}</Text>
+          <View style={{ backgroundColor: colors.primary, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, alignSelf: 'flex-start', marginTop: 8 }}>
+            <Text style={{ fontSize: 11, color: '#fff', fontWeight: '700' }}>{user?.role?.name || 'admin'}</Text>
           </View>
         </View>
 
-        {/* Security */}
-        <View style={{
-          backgroundColor: colors.surface,
-          borderRadius: 12,
-          padding: 16,
-          marginBottom: 16,
-        }}>
-          <Text style={{ fontSize: 14, color: colors.textMuted, marginBottom: 12 }}>SEGURIDAD</Text>
-          
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ fontSize: 20, marginRight: 12 }}>??</Text>
-              <Text style={{ fontSize: 16, color: colors.text }}>Login Biométrico</Text>
+        {/* Dark Mode toggle */}
+        <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 16, marginBottom: 12 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 15, fontWeight: '700', color: colors.textPrimary }}>{'\u{1F319}'} Modo Oscuro</Text>
+              <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>Activa el tema oscuro en toda la app</Text>
             </View>
-            <Switch
-              value={false}
-              onValueChange={handleBiometricToggle}
-              trackColor={{ false: '#E0E0E0', true: colors.primaryLight }}
-              thumbColor={false ? colors.primary : '#f4f3f4'}
-            />
+            <Switch value={isDark} onValueChange={toggleTheme} trackColor={{ false: '#E2E8F0', true: colors.primary }} thumbColor={isDark ? '#fff' : '#f4f3f4'} />
           </View>
         </View>
 
-        {/* Favorites */}
-        <View style={{
-          backgroundColor: colors.surface,
-          borderRadius: 12,
-          padding: 16,
-          marginBottom: 16,
-        }}>
-          <Text style={{ fontSize: 14, color: colors.textMuted, marginBottom: 12 }}>FAVORITOS</Text>
-          
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ fontSize: 20, marginRight: 12 }}>??</Text>
-              <Text style={{ fontSize: 16, color: colors.text }}>Productos Favoritos</Text>
+        {/* Biometric toggle */}
+        <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 16, marginBottom: 12 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 15, fontWeight: '700', color: colors.textPrimary }}>{'\u{1F510}'} Login Biometrico</Text>
+              <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>Accede con huella dactilar</Text>
             </View>
-            <Text style={{ fontSize: 14, color: colors.textSecondary }}>{favorites.length}</Text>
+            <Switch value={biometric} onValueChange={handleToggleBiometric} trackColor={{ false: '#E2E8F0', true: colors.primary }} thumbColor={biometric ? '#fff' : '#f4f3f4'} />
           </View>
-
-          {favorites.length > 0 && (
-            <TouchableOpacity
-              style={{ marginTop: 8 }}
-              onPress={() => {
-                Alert.alert(
-                  'Limpiar Favoritos',
-                  '¿Estás seguro de que quieres eliminar todos los favoritos?',
-                  [
-                    { text: 'Cancelar', style: 'cancel' },
-                    { text: 'Eliminar', style: 'destructive', onPress: clearFavorites },
-                  ]
-                );
-              }}
-            >
-              <Text style={{ fontSize: 14, color: colors.error }}>Limpiar Favoritos</Text>
-            </TouchableOpacity>
-          )}
         </View>
 
         {/* About */}
-        <View style={{
-          backgroundColor: colors.surface,
-          borderRadius: 12,
-          padding: 16,
-          marginBottom: 16,
-        }}>
-          <Text style={{ fontSize: 14, color: colors.textMuted, marginBottom: 12 }}>ACERCA DE</Text>
-          
-          <View style={{ marginBottom: 8 }}>
-            <Text style={{ fontSize: 14, color: colors.text }}>Versión: 1.0.0</Text>
-          </View>
-          <View style={{ marginBottom: 8 }}>
-            <Text style={{ fontSize: 14, color: colors.text }}>Catire Hot Dog</Text>
-          </View>
-          <View>
-            <Text style={{ fontSize: 12, color: colors.textMuted }}>© 2026 Catire Hot Dog. Todos los derechos reservados.</Text>
-          </View>
+        <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 16, marginBottom: 12 }}>
+          <Text style={{ fontSize: 15, fontWeight: '700', color: colors.textPrimary, marginBottom: 8 }}>{'\u{1F4CB}'} Acerca de</Text>
+          <Text style={{ fontSize: 13, color: colors.textSecondary }}>Catire Hot Dog v2.0</Text>
+          <Text style={{ fontSize: 13, color: colors.textSecondary, marginTop: 4 }}>Sistema de gestion de restaurantes</Text>
+          <Text style={{ fontSize: 12, color: colors.textMuted, marginTop: 8 }}>{'\u00A9'} 2026</Text>
         </View>
 
         {/* Logout */}
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#FEE2E2',
-            borderRadius: 12,
-            padding: 16,
-            alignItems: 'center',
-          }}
-          onPress={() => {
-            Alert.alert(
-              'Cerrar Sesión',
-              '¿Estás seguro de que quieres cerrar sesión?',
-              [
-                { text: 'Cancelar', style: 'cancel' },
-                { text: 'Cerrar Sesión', style: 'destructive', onPress: logout },
-              ]
-            );
-          }}
-        >
-          <Text style={{ fontSize: 16, fontWeight: '600', color: '#D32F2F' }}>?? Cerrar Sesión</Text>
+        <TouchableOpacity style={{ backgroundColor: '#FEE2E2', borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 8 }} onPress={handleLogout}>
+          <Text style={{ fontSize: 15, fontWeight: '700', color: '#DC2626' }}>{'\u{1F6AA}'} Cerrar Sesion</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
 };
-

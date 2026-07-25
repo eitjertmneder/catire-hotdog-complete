@@ -73,14 +73,14 @@ export const ChatScreen = () => {
         borderBottomWidth: 1, borderBottomColor: theme.colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>? Volver</Text>
+          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
         </TouchableOpacity>
         <View style={{ marginLeft: 12, flex: 1 }}>
           <Text style={{ fontSize: 16, fontWeight: '700', color: theme.colors.textPrimary }}>
-            ?? Chat - Pedido #{orderId.slice(0, 8)}
+            Chat - Pedido #{orderId.slice(0, 8)}
           </Text>
           <Text style={{ fontSize: 12, color: theme.colors.textMuted }}>
-            {user?.role?.name === 'employee' ? 'Comunícate con el cliente' : 'Comunícate con el trabajador'}
+            {user?.role?.name === 'employee' ? 'Comunï¿½cate con el cliente' : 'Comunï¿½cate con el trabajador'}
           </Text>
         </View>
       </View>
@@ -95,9 +95,9 @@ export const ChatScreen = () => {
         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
         ListEmptyComponent={
           <View style={{ alignItems: 'center', paddingTop: 100 }}>
-            <Text style={{ fontSize: 48, marginBottom: 12 }}>??</Text>
+            <Text style={{ fontSize: 48, marginBottom: 12 }}>{'\u{1F4AC}'}</Text>
             <Text style={{ fontSize: 14, color: theme.colors.textMuted, textAlign: 'center' }}>
-              Inicia una conversación sobre este pedido
+              Inicia una conversaciï¿½n sobre este pedido
             </Text>
           </View>
         }
@@ -148,7 +148,7 @@ export const ChatScreen = () => {
             onPress={handleSend}
             disabled={!message.trim()}
           >
-            <Text style={{ fontSize: 18 }}>??</Text>
+            <Text style={{ fontSize: 18 }}>{'\u{27A4}'}</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

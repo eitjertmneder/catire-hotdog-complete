@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useCartStore } from '../../../shared/store/cart.store';
 import { NameTag } from '../../../shared/api/enums';
+import { useAppTheme } from '../../../shared/contexts/ThemeContext';
 
 // Precios de salchichas
 const SAUSAGE_PRICES: Record<string, number> = {
@@ -138,10 +139,10 @@ const PRODUCTS: Record<string, any> = {
 };
 
 // Sucursales que NO tienen hamburguesa
-const NO_HAMBURGUESA = [5, 9];
+const NO_HAMBURGUESA = [11, 16];
 
 // Sucursales que TIENEN Nestea
-const HAS_NESTEA = [3, 4, 5, 9];
+const HAS_NESTEA = [1, 2, 3, 4, 11, 12, 13];
 
 // Funcion para filtrar productos por sucursal
 const getProductsForBranch = (branchId: number) => {
@@ -159,18 +160,21 @@ const getProductsForBranch = (branchId: number) => {
 };
 
 // Card wrapper component
-const SectionCard = ({ children, title }: { children: React.ReactNode; title: string }) => (
-  <View style={{ 
-    backgroundColor: '#fff', 
-    borderRadius: 14, 
-    padding: 16, 
-    marginBottom: 12,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 1,
-  }}>
-    <Text style={{ fontSize: 14, fontWeight: '700', color: '#212121', marginBottom: 10 }}>{title}</Text>
-    {children}
-  </View>
-);
+const SectionCard = ({ children, title }: { children: React.ReactNode; title: string }) => {
+  const { colors } = useAppTheme();
+  return (
+    <View style={{
+      backgroundColor: colors.surface,
+      borderRadius: 14,
+      padding: 16,
+      marginBottom: 12,
+      shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 1,
+    }}>
+      <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary, marginBottom: 10 }}>{title}</Text>
+      {children}
+    </View>
+  );
+};
 
 export default function BuildOrderScreen() {
   const navigation = useNavigation<any>();
@@ -190,6 +194,7 @@ export default function BuildOrderScreen() {
   const [selectedSauces, setSelectedSauces] = useState<string[]>([]);
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState('');
+  const { isDark, colors } = useAppTheme();
 
   const selectProduct = (product: any) => {
     setSelectedProduct(product);
@@ -292,21 +297,21 @@ export default function BuildOrderScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F5F5' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header limpio */}
       <View style={{ 
         padding: 16, paddingBottom: 12, 
-        backgroundColor: '#fff',
-        borderBottomWidth: 1, borderBottomColor: '#E0E0E0',
+        backgroundColor: colors.surface,
+        borderBottomWidth: 1, borderBottomColor: colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={{ fontSize: 14, color: '#D32F2F', fontWeight: '600' }}>← Volver</Text>
         </TouchableOpacity>
         <View style={{ marginTop: 12, alignItems: 'center' }}>
-          <Text style={{ fontSize: 20, fontWeight: '800', color: '#212121', textAlign: 'center' }}>
+          <Text style={{ fontSize: 20, fontWeight: '800', color: colors.textPrimary, textAlign: 'center' }}>
             {selectedProduct.name}
           </Text>
-          <Text style={{ fontSize: 12, color: '#757575', marginTop: 4 }}>
+          <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 4 }}>
             {branchName}
           </Text>
         </View>
@@ -322,12 +327,12 @@ export default function BuildOrderScreen() {
                   key={size}
                   style={{
                     paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12,
-                    backgroundColor: selectedSize === size ? '#D32F2F' : '#F5F5F5',
-                    borderWidth: 1, borderColor: selectedSize === size ? '#D32F2F' : '#E0E0E0',
+                    backgroundColor: selectedSize === size ? '#D32F2F' : colors.background,
+                    borderWidth: 1, borderColor: selectedSize === size ? '#D32F2F' : colors.border,
                   }}
                   onPress={() => changeSize(size)}
                 >
-                  <Text style={{ fontWeight: '600', fontSize: 14, color: selectedSize === size ? '#fff' : '#212121' }}>{size}</Text>
+                  <Text style={{ fontWeight: '600', fontSize: 14, color: selectedSize === size ? '#fff' : colors.textPrimary }}>{size}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -338,7 +343,7 @@ export default function BuildOrderScreen() {
         {selectedProduct.extras && selectedProduct.extras.length > 0 && (
           <SectionCard title={selectedProduct.extrasLabel}>
             {selectedProduct.rules?.lockedNote && (
-              <Text style={{ fontSize: 12, color: '#757575', marginBottom: 8 }}>{selectedProduct.rules.lockedNote}</Text>
+              <Text style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 8 }}>{selectedProduct.rules.lockedNote}</Text>
             )}
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {selectedProduct.extras.map((extra: string) => {
@@ -350,13 +355,13 @@ export default function BuildOrderScreen() {
                     key={extra}
                     style={{
                       paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12,
-                      backgroundColor: isLocked ? '#D1FAE5' : isSelected ? '#D32F2F' : '#F5F5F5',
-                      borderWidth: 1, borderColor: isLocked ? '#10B981' : isSelected ? '#D32F2F' : '#E0E0E0',
+                      backgroundColor: isLocked ? '#D1FAE5' : isSelected ? '#D32F2F' : colors.background,
+                      borderWidth: 1, borderColor: isLocked ? '#10B981' : isSelected ? '#D32F2F' : colors.border,
                     }}
                     onPress={() => toggleExtra(extra)}
                     disabled={isLocked}
                   >
-                    <Text style={{ fontWeight: '600', fontSize: 13, color: isLocked ? '#10B981' : isSelected ? '#fff' : '#212121' }}>
+                    <Text style={{ fontWeight: '600', fontSize: 13, color: isLocked ? '#10B981' : isSelected ? '#fff' : colors.textPrimary }}>
                       {isLocked ? 'V ' : ''}{extra}
                     </Text>
                     {price && (
@@ -382,12 +387,12 @@ export default function BuildOrderScreen() {
                     key={topping}
                     style={{
                       paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12,
-                      backgroundColor: isSelected ? '#D32F2F' : '#F5F5F5',
-                      borderWidth: 1, borderColor: isSelected ? '#D32F2F' : '#E0E0E0',
+                      backgroundColor: isSelected ? '#D32F2F' : colors.background,
+                      borderWidth: 1, borderColor: isSelected ? '#D32F2F' : colors.border,
                     }}
                     onPress={() => toggleTopping(topping)}
                   >
-                    <Text style={{ fontWeight: '600', fontSize: 13, color: isSelected ? '#fff' : '#212121' }}>{topping}</Text>
+                    <Text style={{ fontWeight: '600', fontSize: 13, color: isSelected ? '#fff' : colors.textPrimary }}>{topping}</Text>
                   </TouchableOpacity>
                 );
               })}
@@ -406,12 +411,12 @@ export default function BuildOrderScreen() {
                     key={sauce}
                     style={{
                       paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12,
-                      backgroundColor: isSelected ? '#D32F2F' : '#F5F5F5',
-                      borderWidth: 1, borderColor: isSelected ? '#D32F2F' : '#E0E0E0',
+                      backgroundColor: isSelected ? '#D32F2F' : colors.background,
+                      borderWidth: 1, borderColor: isSelected ? '#D32F2F' : colors.border,
                     }}
                     onPress={() => toggleSauce(sauce)}
                   >
-                    <Text style={{ fontWeight: '600', fontSize: 13, color: isSelected ? '#fff' : '#212121' }}>{sauce}</Text>
+                    <Text style={{ fontWeight: '600', fontSize: 13, color: isSelected ? '#fff' : colors.textPrimary }}>{sauce}</Text>
                   </TouchableOpacity>
                 );
               })}
@@ -423,12 +428,12 @@ export default function BuildOrderScreen() {
         <SectionCard title="Cantidad">
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
             <TouchableOpacity
-              style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: '#F5F5F5', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#E0E0E0' }}
+              style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: colors.border }}
               onPress={() => setQuantity(Math.max(1, quantity - 1))}
             >
-              <Text style={{ fontSize: 24, fontWeight: '700', color: '#333' }}>-</Text>
+              <Text style={{ fontSize: 24, fontWeight: '700', color: colors.textPrimary }}>-</Text>
             </TouchableOpacity>
-            <Text style={{ fontSize: 28, fontWeight: '800', minWidth: 50, textAlign: 'center', color: '#212121' }}>{quantity}</Text>
+            <Text style={{ fontSize: 28, fontWeight: '800', minWidth: 50, textAlign: 'center', color: colors.textPrimary }}>{quantity}</Text>
             <TouchableOpacity
               style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: '#D32F2F', justifyContent: 'center', alignItems: 'center' }}
               onPress={() => setQuantity(quantity + 1)}
@@ -442,8 +447,8 @@ export default function BuildOrderScreen() {
         <SectionCard title="Notas">
           <TextInput
             style={{
-              borderWidth: 1, borderColor: '#E0E0E0', borderRadius: 10, padding: 14,
-              fontSize: 14, backgroundColor: '#F5F5F5', minHeight: 60, textAlignVertical: 'top',
+              borderWidth: 1, borderColor: colors.border, borderRadius: 10, padding: 14,
+              fontSize: 14, backgroundColor: colors.background, minHeight: 60, textAlignVertical: 'top',
             }}
             placeholder="Ejemplo: sin cebolla, poco pan..."
             placeholderTextColor="#9E9E9E"
@@ -457,8 +462,8 @@ export default function BuildOrderScreen() {
       {/* Boton Agregar */}
       <View style={{ 
         position: 'absolute', bottom: 0, left: 0, right: 0,
-        backgroundColor: '#fff', padding: 16,
-        borderTopWidth: 1, borderTopColor: '#E0E0E0',
+        backgroundColor: colors.surface, padding: 16,
+        borderTopWidth: 1, borderTopColor: colors.border,
       }}>
         <TouchableOpacity
           style={{ backgroundColor: '#D32F2F', paddingVertical: 16, borderRadius: 14, alignItems: 'center' }}

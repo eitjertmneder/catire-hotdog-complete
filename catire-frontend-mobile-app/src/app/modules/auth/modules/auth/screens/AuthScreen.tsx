@@ -1,13 +1,12 @@
-﻿import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Dimensions, TextInput } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import { Image } from 'expo-image';
-
 import LoginForm from '../forms/LoginForm';
 import RegisterForm from '../forms/RegisterForm';
-import { styles } from '../styles/auth.styles';
 import { useCatalogStore } from '../../../../catalog/store/catalog.store';
 import { useOrdersStore } from '../../../../orders/store/orders.store';
 import { useFinanceStore } from '../../../../finance/store/finance.store';
@@ -16,186 +15,225 @@ import { authenticate, checkBiometricsAvailability } from '../../../api/auth.loc
 import ScrollInfinitoSuave from '../../../../../shared/components/ScrollInfinitoSuave';
 
 const Logo = require('@assets/logo.png');
-const BiometricLogo = require('@assets/huella.png');
-
 const { width, height } = Dimensions.get('window');
 
-export default function AuthScreen() {
+export default function AuthScreen() { const navigation = useNavigation<any>();
   const [isLogin, setIsLogin] = useState(true);
   const [canUseBiometrics, setCanUseBiometrics] = useState(false);
-
-  const { loginWithBiometrics, loading } = useAuthStore();
+  const { loginWithBiometrics, loading, login } = useAuthStore();
 
   useEffect(() => {
     useCatalogStore.persist.clearStorage();
     useOrdersStore.persist.clearStorage();
     useFinanceStore.persist.clearStorage();
-    
-    async function checkBiometrics () {
+    async function checkBiometrics() {
       if (Platform.OS === 'web') return;
       try {
-        const isBiometricAvailable = await checkBiometricsAvailability();
-        const isBiometricEnabled = await SecureStore.getItemAsync('biometric_enabled') || 'false';
-        setCanUseBiometrics(isBiometricAvailable && isBiometricEnabled === 'true');
+        const available = await checkBiometricsAvailability();
+        const enabled = (await SecureStore.getItemAsync('biometric_enabled')) || 'false';
+        setCanUseBiometrics(available && enabled === 'true');
       } catch {}
-    };
-
+    }
     checkBiometrics();
   }, []);
 
   const handleBiometricPress = async () => {
     try {
-      const isFingerprintValid = await authenticate();
-      if (isFingerprintValid) {
-        await loginWithBiometrics();
-      }
-    } catch (error) {
-      console.error("Error biometrico:", error);
+      const valid = await authenticate();
+      if (valid) await loginWithBiometrics();
+    } catch (e) {
+      console.error('Error:', e);
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-        
-        {/* Header con Logo y Scroll Infinito */}
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#EC3137' }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+
+        {/* TOP - Scroll infinito llenando espacio */}
         <View style={{
           flexDirection: 'row',
+          justifyContent: 'space-around',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingHorizontal: 20,
           paddingTop: 20,
-          paddingBottom: 10,
+          paddingBottom: 16,
+          paddingHorizontal: 4,
+          gap: 4,
         }}>
-          {/* Logo a la izquierda */}
-          <View style={{ flex: 1, alignItems: 'center' }}>
-            <View style={{
-              width: 100,
-              height: 100,
-              borderRadius: 50,
-              backgroundColor: '#D32F2F',
-              justifyContent: 'center',
-              alignItems: 'center',
-              shadowColor: '#D32F2F',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 5,
-            }}>
-              <Image source={Logo} style={{ width: 80, height: 80 }} />
-            </View>
-            <Text style={{
-              fontSize: 12,
-              color: '#D32F2F',
-              fontWeight: '700',
-              marginTop: 8,
-              letterSpacing: 2,
-            }}>DESDE 2003</Text>
-          </View>
-
-          {/* Scroll Infinito a la derecha */}
-          <View style={{
-            width: 120,
-            height: 200,
-            overflow: 'hidden',
-            borderRadius: 20,
-          }}>
-            <ScrollInfinitoSuave 
-              scrollDirection="down" 
-              iconSet="set1"
-            />
-          </View>
+          <ScrollInfinitoSuave scrollDirection="down" />
+          <ScrollInfinitoSuave scrollDirection="up" />
+          <ScrollInfinitoSuave scrollDirection="down" />
+          <ScrollInfinitoSuave scrollDirection="up" />
         </View>
 
-        {/* Título */}
-        <View style={{
-          alignItems: 'center',
-          marginVertical: 20,
-        }}>
-          <Text style={{
-            fontSize: 28,
-            fontWeight: '800',
-            color: '#212121',
-            textAlign: 'center',
-          }}>
-            {isLogin ? 'BIENVENIDO DE VUELTA!' : 'UNETE A LA FAMILIA!'}
-          </Text>
-          <Text style={{
-            fontSize: 14,
-            color: '#757575',
-            textAlign: 'center',
-            marginTop: 8,
-          }}>
-            {isLogin ? 'Inicia sesión para continuar' : 'Crea tu cuenta para empezar'}
-          </Text>
-        </View>
-
-        {/* Formulario */}
+        {/* BOTTOM - Formulario profesional */}
         <View style={{
           backgroundColor: '#fff',
-          borderRadius: 20,
-          padding: 24,
-          marginHorizontal: 20,
+          borderTopLeftRadius: 32,
+          borderTopRightRadius: 32,
+          paddingTop: 32,
+          paddingBottom: 20,
+          paddingHorizontal: 28,
+          flex: 1,
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
+          shadowOffset: { width: 0, height: -8 },
           shadowOpacity: 0.1,
-          shadowRadius: 12,
-          elevation: 5,
+          shadowRadius: 24,
+          elevation: 8,
         }}>
-          {isLogin ? <LoginForm /> : <RegisterForm />}
+          {/* Titulo */}
+          <View style={{ alignItems: 'center', marginBottom: 24 }}>
+            <Text style={{
+              fontSize: 28,
+              fontWeight: '900',
+              color: '#1A1A2E',
+              textAlign: 'center',
+              letterSpacing: 0.5,
+            }}>
+              {isLogin ? 'Bienvenido' : 'Crear Cuenta'}
+            </Text>
+            <Text style={{ fontSize: 14, color: '#94A3B8', textAlign: 'center', marginTop: 6, lineHeight: 20 }}>
+              {isLogin
+                ? 'Ingresa tus credenciales para acceder a tu cuenta'
+                : 'Registrate para empezar a ordenar tu comida favorita'}
+            </Text>
+          </View>
 
-          {isLogin && canUseBiometrics && (
-            <View style={{ marginTop: 25, alignItems: 'center' }}>
-              <Text style={{ marginBottom: 10, color: '#888', fontSize: 12 }}>
-                O usa tu huella para acceder rápido:
+          {/* Formulario card */}
+          <View style={{
+            backgroundColor: '#F8FAFC',
+            borderRadius: 20,
+            padding: 24,
+            borderWidth: 1,
+            borderColor: '#E2E8F0',
+          }}>
+            {isLogin ? <LoginForm /> : <RegisterForm />}
+
+            {isLogin && canUseBiometrics && (
+              <View style={{ marginTop: 20, alignItems: 'center' }}>
+                <View style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 12,
+                }}>
+                  <View style={{ flex: 1, height: 1, backgroundColor: '#E2E8F0' }} />
+                  <Text style={{ marginHorizontal: 12, color: '#94A3B8', fontSize: 12, fontWeight: '600' }}>
+                    O
+                  </Text>
+                  <View style={{ flex: 1, height: 1, backgroundColor: '#E2E8F0' }} />
+                </View>
+                <TouchableOpacity
+                  style={{
+                    paddingVertical: 12,
+                    paddingHorizontal: 24,
+                    backgroundColor: '#FEF2F2',
+                    borderRadius: 14,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: '#FECACA',
+                  }}
+                  onPress={handleBiometricPress}
+                  disabled={loading}
+                >
+                  <Image source={require('@assets/huella.png')} style={{ width: 28, height: 28, marginRight: 10 }} />
+                  <Text style={{ color: '#DC2626', fontWeight: '700', fontSize: 14 }}>
+                    {loading ? 'Verificando...' : 'Usar huella digital'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Divider + toggle */}
+            <View style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              marginTop: 20,
+              paddingTop: 16,
+              borderTopWidth: 1,
+              borderTopColor: '#E2E8F0',
+            }}>
+              <Text style={{ color: '#94A3B8', fontSize: 13 }}>
+                {isLogin ? 'No tienes cuenta? ' : 'Ya tienes cuenta? '}
               </Text>
-              <TouchableOpacity
-                style={{
-                  padding: 12,
-                  backgroundColor: '#FEE2E2',
-                  borderRadius: 50,
-                  opacity: loading ? 0.7 : 1
-                }}
-                onPress={handleBiometricPress}
-                disabled={loading}
-              >
-                <Image source={BiometricLogo} style={{ width: 50, height: 50 }} />
+              <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
+                <Text style={{ color: '#EC3137', fontSize: 13, fontWeight: '700' }}>
+                  {isLogin ? 'Registrate ahora' : 'Inicia sesion'}
+                </Text>
               </TouchableOpacity>
             </View>
-          )}
-
-          <View style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            marginTop: 20,
-          }}>
-            <Text style={{ color: '#757575', fontSize: 14 }}>
-              {isLogin ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
-            </Text>
-            <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-              <Text style={{
-                color: '#D32F2F',
-                fontSize: 14,
-                fontWeight: '700',
-              }}>
-                {isLogin ? 'Regístrate aquí' : 'Inicia sesión'}
-              </Text>
-            </TouchableOpacity>
           </View>
-        </View>
 
-        {/* Footer */}
-        <View style={{
-          alignItems: 'center',
-          marginTop: 30,
-          paddingBottom: 20,
-        }}>
-          <Text style={{
-            fontSize: 12,
-            color: '#9E9E9E',
-          }}>
-            🌭 Catire Hot Dog © 2026
-          </Text>
+          {/* Boton Invitado moderno */}
+          <TouchableOpacity
+            onPress={async () => {
+              try {
+                await login({ email: 'guest@test.com', password: 'guest123' } as any);
+                await SecureStore.setItemAsync('user_password', 'guest123');
+              } catch (e) {
+                console.log('Guest error:', e);
+              }
+            }}
+            style={{
+              width: '100%',
+              paddingVertical: 16,
+              borderRadius: 16,
+              backgroundColor: '#F1F5F9',
+              alignItems: 'center',
+              marginTop: 16,
+              borderWidth: 1.5,
+              borderColor: '#E2E8F0',
+              flexDirection: 'row',
+              justifyContent: 'center',
+            }}
+          >
+            <Text style={{ fontSize: 14, color: '#475569', fontWeight: '700', letterSpacing: 0.3 }}>
+              Continuar como Invitado
+            </Text>
+          </TouchableOpacity>
+
+          {/* Firebase Login button */}
+          <TouchableOpacity
+            onPress={() => navigation.navigate('FirebaseLogin')}
+            style={{
+              width: '100%',
+              paddingVertical: 16,
+              borderRadius: 16,
+              backgroundColor: '#1A73E8',
+              alignItems: 'center',
+              marginTop: 12,
+            }}
+          >
+            <Text style={{ fontSize: 14, color: '#fff', fontWeight: '700', letterSpacing: 0.3 }}>
+              Login con Firebase
+            </Text>
+          </TouchableOpacity>
+
+          {/* Logo + Copyright */}
+          <View style={{ alignItems: 'center', marginTop: 28, paddingBottom: 10 }}>
+            <View style={{
+              width: 72,
+              height: 72,
+              borderRadius: 36,
+              backgroundColor: '#EC3137',
+              justifyContent: 'center',
+              alignItems: 'center',
+              shadowColor: '#EC3137',
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.35,
+              shadowRadius: 12,
+              elevation: 8,
+              marginBottom: 10,
+            }}>
+              <Image source={Logo} style={{ width: 52, height: 52 }} />
+            </View>
+            <Text style={{ fontSize: 14, fontWeight: '800', color: '#1A1A2E', letterSpacing: 1 }}>
+              CATIRE HOT DOG
+            </Text>
+            <Text style={{ fontSize: 11, color: '#CBD5E1', marginTop: 4 }}>
+              Desde 2003 - La mejor comida rapida
+            </Text>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

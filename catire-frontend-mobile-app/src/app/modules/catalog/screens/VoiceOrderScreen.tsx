@@ -36,7 +36,7 @@ export const VoiceOrderScreen = () => {
       processOrder(mockResult);
     } else {
       startListening();
-      speak('¿Qué quieres ordenar?');
+      speak('ï¿½Quï¿½ quieres ordenar?');
     }
   };
 
@@ -65,14 +65,14 @@ export const VoiceOrderScreen = () => {
                 features: [],
               });
               speak('Agregado al carrito');
-              Alert.alert('Éxito', 'Producto agregado al carrito');
+              Alert.alert('ï¿½xito', 'Producto agregado al carrito');
             }
           },
         ]
       );
     } else {
-      speak('No entendí el producto. Por favor, intenta de nuevo.');
-      Alert.alert('No entendí', 'No pude identificar el producto. Intenta con: "Quiero 2 perros calientes"');
+      speak('No entendï¿½ el producto. Por favor, intenta de nuevo.');
+      Alert.alert('No entendï¿½', 'No pude identificar el producto. Intenta con: "Quiero 2 perros calientes"');
     }
   };
 
@@ -86,10 +86,10 @@ export const VoiceOrderScreen = () => {
         borderBottomWidth: 1, borderBottomColor: theme.colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>? Volver</Text>
+          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
         </TouchableOpacity>
         <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
-          ?? Pedido por Voz
+          Pedido por Voz
         </Text>
       </View>
 
@@ -113,7 +113,7 @@ export const VoiceOrderScreen = () => {
             shadowRadius: 8,
             elevation: 8,
           }}>
-            <Text style={{ fontSize: 60 }}>??</Text>
+            <Text style={{ fontSize: 60 }}>{'\u{1F3A4}'}</Text>
           </Animated.View>
         </TouchableOpacity>
 
@@ -153,7 +153,7 @@ export const VoiceOrderScreen = () => {
             borderColor: '#6EE7B7',
           }}>
             <Text style={{ fontSize: 14, fontWeight: '600', color: '#065F46' }}>
-              ? {lastOrder}
+              {'\u2714'} {lastOrder}
             </Text>
           </View>
         ) : null}
@@ -169,16 +169,16 @@ export const VoiceOrderScreen = () => {
             Ejemplos de pedidos:
           </Text>
           <Text style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: 8 }}>
-            • "Quiero 2 perros calientes"
+            {'\u2022'} "Quiero 2 perros calientes"
           </Text>
           <Text style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: 8 }}>
-            • "Una hamburguesa sencilla"
+            {'\u2022'} "Una hamburguesa sencilla"
           </Text>
           <Text style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: 8 }}>
-            • "3 salchipapas normales"
+            {'\u2022'} "3 salchipapas normales"
           </Text>
           <Text style={{ fontSize: 13, color: theme.colors.textSecondary }}>
-            • "Una coca cola 2 litros"
+            {'\u2022'} "Una coca cola 2 litros"
           </Text>
         </View>
 
@@ -192,9 +192,9 @@ export const VoiceOrderScreen = () => {
               padding: 16,
               alignItems: 'center',
             }}
-            onPress={() => speak('¿Qué quieres ordenar?')}
+            onPress={() => speak('ï¿½Quï¿½ quieres ordenar?')}
           >
-            <Text style={{ fontSize: 24, marginBottom: 8 }}>??</Text>
+            <Text style={{ fontSize: 24, marginBottom: 8 }}>{'\u{1F50A}'}</Text>
             <Text style={{ fontSize: 12, color: theme.colors.textPrimary }}>Repetir</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -207,7 +207,7 @@ export const VoiceOrderScreen = () => {
             }}
             onPress={() => navigation.navigate('Cart' as any)}
           >
-            <Text style={{ fontSize: 24, marginBottom: 8 }}>??</Text>
+            <Text style={{ fontSize: 24, marginBottom: 8 }}>{'\u{1F6D2}'}</Text>
             <Text style={{ fontSize: 12, color: theme.colors.textPrimary }}>Ver Carrito</Text>
           </TouchableOpacity>
         </View>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useAppTheme } from '../../../shared/contexts/ThemeContext';
 
 const CATEGORIES = [
   { id: 'perros', name: 'Perros', icon: 'P' },
@@ -11,10 +12,10 @@ const CATEGORIES = [
 ];
 
 // Sucursales que NO tienen hamburguesa
-const NO_HAMBURGUESA = [5, 9];
+const NO_HAMBURGUESA = [11, 16];
 
 // Sucursales que TIENEN Nestea
-const HAS_NESTEA = [3, 4, 5, 9];
+const HAS_NESTEA = [1, 2, 3, 4, 11, 12, 13];
 
 const PRODUCTS_BY_CATEGORY: Record<string, any[]> = {
   perros: [
@@ -23,7 +24,7 @@ const PRODUCTS_BY_CATEGORY: Record<string, any[]> = {
   ],
   hamburguesas: [
     { id: 'hamb_sencilla', name: 'Hamburguesa Sencilla', price: '$4.50', image: 'https://pikapizza.wordpress.com/wp-content/uploads/2013/03/hamburguesa-tocineta.jpg' },
-    { id: 'hamb_mixta', name: 'Hamburguesa Mixta', price: '$5.00', image: 'https://scontent.fsci1-2.fna.fbcdn.net/v/t39.30808-6/579365069_2696975033988171_4554365983221921478_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1423&ctp=s1080x1423&_nc_cat=101&ccb=1-7&_nc_sid=127cfc&_nc_ohc=kVJtsTmuK68Q7kNvwEXk9O-&_nc_oc=AdrG9qmQCEj2at89R3zqB2YKoxSHsP6lSYVWEJ4VytGLovre1CvEfwufMzXkG6j4Igo&_nc_zt=23&_nc_ht=scontent.fsci1-2.fna&_nc_gid=bYTCCnWZxGL8SzVNiliIHA&_nc_ss=7b289&oh=00_AQDOIXMXNd1x6F3h0nxzsx2peZgFylIIX3jcp-0WjE1Hvg&oe=6A5A0C57' },
+    { id: 'hamb_mixta', name: 'Hamburguesa Mixta', price: '$5.00', image: 'https://storage.googleapis.com/aur-sitemap-img/restaurants/moa-cafe/757161fc1396.jpg' },
   ],
   salchipapas: [
     { id: 'salchi_junior', name: 'Salchipapa Junior', price: '$3.00', image: 'https://livornos.com/wp-content/uploads/2023/12/salchipapas.png' },
@@ -75,6 +76,7 @@ export default function MenuScreen() {
   const initialCategory = route.params?.category || 'perros';
 
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const { isDark, colors } = useAppTheme();
 
   // Filtrar categorias y productos por sucursal
   const categories = getCategoriesForBranch(branchId);
@@ -90,27 +92,27 @@ export default function MenuScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F5F5' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Back + Title centrado */}
       <View style={{ 
         padding: 16, paddingBottom: 12, 
-        backgroundColor: '#fff',
-        borderBottomWidth: 1, borderBottomColor: '#E0E0E0',
+        backgroundColor: colors.surface,
+        borderBottomWidth: 1, borderBottomColor: colors.border,
         alignItems: 'center',
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ alignSelf: 'flex-start' }}>
           <Text style={{ fontSize: 14, color: '#D32F2F', fontWeight: '600' }}>← Volver</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 22, fontWeight: '800', color: '#212121', marginTop: 8 }}>
+        <Text style={{ fontSize: 22, fontWeight: '800', color: colors.textPrimary, marginTop: 8 }}>
           {getCategoryTitle()}
         </Text>
-        <Text style={{ fontSize: 13, color: '#757575', marginTop: 4 }}>
+        <Text style={{ fontSize: 13, color: colors.textSecondary, marginTop: 4 }}>
           📍 {branchName}
         </Text>
       </View>
 
       {/* Tabs de Categorias */}
-      <View style={{ backgroundColor: '#fff', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#E0E0E0' }}>
+      <View style={{ backgroundColor: colors.surface, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border }}>
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false}
@@ -121,8 +123,8 @@ export default function MenuScreen() {
               key={cat.id}
               style={{
                 paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
-                backgroundColor: selectedCategory === cat.id ? '#D32F2F' : '#F5F5F5',
-                borderWidth: 1, borderColor: selectedCategory === cat.id ? '#D32F2F' : '#E0E0E0',
+                backgroundColor: selectedCategory === cat.id ? '#D32F2F' : colors.background,
+                borderWidth: 1, borderColor: selectedCategory === cat.id ? '#D32F2F' : colors.border,
                 flexDirection: 'row', alignItems: 'center', gap: 8,
               }}
               onPress={() => setSelectedCategory(cat.id)}
@@ -152,14 +154,14 @@ export default function MenuScreen() {
               <TouchableOpacity
                 key={product.id}
                 style={{
-                  width: '47%', backgroundColor: '#fff', borderRadius: 16, overflow: 'hidden',
+                  width: '47%', backgroundColor: colors.surface, borderRadius: 16, overflow: 'hidden',
                   shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 6, elevation: 3,
                 }}
                 onPress={() => handleProductPress(product)}
               >
                 <Image source={{ uri: product.image }} style={{ width: '100%', height: 120 }} resizeMode="contain" />
                 <View style={{ padding: 10 }}>
-                  <Text style={{ fontSize: 13, fontWeight: '700', color: '#212121' }}>{product.name}</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '700', color: colors.textPrimary }}>{product.name}</Text>
                   <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#D32F2F', marginTop: 4 }}>{product.price}</Text>
                 </View>
               </TouchableOpacity>

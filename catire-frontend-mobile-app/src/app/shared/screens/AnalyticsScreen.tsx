@@ -1,250 +1,127 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import React from 'react';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { useAuthStore } from '../store/auth.store';
-import { Api } from '../api/api';
 import { theme } from '../styles/theme';
 
-const api = new Api();
-const { width } = Dimensions.get('window');
+const BRANCH_SALES = [
+  { name: 'Barrio Sucre', sales: 4200, color: '#EC3137' },
+  { name: 'Carabobo', sales: 3800, color: '#2563EB' },
+  { name: 'El Malecon', sales: 3500, color: '#059669' },
+  { name: 'Prados del Este', sales: 3100, color: '#7C3AED' },
+  { name: 'Barrio Obrero', sales: 2900, color: '#D97706' },
+];
 
-interface AnalyticsData {
-  totalSales: number;
-  totalOrders: number;
-  averageOrderValue: number;
-  topProducts: { name: string; count: number; revenue: number }[];
-  salesByHour: { hour: number; sales: number }[];
-  salesByBranch: { branch: string; sales: number }[];
-  dailyTrend: { date: string; sales: number }[];
-}
+const TOP_PRODUCTS = [
+  { name: 'Perro Caliente Normal', count: 156, revenue: 780 },
+  { name: 'Hamburguesa Sencilla', count: 89, revenue: 356 },
+  { name: 'Salchipapa Normal', count: 78, revenue: 390 },
+  { name: 'Coca Cola 2L', count: 67, revenue: 167 },
+  { name: 'Nestea', count: 45, revenue: 45 },
+];
+
+const HOURLY_SALES = [
+  { hour: '10am', sales: 320 }, { hour: '11am', sales: 580 },
+  { hour: '12pm', sales: 890 }, { hour: '1pm', sales: 750 },
+  { hour: '2pm', sales: 420 }, { hour: '3pm', sales: 310 },
+  { hour: '4pm', sales: 480 }, { hour: '5pm', sales: 620 },
+  { hour: '6pm', sales: 710 }, { hour: '7pm', sales: 540 },
+  { hour: '8pm', sales: 380 },
+];
+
+const DAILY_TREND = [
+  { day: 'Lun', sales: 2100 }, { day: 'Mar', sales: 2450 },
+  { day: 'Mie', sales: 2800 }, { day: 'Jue', sales: 2650 },
+  { day: 'Vie', sales: 3200 }, { day: 'Sab', sales: 3800 },
+  { day: 'Dom', sales: 2900 },
+];
+
+const MEDALS = ['\u{1F947}', '\u{1F948}', '\u{1F949}'];
 
 export const AnalyticsScreen = () => {
-  const navigation = useNavigation();
-  const { token } = useAuthStore();
-  const [analytics, setAnalytics] = useState<AnalyticsData>({
-    totalSales: 0,
-    totalOrders: 0,
-    averageOrderValue: 0,
-    topProducts: [],
-    salesByHour: [],
-    salesByBranch: [],
-    dailyTrend: [],
-  });
-  const [period, setPeriod] = useState<'day' | 'week' | 'month'>('week');
-
-  useEffect(() => {
-    fetchAnalytics();
-  }, [period]);
-
-  const fetchAnalytics = async () => {
-    // Simulated analytics data
-    setAnalytics({
-      totalSales: 12500,
-      totalOrders: 342,
-      averageOrderValue: 36.55,
-      topProducts: [
-        { name: 'Perro Caliente Normal', count: 156, revenue: 546 },
-        { name: 'Hamburguesa Sencilla', count: 89, revenue: 356 },
-        { name: 'Salchipapa Normal', count: 67, revenue: 301.5 },
-        { name: 'Coca Cola 2L', count: 45, revenue: 112.5 },
-        { name: 'Agua Mineral', count: 34, revenue: 34 },
-      ],
-      salesByHour: [
-        { hour: 10, sales: 800 },
-        { hour: 11, sales: 1200 },
-        { hour: 12, sales: 2500 },
-        { hour: 13, sales: 2200 },
-        { hour: 14, sales: 1800 },
-        { hour: 15, sales: 1500 },
-        { hour: 16, sales: 1200 },
-        { hour: 17, sales: 900 },
-        { hour: 18, sales: 600 },
-      ],
-      salesByBranch: [
-        { branch: 'Barrio Sucre', sales: 3200 },
-        { branch: 'Carabobo', sales: 2800 },
-        { branch: 'El Malecón', sales: 2500 },
-        { branch: 'Prados del Este', sales: 2100 },
-        { branch: 'Barrio Obrero', sales: 1900 },
-      ],
-      dailyTrend: [
-        { date: 'Lun', sales: 1800 },
-        { date: 'Mar', sales: 2100 },
-        { date: 'Mié', sales: 1900 },
-        { date: 'Jue', sales: 2400 },
-        { date: 'Vie', sales: 2800 },
-        { date: 'Sáb', sales: 3200 },
-        { date: 'Dom', sales: 2500 },
-      ],
-    });
-  };
-
-  const renderBarChart = (data: { label: string; value: number; maxValue: number }[]) => (
-    <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-around', height: 120 }}>
-      {data.map((item, index) => (
-        <View key={index} style={{ alignItems: 'center', flex: 1 }}>
-          <View style={{
-            width: 20,
-            height: (item.value / item.maxValue) * 100,
-            backgroundColor: theme.colors.primary,
-            borderRadius: 4,
-            marginBottom: 4,
-          }} />
-          <Text style={{ fontSize: 10, color: theme.colors.textMuted }}>{item.label}</Text>
-        </View>
-      ))}
-    </View>
-  );
+  const navigation = useNavigation<any>();
+  const totalSales = BRANCH_SALES.reduce((s, b) => s + b.sales, 0);
+  const maxSale = Math.max(...BRANCH_SALES.map(b => b.sales));
+  const maxHourly = Math.max(...HOURLY_SALES.map(h => h.sales));
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      {/* Header */}
-      <View style={{
-        flexDirection: 'row', alignItems: 'center',
-        paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
-      }}>
+      <View style={{ padding: 16, backgroundColor: '#EC3137', flexDirection: 'row', alignItems: 'center' }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>? Volver</Text>
+          <Text style={{ fontSize: 16, color: '#fff', fontWeight: '600' }}>{'<'} Volver</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
-          ?? Analytics
-        </Text>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: '#fff', marginLeft: 12 }}>{'\u{1F4CA}'} Analytics</Text>
       </View>
-
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        {/* Period Selector */}
-        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
-          {(['day', 'week', 'month'] as const).map((p) => (
-            <TouchableOpacity
-              key={p}
-              style={{
-                flex: 1,
-                paddingVertical: 10,
-                borderRadius: 8,
-                backgroundColor: period === p ? theme.colors.primary : theme.colors.white,
-                alignItems: 'center',
-              }}
-              onPress={() => setPeriod(p)}
-            >
-              <Text style={{
-                fontSize: 13,
-                fontWeight: '600',
-                color: period === p ? '#fff' : theme.colors.textPrimary,
-              }}>
-                {p === 'day' ? 'Hoy' : p === 'week' ? 'Semana' : 'Mes'}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Stats Cards */}
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
-          <View style={{ width: '48%', backgroundColor: theme.colors.white, borderRadius: 12, padding: 16 }}>
-            <Text style={{ fontSize: 12, color: theme.colors.textMuted }}>Ventas Totales</Text>
-            <Text style={{ fontSize: 24, fontWeight: '700', color: '#10B981', marginTop: 4 }}>
-              ${analytics.totalSales.toLocaleString()}
-            </Text>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16 }}>
+        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
+          <View style={{ flex: 1, backgroundColor: '#EC3137', borderRadius: 14, padding: 16 }}>
+            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, fontWeight: '600' }}>{'\u{1F4B0}'} Ventas Total</Text>
+            <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900', marginTop: 4 }}>{totalSales.toLocaleString()}</Text>
           </View>
-          <View style={{ width: '48%', backgroundColor: theme.colors.white, borderRadius: 12, padding: 16 }}>
-            <Text style={{ fontSize: 12, color: theme.colors.textMuted }}>Total Pedidos</Text>
-            <Text style={{ fontSize: 24, fontWeight: '700', color: '#3B82F6', marginTop: 4 }}>
-              {analytics.totalOrders}
-            </Text>
-          </View>
-          <View style={{ width: '100%', backgroundColor: theme.colors.white, borderRadius: 12, padding: 16 }}>
-            <Text style={{ fontSize: 12, color: theme.colors.textMuted }}>Promedio por Pedido</Text>
-            <Text style={{ fontSize: 24, fontWeight: '700', color: '#8B5CF6', marginTop: 4 }}>
-              ${analytics.averageOrderValue.toFixed(2)}
-            </Text>
+          <View style={{ flex: 1, backgroundColor: '#2563EB', borderRadius: 14, padding: 16 }}>
+            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, fontWeight: '600' }}>{'\u{1F4E6}'} Pedidos</Text>
+            <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900', marginTop: 4 }}>437</Text>
           </View>
         </View>
 
-        {/* Sales by Hour Chart */}
-        <View style={{ backgroundColor: theme.colors.white, borderRadius: 12, padding: 16, marginBottom: 16 }}>
-          <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
-            ?? Ventas por Hora
-          </Text>
-          {renderBarChart(
-            analytics.salesByHour.map(h => ({
-              label: `${h.hour}:00`,
-              value: h.sales,
-              maxValue: Math.max(...analytics.salesByHour.map(x => x.sales)),
-            }))
-          )}
-        </View>
-
-        {/* Sales by Branch */}
-        <View style={{ backgroundColor: theme.colors.white, borderRadius: 12, padding: 16, marginBottom: 16 }}>
-          <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
-            ?? Ventas por Sucursal
-          </Text>
-          {analytics.salesByBranch.map((branch, index) => (
-            <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-              <Text style={{ flex: 1, fontSize: 13, color: theme.colors.textPrimary }}>{branch.branch}</Text>
-              <View style={{ flex: 2, height: 8, backgroundColor: theme.colors.borderLight, borderRadius: 4, marginHorizontal: 8 }}>
-                <View style={{
-                  width: `${(branch.sales / analytics.salesByBranch[0].sales) * 100}%`,
-                  height: '100%',
-                  backgroundColor: theme.colors.primary,
-                  borderRadius: 4,
-                }} />
+        <Text style={{ fontSize: 16, fontWeight: '800', color: '#1E293B', marginBottom: 12 }}>{'\u{1F4C8}'} Ventas por Hora</Text>
+        <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 16, marginBottom: 16 }}>
+          {HOURLY_SALES.map((item, idx) => (
+            <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+              <Text style={{ width: 45, fontSize: 12, color: '#64748B', fontWeight: '600' }}>{item.hour}</Text>
+              <View style={{ flex: 1, height: 12, backgroundColor: '#F1F5F9', borderRadius: 6, overflow: 'hidden', marginHorizontal: 8 }}>
+                <View style={{ height: '100%', backgroundColor: '#EC3137', borderRadius: 6, flex: item.sales / maxHourly }} />
               </View>
-              <Text style={{ fontSize: 13, fontWeight: '600', color: theme.colors.textPrimary }}>
-                ${branch.sales.toLocaleString()}
-              </Text>
+              <Text style={{ fontSize: 12, fontWeight: '700', color: '#334155', width: 50, textAlign: 'right' }}>{item.sales}</Text>
             </View>
           ))}
         </View>
 
-        {/* Top Products */}
-        <View style={{ backgroundColor: theme.colors.white, borderRadius: 12, padding: 16, marginBottom: 16 }}>
-          <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
-            ?? Productos Más Vendidos
-          </Text>
-          {analytics.topProducts.map((product, index) => (
-            <View key={index} style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              paddingVertical: 8,
-              borderBottomWidth: index < analytics.topProducts.length - 1 ? 1 : 0,
-              borderBottomColor: theme.colors.border,
-            }}>
-              <Text style={{ fontSize: 20, marginRight: 12 }}>
-                {index === 0 ? '??' : index === 1 ? '??' : index === 2 ? '??' : `${index + 1}.`}
-              </Text>
+        <Text style={{ fontSize: 16, fontWeight: '800', color: '#1E293B', marginBottom: 12 }}>{'\u{1F3EA}'} Ventas por Sucursal</Text>
+        <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 16, marginBottom: 16 }}>
+          {BRANCH_SALES.map((branch, idx) => (
+            <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+              <View style={{ width: 4, height: 24, borderRadius: 2, backgroundColor: branch.color, marginRight: 10 }} />
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 14, fontWeight: '600', color: theme.colors.textPrimary }}>
-                  {product.name}
-                </Text>
-                <Text style={{ fontSize: 12, color: theme.colors.textMuted }}>
-                  {product.count} vendidos
-                </Text>
+                <Text style={{ fontSize: 13, fontWeight: '700', color: '#1E293B' }}>{branch.name}</Text>
+                <View style={{ height: 6, backgroundColor: '#F1F5F9', borderRadius: 3, overflow: 'hidden', marginTop: 4 }}>
+                  <View style={{ height: '100%', backgroundColor: branch.color, borderRadius: 3, flex: branch.sales / maxSale }} />
+                </View>
               </View>
-              <Text style={{ fontSize: 14, fontWeight: '700', color: '#10B981' }}>
-                ${product.revenue.toFixed(2)}
-              </Text>
+              <Text style={{ fontSize: 14, fontWeight: '800', color: branch.color, marginLeft: 8 }}>{branch.sales.toLocaleString()}</Text>
             </View>
           ))}
         </View>
 
-        {/* Daily Trend */}
-        <View style={{ backgroundColor: theme.colors.white, borderRadius: 12, padding: 16, marginBottom: 16 }}>
-          <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
-            ?? Tendencia Diaria
-          </Text>
-          {renderBarChart(
-            analytics.dailyTrend.map(d => ({
-              label: d.date,
-              value: d.sales,
-              maxValue: Math.max(...analytics.dailyTrend.map(x => x.sales)),
-            }))
-          )}
+        <Text style={{ fontSize: 16, fontWeight: '800', color: '#1E293B', marginBottom: 12 }}>{'\u{1F3C6}'} Productos Mas Vendidos</Text>
+        <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 16, marginBottom: 16 }}>
+          {TOP_PRODUCTS.map((product, idx) => (
+            <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: idx < TOP_PRODUCTS.length - 1 ? 1 : 0, borderBottomColor: '#F1F5F9' }}>
+              <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: idx === 0 ? '#FCD34D' : idx === 1 ? '#D1D5DB' : idx === 2 ? '#F59E0B' : '#F1F5F9', justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: idx < 3 ? '#fff' : '#94A3B8' }}>{idx < 3 ? MEDALS[idx] : (idx + 1)}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: '#1E293B' }}>{product.name}</Text>
+                <Text style={{ fontSize: 12, color: '#94A3B8' }}>{product.count} vendidos</Text>
+              </View>
+              <Text style={{ fontSize: 14, fontWeight: '800', color: '#059669' }}>{product.revenue}</Text>
+            </View>
+          ))}
+        </View>
+
+        <Text style={{ fontSize: 16, fontWeight: '800', color: '#1E293B', marginBottom: 12 }}>{'\u{1F4C9}'} Tendencia Diaria</Text>
+        <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 16, marginBottom: 20 }}>
+          {DAILY_TREND.map((day, idx) => (
+            <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+              <Text style={{ width: 35, fontSize: 13, fontWeight: '700', color: '#64748B' }}>{day.day}</Text>
+              <View style={{ flex: 1, height: 20, backgroundColor: '#F1F5F9', borderRadius: 10, overflow: 'hidden', marginHorizontal: 10 }}>
+                <View style={{ height: '100%', backgroundColor: '#EC3137', borderRadius: 10, flex: day.sales / 4000 }} />
+              </View>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: '#334155', width: 50, textAlign: 'right' }}>{day.sales}</Text>
+            </View>
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
-

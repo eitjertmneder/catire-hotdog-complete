@@ -1,10 +1,11 @@
-﻿import { create } from 'zustand';
+import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface Promotion {
   id: string;
   code: string;
+  name: string;
   description: string;
   discount_type: 'percentage' | 'fixed';
   discount_value: number;
@@ -15,6 +16,9 @@ export interface Promotion {
   valid_until: Date;
   active: boolean;
   applicable_products?: number[];
+  applicable_branches?: string[];
+  notes?: string;
+  valid_days?: string;
 }
 
 type PromotionState = {
