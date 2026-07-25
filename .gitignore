@@ -4,3 +4,7 @@ dist/
 *.env
 .env.local
 .DS_Store
+
+# Firebase sensitive files
+catire-backend-services/auth-service/firebase-service-account.json
+catire-frontend-mobile-app/google-services.json
