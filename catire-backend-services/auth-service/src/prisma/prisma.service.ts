@@ -10,22 +10,25 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
         connectionString: process.env['DATABASE_URL']!,
       }),
     });
-
-    this.$extends({
-      query: {
-        $allModels: {
-          delete({ model, args }) {
-            return (this as any)[model].update({
-              where: args.where,
-              data: { deleted_at: new Date() },
-            });
-          },
-        },
-      },
-    });
   }
 
   async onModuleInit() {
     await this.$connect();
+  }
+
+  // Soft delete helper - use this instead of direct delete
+  async softDelete(model: string, where: any) {
+    return (this as any)[model].update({
+      where,
+      data: { deleted_at: new Date() },
+    });
+  }
+
+  // Soft delete many helper
+  async softDeleteMany(model: string, where: any) {
+    return (this as any)[model].updateMany({
+      where,
+      data: { deleted_at: new Date() },
+    });
   }
 }

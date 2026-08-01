@@ -12,7 +12,7 @@ const schema = z.object({
   dni: z.string().min(7, 'La cédula debe tener al menos 7 dígitos').max(8, 'Máximo 8 dígitos'),
   phone_1: z.string().regex(/^04(12|22|14|24|16|26)\d{7}$/, 'Número no válido (Ej: 04141234567)'),
   phone_2: z.string().regex(/^04(12|22|14|24|16|26)\d{7}$/, 'Número no válido').optional().or(z.literal('')),
-  password: z.string().min(6, 'Mínimo 6 caracteres'),
+  password: z.string().min(8, 'Mínimo 8 caracteres'),
 });
 
 type FormValues = z.infer<typeof schema>;

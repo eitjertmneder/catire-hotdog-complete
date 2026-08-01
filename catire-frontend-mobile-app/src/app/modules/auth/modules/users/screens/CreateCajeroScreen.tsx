@@ -4,14 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../../../../shared/store/auth.store';
 import { Api } from '../../../../../shared/api/api';
-import { theme } from '../../../../../shared/styles/theme';
+import { useAppTheme } from '../../../../../shared/contexts/ThemeContext';
 
 const api = new Api();
 
 const BRANCHES = [
   { id: 1, name: 'Barrio Sucre' },
-  { id: 2, name: 'Carabobo' },
-  { id: 3, name: 'El Malec�n' },
+  { id: 3, name: 'El Malecon' },
   { id: 4, name: 'Prados del Este' },
   { id: 11, name: 'Barrio Obrero' },
   { id: 12, name: 'La Asogata' },
@@ -31,6 +30,7 @@ interface User {
 export const CreateCajeroScreen = () => {
   const navigation = useNavigation();
   const { token } = useAuthStore();
+  const { colors } = useAppTheme();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -81,6 +81,33 @@ export const CreateCajeroScreen = () => {
     setActionLoading(false);
   };
 
+  const handleDegradar = async (cajero: User) => {
+    if (!token) return;
+    Alert.alert(
+      'Degradar Cajero',
+      `¿Seguro que quieres degradar a ${cajero.full_name} a cliente?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Degradar',
+          style: 'destructive',
+          onPress: async () => {
+            const res = await api.put('auth', `users/${cajero.id}`, {
+              role_id: 1,
+              branch_id: null,
+            }, token);
+            if (!res.error) {
+              Alert.alert('Éxito', `${cajero.full_name} ahora es cliente`);
+              fetchUsers();
+            } else {
+              Alert.alert('Error', 'No se pudo degradar el usuario');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const handleReasignBranch = async (userId: number, newBranchId: number) => {
     if (!token) return;
     const res = await api.put('auth', `users/${userId}`, {
@@ -93,25 +120,25 @@ export const CreateCajeroScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={{ 
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+        backgroundColor: colors.white,
+        borderBottomWidth: 1, borderBottomColor: colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>← Volver</Text>
+          <Text style={{ fontSize: 16, color: colors.primary, fontWeight: '600' }}>← Volver</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginLeft: 12 }}>
           🧑‍💼 Gestionar Cajeros
         </Text>
       </View>
 
       {loading ? (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
         <FlatList
@@ -119,17 +146,17 @@ export const CreateCajeroScreen = () => {
             <>
               {/* Cajeros Actuales */}
               <View style={{ padding: 16, paddingBottom: 8 }}>
-                <Text style={{ fontSize: 16, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
+                <Text style={{ fontSize: 16, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 }}>
                   Cajeros Actuales ({cajeros.length})
                 </Text>
                 {cajeros.length === 0 ? (
-                  <Text style={{ color: theme.colors.textMuted, textAlign: 'center', paddingVertical: 20 }}>
+                  <Text style={{ color: colors.textMuted, textAlign: 'center', paddingVertical: 20 }}>
                     No hay cajeros registrados
                   </Text>
                 ) : (
                   cajeros.map(cajero => (
                     <View key={cajero.id} style={{
-                      backgroundColor: theme.colors.white,
+                      backgroundColor: colors.white,
                       borderRadius: 12,
                       padding: 14,
                       marginBottom: 8,
@@ -141,21 +168,35 @@ export const CreateCajeroScreen = () => {
                     }}>
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                         <View style={{ flex: 1 }}>
-                          <Text style={{ fontSize: 15, fontWeight: '600', color: theme.colors.textPrimary }}>
+                          <Text style={{ fontSize: 15, fontWeight: '600', color: colors.textPrimary }}>
                             {cajero.full_name}
                           </Text>
-                          <Text style={{ fontSize: 12, color: theme.colors.textSecondary, marginTop: 2 }}>
+                          <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>
                             {cajero.email}
                           </Text>
                         </View>
-                        <View style={{ 
-                          backgroundColor: '#D1FAE5', 
-                          paddingHorizontal: 10, paddingVertical: 4, 
-                          borderRadius: 8 
-                        }}>
-                          <Text style={{ color: theme.colors.success, fontWeight: '600', fontSize: 11 }}>
-                            {getBranchName(cajero.branch_id)}
-                          </Text>
+                        <View style={{ alignItems: 'flex-end', gap: 6 }}>
+                          <View style={{
+                            backgroundColor: '#D1FAE5',
+                            paddingHorizontal: 10, paddingVertical: 4,
+                            borderRadius: 8,
+                          }}>
+                            <Text style={{ color: colors.success, fontWeight: '600', fontSize: 11 }}>
+                              {getBranchName(cajero.branch_id)}
+                            </Text>
+                          </View>
+                          <TouchableOpacity
+                            style={{
+                              backgroundColor: '#FEE2E2',
+                              paddingHorizontal: 10, paddingVertical: 4,
+                              borderRadius: 8,
+                            }}
+                            onPress={() => handleDegradar(cajero)}
+                          >
+                            <Text style={{ color: '#EF4444', fontWeight: '600', fontSize: 11 }}>
+                              Degradar
+                            </Text>
+                          </TouchableOpacity>
                         </View>
                       </View>
                     </View>
@@ -165,7 +206,7 @@ export const CreateCajeroScreen = () => {
 
               {/* Convertir Usuarios */}
               <View style={{ padding: 16, paddingTop: 8 }}>
-                <Text style={{ fontSize: 16, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
+                <Text style={{ fontSize: 16, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 }}>
                   Convertir Usuario en Cajero ({clients.length})
                 </Text>
               </View>
@@ -177,7 +218,7 @@ export const CreateCajeroScreen = () => {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={{
-                backgroundColor: theme.colors.white,
+                backgroundColor: colors.white,
                 borderRadius: 12,
                 padding: 14,
                 marginHorizontal: 16,
@@ -195,10 +236,10 @@ export const CreateCajeroScreen = () => {
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 15, fontWeight: '600', color: theme.colors.textPrimary }}>
+                  <Text style={{ fontSize: 15, fontWeight: '600', color: colors.textPrimary }}>
                     {item.full_name}
                   </Text>
-                  <Text style={{ fontSize: 12, color: theme.colors.textSecondary, marginTop: 2 }}>
+                  <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>
                     {item.email}
                   </Text>
                 </View>
@@ -215,7 +256,7 @@ export const CreateCajeroScreen = () => {
           ListEmptyComponent={
             <View style={{ alignItems: 'center', paddingTop: 40 }}>
               <Text style={{ fontSize: 48, marginBottom: 12 }}>👥</Text>
-              <Text style={{ color: theme.colors.textMuted }}>No hay usuarios disponibles</Text>
+              <Text style={{ color: colors.textMuted }}>No hay usuarios disponibles</Text>
             </View>
           }
         />
@@ -225,10 +266,10 @@ export const CreateCajeroScreen = () => {
       <Modal visible={showModal} transparent animationType="fade">
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
           <View style={{ backgroundColor: 'white', padding: 24, borderRadius: 16, width: '88%' }}>
-            <Text style={{ fontSize: 17, fontWeight: '700', marginBottom: 8, textAlign: 'center', color: theme.colors.textPrimary }}>
+            <Text style={{ fontSize: 17, fontWeight: '700', marginBottom: 8, textAlign: 'center', color: colors.textPrimary }}>
               Asignar Sucursal
             </Text>
-            <Text style={{ fontSize: 14, color: theme.colors.textSecondary, textAlign: 'center', marginBottom: 16 }}>
+            <Text style={{ fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginBottom: 16 }}>
               {selectedUser?.full_name}
             </Text>
 
@@ -241,16 +282,16 @@ export const CreateCajeroScreen = () => {
                   style={{
                     padding: 12,
                     borderRadius: 10,
-                    backgroundColor: selectedBranch.id === item.id ? '#FEE2E2' : theme.colors.borderLight,
+                    backgroundColor: selectedBranch.id === item.id ? '#FEE2E2' : colors.borderLight,
                     marginBottom: 6,
                     borderWidth: 1,
-                    borderColor: selectedBranch.id === item.id ? theme.colors.primary : 'transparent',
+                    borderColor: selectedBranch.id === item.id ? colors.primary : 'transparent',
                   }}
                   onPress={() => setSelectedBranch(item)}
                 >
                   <Text style={{ 
                     fontWeight: selectedBranch.id === item.id ? '700' : '500',
-                    color: selectedBranch.id === item.id ? theme.colors.primary : theme.colors.textPrimary,
+                    color: selectedBranch.id === item.id ? colors.primary : colors.textPrimary,
                     fontSize: 14,
                   }}>
                     {item.name}
@@ -261,13 +302,13 @@ export const CreateCajeroScreen = () => {
 
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
               <TouchableOpacity 
-                style={{ flex: 1, padding: 14, borderRadius: 10, backgroundColor: theme.colors.borderLight, alignItems: 'center' }} 
+                style={{ flex: 1, padding: 14, borderRadius: 10, backgroundColor: colors.borderLight, alignItems: 'center' }} 
                 onPress={() => { setShowModal(false); setSelectedUser(null); }}
               >
-                <Text style={{ color: theme.colors.textSecondary, fontWeight: '600' }}>Cancelar</Text>
+                <Text style={{ color: colors.textSecondary, fontWeight: '600' }}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={{ flex: 1, padding: 14, borderRadius: 10, backgroundColor: theme.colors.primary, alignItems: 'center' }}
+                style={{ flex: 1, padding: 14, borderRadius: 10, backgroundColor: colors.primary, alignItems: 'center' }}
                 onPress={handleConvertToCajero}
                 disabled={actionLoading}
               >
@@ -280,5 +321,3 @@ export const CreateCajeroScreen = () => {
     </SafeAreaView>
   );
 };
-
-

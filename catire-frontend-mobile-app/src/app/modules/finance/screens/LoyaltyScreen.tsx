@@ -4,12 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../../shared/store/auth.store';
 import { useLoyaltyStore, LoyaltyTransaction } from '../../../shared/store/loyalty.store';
-import { theme } from '../../../shared/styles/theme';
+import { useAppTheme } from '../../../shared/contexts/ThemeContext';
 
 export const LoyaltyScreen = () => {
   const navigation = useNavigation();
   const { user } = useAuthStore();
   const { getPoints, getTransactionHistory } = useLoyaltyStore();
+  const { colors } = useAppTheme();
   
   const userId = user?.id || 0;
   const points = getPoints(userId);
@@ -27,18 +28,18 @@ export const LoyaltyScreen = () => {
   const level = getLevel(points);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={{
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+        backgroundColor: colors.white,
+        borderBottomWidth: 1, borderBottomColor: colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
+          <Text style={{ fontSize: 16, color: colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginLeft: 12 }}>
           Puntos de Fidelidad
         </Text>
       </View>
@@ -78,29 +79,29 @@ export const LoyaltyScreen = () => {
 
             {/* How it works */}
             <View style={{
-              backgroundColor: theme.colors.white,
+              backgroundColor: colors.white,
               borderRadius: 12,
               padding: 16,
               marginBottom: 16,
             }}>
-              <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
+              <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 }}>
                 ¿Cómo funciona?
               </Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
                 <Text style={{ fontSize: 20, marginRight: 10 }}>{'\u{1F4B0}'}</Text>
-                <Text style={{ fontSize: 13, color: theme.colors.textSecondary, flex: 1 }}>
+                <Text style={{ fontSize: 13, color: colors.textSecondary, flex: 1 }}>
                   Gana 1 punto por cada $1 en compras
                 </Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
                 <Text style={{ fontSize: 20, marginRight: 10 }}>{'\u{1F3AF}'}</Text>
-                <Text style={{ fontSize: 13, color: theme.colors.textSecondary, flex: 1 }}>
+                <Text style={{ fontSize: 13, color: colors.textSecondary, flex: 1 }}>
                   Acumula puntos y sube de nivel
                 </Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Text style={{ fontSize: 20, marginRight: 10 }}>{'\u{1F381}'}</Text>
-                <Text style={{ fontSize: 13, color: theme.colors.textSecondary, flex: 1 }}>
+                <Text style={{ fontSize: 13, color: colors.textSecondary, flex: 1 }}>
                   Canjea por descuentos especiales
                 </Text>
               </View>
@@ -108,12 +109,12 @@ export const LoyaltyScreen = () => {
 
             {/* Levels */}
             <View style={{
-              backgroundColor: theme.colors.white,
+              backgroundColor: colors.white,
               borderRadius: 12,
               padding: 16,
               marginBottom: 16,
             }}>
-              <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
+              <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 }}>
                 Niveles
               </Text>
               {[
@@ -128,29 +129,29 @@ export const LoyaltyScreen = () => {
                   alignItems: 'center',
                   paddingVertical: 8,
                   borderBottomWidth: index < 4 ? 1 : 0,
-                  borderBottomColor: theme.colors.border,
+                  borderBottomColor: colors.border,
                 }}>
                   <Text style={{ fontSize: 24, marginRight: 12 }}>{lvl.emoji}</Text>
-                  <Text style={{ flex: 1, fontSize: 14, color: theme.colors.textPrimary }}>{lvl.name}</Text>
-                  <Text style={{ fontSize: 12, color: theme.colors.textMuted }}>{lvl.points} pts</Text>
+                  <Text style={{ flex: 1, fontSize: 14, color: colors.textPrimary }}>{lvl.name}</Text>
+                  <Text style={{ fontSize: 12, color: colors.textMuted }}>{lvl.points} pts</Text>
                 </View>
               ))}
             </View>
 
             {/* History Header */}
-            <Text style={{ fontSize: 16, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
+            <Text style={{ fontSize: 16, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 }}>
               Historial de Puntos
             </Text>
           </>
         }
         ListEmptyComponent={
           <View style={{ alignItems: 'center', paddingTop: 20 }}>
-            <Text style={{ fontSize: 14, color: theme.colors.textMuted }}>Sin transacciones aún</Text>
+            <Text style={{ fontSize: 14, color: colors.textMuted }}>Sin transacciones aún</Text>
           </View>
         }
         renderItem={({ item }) => (
           <View style={{
-            backgroundColor: theme.colors.white,
+            backgroundColor: colors.white,
             borderRadius: 12,
             padding: 14,
             marginBottom: 8,
@@ -166,10 +167,10 @@ export const LoyaltyScreen = () => {
               <Text style={{ fontSize: 18 }}>{item.type === 'earned' ? '\u2B06' : '\u2B07'}</Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 14, fontWeight: '600', color: theme.colors.textPrimary }}>
+              <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textPrimary }}>
                 {item.description}
               </Text>
-              <Text style={{ fontSize: 12, color: theme.colors.textMuted }}>
+              <Text style={{ fontSize: 12, color: colors.textMuted }}>
                 {new Date(item.created_at).toLocaleDateString()}
               </Text>
             </View>

@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Param,
@@ -26,7 +26,7 @@ export class OrdersController {
   @Get()
   @CheckPermission('Orders', 'read')
   async findAll(@Request() req: TypedRequest) {
-    return await this.service.findAll(req.headers?.authorization || '');
+    return await this.service.findAll(req.headers?.authorization || '', req.user);
   }
 
   @Post()
@@ -53,7 +53,7 @@ export class OrdersController {
     @Param('id') id: string,
     @Body() body: UpdateOrderDTO,
   ) {
-    return this.service.update(id, body as any, req.headers?.authorization || '');
+    return this.service.update(id, body as any, req.headers?.authorization || '', req.user);
   }
 
   @Delete(':id')

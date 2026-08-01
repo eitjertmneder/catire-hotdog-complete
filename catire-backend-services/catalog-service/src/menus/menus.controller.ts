@@ -22,21 +22,18 @@ export class MenusController {
   constructor(private readonly menusService: MenusService) {}
 
   @Post()
-  @UseGuards(PermissionGuard)
   @CheckPermission('Menus', 'create')
   create(@Body() createMenuDto: CreateMenuDTO) {
     return this.menusService.create(createMenuDto);
   }
 
   @Get()
-  @UseGuards(PermissionGuard)
   @CheckPermission('Menus', 'read')
   findAll() {
     return this.menusService.findAll();
   }
 
   @Get(':id')
-  @UseGuards(PermissionGuard)
   @CheckPermission('Menus', 'read')
   async findOne(@Param('id') id: number) {
     const menu = await this.menusService.findOne(id);
@@ -45,7 +42,6 @@ export class MenusController {
   }
 
   @Patch(':id')
-  @UseGuards(PermissionGuard)
   @CheckPermission('Menus', 'update')
   async update(@Param('id') id: number, @Body() updateMenuDto: UpdateMenuDTO) {
     const menu = await this.menusService.update(id, updateMenuDto);
@@ -54,7 +50,6 @@ export class MenusController {
   }
 
   @Delete(':id')
-  @UseGuards(PermissionGuard)
   @CheckPermission('Menus', 'delete')
   async remove(@Param('id') id: number): Promise<void> {
     const menu = await this.menusService.remove(id);

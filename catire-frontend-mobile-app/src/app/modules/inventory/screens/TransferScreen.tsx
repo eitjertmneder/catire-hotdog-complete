@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../../shared/store/auth.store';
 import { useBranchSyncStore, TransferRequest } from '../../../shared/store/branch-sync.store';
-import { theme } from '../../../shared/styles/theme';
+import { useAppTheme } from '../../../shared/contexts/ThemeContext';
 
 const EMOJI = {
   box: '\u{1F4E6}',
@@ -20,7 +20,6 @@ const EMOJI = {
 
 const BRANCHES = [
   { id: 1, name: 'Barrio Sucre' },
-  { id: 2, name: 'Carabobo' },
   { id: 3, name: 'El Malecón' },
   { id: 4, name: 'Prados del Este' },
   { id: 11, name: 'Barrio Obrero' },
@@ -34,6 +33,7 @@ export const TransferScreen = () => {
   const navigation = useNavigation();
   const { user } = useAuthStore();
   const { transferRequests, createTransferRequest, approveTransfer, completeTransfer, rejectTransfer, getTransferRequests } = useBranchSyncStore();
+  const { colors } = useAppTheme();
 
   const [showModal, setShowModal] = useState(false);
   const [fromBranch, setFromBranch] = useState(BRANCHES[0]);
@@ -88,7 +88,7 @@ export const TransferScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={{
         flexDirection: 'row', alignItems: 'center',
@@ -112,14 +112,14 @@ export const TransferScreen = () => {
               paddingHorizontal: 12,
               paddingVertical: 8,
               borderRadius: 16,
-              backgroundColor: filter === f ? theme.colors.primary : theme.colors.white,
+              backgroundColor: filter === f ? colors.primary : colors.white,
             }}
             onPress={() => setFilter(f)}
           >
             <Text style={{
               fontSize: 12,
               fontWeight: '600',
-              color: filter === f ? '#fff' : theme.colors.textSecondary,
+              color: filter === f ? '#fff' : colors.textSecondary,
             }}>
               {f === 'all' ? 'Todas' : f === 'pending' ? 'Pendientes' : f === 'approved' ? 'Aprobadas' : 'Completadas'}
             </Text>
@@ -130,7 +130,7 @@ export const TransferScreen = () => {
       {/* Create Button */}
       <TouchableOpacity
         style={{
-          backgroundColor: theme.colors.primary,
+          backgroundColor: colors.primary,
           marginHorizontal: 16,
           marginBottom: 16,
           paddingVertical: 14,
@@ -150,18 +150,18 @@ export const TransferScreen = () => {
         ListEmptyComponent={
           <View style={{ alignItems: 'center', paddingTop: 60 }}>
             <Text style={{ fontSize: 48, marginBottom: 12 }}>{EMOJI.empty}</Text>
-            <Text style={{ fontSize: 16, color: theme.colors.textMuted }}>No hay transferencias</Text>
+            <Text style={{ fontSize: 16, color: colors.textMuted }}>No hay transferencias</Text>
           </View>
         }
         renderItem={({ item }) => (
           <View style={{
-            backgroundColor: theme.colors.white,
+            backgroundColor: colors.white,
             borderRadius: 12,
             padding: 16,
             marginBottom: 10,
           }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-              <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary }}>
+              <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary }}>
                 #{item.id.slice(-6)}
               </Text>
               <View style={{
@@ -175,13 +175,13 @@ export const TransferScreen = () => {
                 </Text>
               </View>
             </View>
-            <Text style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: 4 }}>
+            <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 4 }}>
               De: {BRANCHES.find(b => b.id === item.from_branch_id)?.name || `Sucursal ${item.from_branch_id}`}
             </Text>
-            <Text style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: 8 }}>
+            <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 8 }}>
               Hacia: {BRANCHES.find(b => b.id === item.to_branch_id)?.name || `Sucursal ${item.to_branch_id}`}
             </Text>
-            <Text style={{ fontSize: 12, color: theme.colors.textMuted }}>
+            <Text style={{ fontSize: 12, color: colors.textMuted }}>
               {item.items.length} items \u2022 {new Date(item.created_at).toLocaleDateString()}
             </Text>
 
@@ -224,14 +224,14 @@ export const TransferScreen = () => {
       <Modal visible={showModal} transparent animationType="slide">
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
           <View style={{
-            backgroundColor: theme.colors.white,
+            backgroundColor: colors.white,
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
             padding: 20,
           }}>
             <Text style={{ fontSize: 18, fontWeight: '700', marginBottom: 16 }}>{EMOJI.transfer} Nueva Transferencia</Text>
 
-            <Text style={{ fontSize: 12, color: theme.colors.textMuted, marginBottom: 4 }}>DESDE SUCURSAL</Text>
+            <Text style={{ fontSize: 12, color: colors.textMuted, marginBottom: 4 }}>DESDE SUCURSAL</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
               {BRANCHES.slice(0, 5).map((b) => (
                 <TouchableOpacity
@@ -240,18 +240,18 @@ export const TransferScreen = () => {
                     paddingHorizontal: 12,
                     paddingVertical: 8,
                     borderRadius: 8,
-                    backgroundColor: fromBranch.id === b.id ? theme.colors.primary : theme.colors.background,
+                    backgroundColor: fromBranch.id === b.id ? colors.primary : colors.background,
                   }}
                   onPress={() => setFromBranch(b)}
                 >
-                  <Text style={{ fontSize: 12, color: fromBranch.id === b.id ? '#fff' : theme.colors.textPrimary }}>
+                  <Text style={{ fontSize: 12, color: fromBranch.id === b.id ? '#fff' : colors.textPrimary }}>
                     {b.name}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
 
-            <Text style={{ fontSize: 12, color: theme.colors.textMuted, marginBottom: 4 }}>HACIA SUCURSAL</Text>
+            <Text style={{ fontSize: 12, color: colors.textMuted, marginBottom: 4 }}>HACIA SUCURSAL</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
               {BRANCHES.filter(b => b.id !== fromBranch.id).slice(0, 5).map((b) => (
                 <TouchableOpacity
@@ -260,11 +260,11 @@ export const TransferScreen = () => {
                     paddingHorizontal: 12,
                     paddingVertical: 8,
                     borderRadius: 8,
-                    backgroundColor: toBranch.id === b.id ? theme.colors.primary : theme.colors.background,
+                    backgroundColor: toBranch.id === b.id ? colors.primary : colors.background,
                   }}
                   onPress={() => setToBranch(b)}
                 >
-                  <Text style={{ fontSize: 12, color: toBranch.id === b.id ? '#fff' : theme.colors.textPrimary }}>
+                  <Text style={{ fontSize: 12, color: toBranch.id === b.id ? '#fff' : colors.textPrimary }}>
                     {b.name}
                   </Text>
                 </TouchableOpacity>
@@ -274,14 +274,14 @@ export const TransferScreen = () => {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
               <Text style={{ fontSize: 14, fontWeight: '600' }}>ITEMS</Text>
               <TouchableOpacity onPress={() => setItems([...items, { name: '', quantity: '' }])}>
-                <Text style={{ color: theme.colors.primary, fontWeight: '600' }}>{EMOJI.add} Agregar</Text>
+                <Text style={{ color: colors.primary, fontWeight: '600' }}>{EMOJI.add} Agregar</Text>
               </TouchableOpacity>
             </View>
 
             {items.map((item, index) => (
               <View key={index} style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
                 <TextInput
-                  style={{ flex: 2, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 6, padding: 10, fontSize: 14 }}
+                  style={{ flex: 2, borderWidth: 1, borderColor: colors.border, borderRadius: 6, padding: 10, fontSize: 14 }}
                   placeholder="Ingrediente"
                   value={item.name}
                   onChangeText={(v) => {
@@ -291,7 +291,7 @@ export const TransferScreen = () => {
                   }}
                 />
                 <TextInput
-                  style={{ flex: 1, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 6, padding: 10, fontSize: 14, textAlign: 'center' }}
+                  style={{ flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 6, padding: 10, fontSize: 14, textAlign: 'center' }}
                   placeholder="Cant."
                   keyboardType="numeric"
                   value={item.quantity}
@@ -313,13 +313,13 @@ export const TransferScreen = () => {
 
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
               <TouchableOpacity
-                style={{ flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center', backgroundColor: theme.colors.borderLight }}
+                style={{ flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center', backgroundColor: colors.borderLight }}
                 onPress={() => setShowModal(false)}
               >
-                <Text style={{ color: theme.colors.textSecondary }}>Cancelar</Text>
+                <Text style={{ color: colors.textSecondary }}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={{ flex: 2, paddingVertical: 14, borderRadius: 12, alignItems: 'center', backgroundColor: theme.colors.primary }}
+                style={{ flex: 2, paddingVertical: 14, borderRadius: 12, alignItems: 'center', backgroundColor: colors.primary }}
                 onPress={handleCreate}
               >
                 <Text style={{ color: '#fff', fontWeight: '700' }}>Crear Solicitud</Text>

@@ -7,6 +7,20 @@ import { useCatalogStore } from '../../modules/catalog/store/catalog.store';
 import { useFinanceStore } from '../../modules/finance/store/finance.store';
 import { Platform } from 'react-native';
 import { useOrdersStore } from '../../modules/orders/store/orders.store';
+import { NotificationService } from '../services/notification.service';
+import { Api } from '../api/api';
+
+const apiClient = new Api();
+
+function logAudit(event_type: string, description: string, user?: User | null, metadata?: Record<string, any>, token?: string | null) {
+  apiClient.post('orders', 'audit', {
+    event_type,
+    user_id: user?.id,
+    user_name: user?.full_name,
+    description,
+    metadata,
+  }, token || undefined).catch(() => {});
+}
 
 type AuthState = {
   user?: User | null;
@@ -53,6 +67,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       if (res.error) {
         set({ error: res.message });
+        logAudit('LOGIN_FAILURE', `Failed login attempt for ${payload.email}`, null, { email: payload.email });
         return;
       }
 
@@ -61,6 +76,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       if (validateRes.error) {
         set({ error: validateRes.message });
+        logAudit('LOGIN_FAILURE', `Token validation failed for ${payload.email}`, null, { email: payload.email });
         return;
       }
 
@@ -72,6 +88,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       set({ token, user: validateRes.data });
+
+      logAudit('LOGIN_SUCCESS', `${validateRes.data?.full_name || payload.email} logged in`, validateRes.data, { email: payload.email }, token);
+
+      // Register for push notifications after login
+      NotificationService.registerForPushNotifications().then(pushToken => {
+        if (pushToken) console.log('Push token registered:', pushToken);
+      });
 
     } finally {
       set({ loading: false });
@@ -131,6 +154,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logout: async () => {
       if (Platform.OS !== 'web') {
         await SecureStore.deleteItemAsync('token');
+        // NO borramos user_email ni user_password - la huella biometrica los necesita para re-autenticar
       }
       useCatalogStore.persist.clearStorage();
       useOrdersStore.persist.clearStorage();

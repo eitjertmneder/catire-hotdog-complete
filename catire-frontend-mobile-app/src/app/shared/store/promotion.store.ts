@@ -16,7 +16,7 @@ export interface Promotion {
   valid_until: Date;
   active: boolean;
   applicable_products?: number[];
-  applicable_branches?: string[];
+  applicable_branches?: number[];  // Branch IDs (numbers)
   notes?: string;
   valid_days?: string;
 }
@@ -24,6 +24,9 @@ export interface Promotion {
 type PromotionState = {
   promotions: Promotion[];
   addPromotion: (promo: Omit<Promotion, 'id' | 'current_uses'>) => void;
+  updatePromotion: (id: string, updates: Partial<Promotion>) => void;
+  removePromotion: (id: string) => void;
+  togglePromotionActive: (id: string) => void;
   validatePromo: (code: string, total: number) => { valid: boolean; discount: number; message: string };
   applyPromo: (code: string) => void;
   getActivePromotions: () => Promotion[];
@@ -43,29 +46,49 @@ export const usePromotionStore = create<PromotionState>()(
         set((state) => ({ promotions: [...state.promotions, newPromo] }));
       },
 
+      updatePromotion: (id, updates) => {
+        set((state) => ({
+          promotions: state.promotions.map(p =>
+            p.id === id ? { ...p, ...updates } : p
+          ),
+        }));
+      },
+
+      removePromotion: (id) => {
+        set((state) => ({ promotions: state.promotions.filter(p => p.id !== id) }));
+      },
+
+      togglePromotionActive: (id) => {
+        set((state) => ({
+          promotions: state.promotions.map(p =>
+            p.id === id ? { ...p, active: !p.active } : p
+          ),
+        }));
+      },
+
       validatePromo: (code, total) => {
         const { promotions } = get();
         const promo = promotions.find(p => p.code.toUpperCase() === code.toUpperCase());
         
         if (!promo) {
-          return { valid: false, discount: 0, message: 'Código no válido' };
+          return { valid: false, discount: 0, message: 'Codigo no valido' };
         }
         
         if (!promo.active) {
-          return { valid: false, discount: 0, message: 'Promoción inactiva' };
+          return { valid: false, discount: 0, message: 'Promocion inactiva' };
         }
         
         const now = new Date();
         if (now < new Date(promo.valid_from) || now > new Date(promo.valid_until)) {
-          return { valid: false, discount: 0, message: 'Promoción expirada' };
+          return { valid: false, discount: 0, message: 'Promocion expirada' };
         }
         
         if (promo.current_uses >= promo.max_uses) {
-          return { valid: false, discount: 0, message: 'Promoción agotada' };
+          return { valid: false, discount: 0, message: 'Promocion agotada' };
         }
         
         if (total < promo.min_purchase) {
-          return { valid: false, discount: 0, message: `Compra mínima: $${promo.min_purchase}` };
+          return { valid: false, discount: 0, message: `Compra minima: $${promo.min_purchase}` };
         }
         
         let discount = 0;

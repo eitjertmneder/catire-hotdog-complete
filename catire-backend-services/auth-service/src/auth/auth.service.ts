@@ -8,8 +8,6 @@ import { User } from '@prisma/client';
 import { Payload } from './strategy/jwt.strategy';
 import { UserRole } from 'src/types/user';
 import axios from 'axios';
-// In-memory lockout tracker
-const loginAttempts = new Map<string, { count: number; lockedUntil: number }>();
 
 @Injectable()
 export class AuthService {
@@ -17,40 +15,72 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
     private prisma: PrismaService,
-  private securityService: SecurityService) {}
+    private securityService: SecurityService,
+  ) {}
 
-  private getLockoutInfo(email: string): { locked: boolean; remainingSeconds: number } {
-    const record = loginAttempts.get(email);
+  private async getLockoutInfo(email: string): Promise<{ locked: boolean; remainingSeconds: number }> {
+    const record = await this.prisma.loginAttempt.findUnique({ where: { email } });
     if (!record) return { locked: false, remainingSeconds: 0 };
 
-    const now = Date.now();
-    if (record.lockedUntil > now) {
-      return { locked: true, remainingSeconds: Math.ceil((record.lockedUntil - now) / 1000) };
+    // If there's a lockout time set
+    if (record.locked_until) {
+      // Check if lockout is still active
+      if (record.locked_until > new Date()) {
+        const remainingMs = record.locked_until.getTime() - Date.now();
+        return { locked: true, remainingSeconds: Math.ceil(remainingMs / 1000) };
+      }
+      // Lockout expired, clear record
+      await this.prisma.loginAttempt.delete({ where: { email } });
+      return { locked: false, remainingSeconds: 0 };
     }
 
-    // Lockout expired, clear record
-    loginAttempts.delete(email);
+    // No lockout set, but attempts exist - not locked
     return { locked: false, remainingSeconds: 0 };
   }
 
-  private recordFailedAttempt(email: string): { locked: boolean; remainingSeconds: number } {
-    const record = loginAttempts.get(email) || { count: 0, lockedUntil: 0 };
-    record.count++;
+  private async recordFailedAttempt(email: string): Promise<{ locked: boolean; remainingSeconds: number; attemptsLeft: number }> {
+    const existing = await this.prisma.loginAttempt.findUnique({ where: { email } });
+    const count = (existing?.count || 0) + 1;
+    const maxAttempts = 3;
+    const attemptsLeft = Math.max(0, maxAttempts - count);
 
-    if (record.count >= 3) {
-      // Calculate lockout duration: 25s for 3rd, increases with more attempts
-      const lockoutDuration = 25000 + (record.count - 3) * 10000;
-      record.lockedUntil = Date.now() + lockoutDuration;
-      loginAttempts.set(email, record);
-      return { locked: true, remainingSeconds: Math.ceil(lockoutDuration / 1000) };
+    // Progressive lockout durations (in milliseconds)
+    const lockoutDurations = [
+      5 * 60 * 1000,   // 1st lockout: 5 minutes
+      10 * 60 * 1000,  // 2nd lockout: 10 minutes
+      20 * 60 * 1000,  // 3rd lockout: 20 minutes
+    ];
+
+    // Count how many times this email has been locked before
+    const lockoutCount = existing?.locked_until ? (existing.count >= 3 ? Math.floor((existing.count - 3) / 3) + 1 : 0) : 0;
+
+    if (count >= maxAttempts) {
+      // Calculate which lockout level we're at
+      const lockoutIndex = Math.min(lockoutCount, lockoutDurations.length - 1);
+      const lockoutDuration = lockoutDurations[lockoutIndex];
+      const lockedUntil = new Date(Date.now() + lockoutDuration);
+
+      await this.prisma.loginAttempt.upsert({
+        where: { email },
+        update: { count, locked_until: lockedUntil },
+        create: { email, count, locked_until: lockedUntil },
+      });
+
+      const remainingSeconds = Math.ceil(lockoutDuration / 1000);
+      return { locked: true, remainingSeconds, attemptsLeft: 0 };
     }
 
-    loginAttempts.set(email, record);
-    return { locked: false, remainingSeconds: 0 };
+    await this.prisma.loginAttempt.upsert({
+      where: { email },
+      update: { count },
+      create: { email, count },
+    });
+
+    return { locked: false, remainingSeconds: 0, attemptsLeft };
   }
 
-  private clearAttempts(email: string) {
-    loginAttempts.delete(email);
+  async clearAttempts(email: string) {
+    await this.prisma.loginAttempt.deleteMany({ where: { email } });
   }
 
   async validateUser(email: string, password: string): Promise<User | null> {
@@ -58,11 +88,15 @@ export class AuthService {
       const user = await this.userService.findOneUser(email);
       if (!user) return null;
 
+      // Try with pepper first (new passwords)
+      const pepperMatch = await this.securityService.verifyPassword(password, user.password);
+      if (pepperMatch) return user;
+
+      // Fallback: plain bcrypt (legacy passwords from seed/old registrations)
       const bcrypt = await import('bcrypt');
-      const matchResult = await bcrypt.compare(String(password), String(user.password));
-      if (user && matchResult) {
-        return user;
-      }
+      const legacyMatch = await bcrypt.compare(String(password), String(user.password));
+      if (legacyMatch) return user;
+
       return null;
     } catch (error: unknown) {
       return null;
@@ -71,7 +105,7 @@ export class AuthService {
 
   async login(email: string, password: string): Promise<TokenPairDTO> {
     // Check lockout
-    const lockout = this.getLockoutInfo(email);
+    const lockout = await this.getLockoutInfo(email);
     if (lockout.locked) {
       throw new UnauthorizedException(
         `Cuenta bloqueada. Intenta de nuevo en ${lockout.remainingSeconds} segundos.`
@@ -80,20 +114,44 @@ export class AuthService {
 
     const user = await this.validateUser(email, password);
     if (!user) {
-      const lockoutResult = this.recordFailedAttempt(email);
+      const lockoutResult = await this.recordFailedAttempt(email);
       if (lockoutResult.locked) {
+        const minutes = Math.ceil(lockoutResult.remainingSeconds / 60);
+        // Log failed login to audit
+        try {
+          await axios.post('http://order-service:3000/audit', {
+            event_type: 'login_fail',
+            action: 'LOGIN_FAILURE',
+            description: `Intento de login fallido para ${email}. Cuenta bloqueada por ${minutes} minutos.`,
+            user_email: email,
+            severity: 'warning',
+          });
+        } catch (e) {
+          // Don't fail login if audit fails
+        }
         throw new UnauthorizedException(
-          `Demasiados intentos fallidos. Cuenta bloqueada por ${lockoutResult.remainingSeconds} segundos.`
+          `Demasiados intentos fallidos. Cuenta bloqueada por ${minutes} minutos.`
         );
       }
-      const attemptsLeft = 3 - (loginAttempts.get(email)?.count || 0);
+      // Log failed login to audit
+      try {
+        await axios.post('http://order-service:3000/audit', {
+          event_type: 'login_fail',
+          action: 'LOGIN_FAILURE',
+          description: `Intento de login fallido para ${email}. Quedan ${lockoutResult.attemptsLeft} intentos.`,
+          user_email: email,
+          severity: 'warning',
+        });
+      } catch (e) {
+        // Don't fail login if audit fails
+      }
       throw new UnauthorizedException(
-        `Correo o clave incorrectos. Te quedan ${attemptsLeft} intentos.`
+        `Correo o clave incorrectos. Te quedan ${lockoutResult.attemptsLeft} intento(s).`
       );
     }
 
     // Success - clear attempts
-    this.clearAttempts(email);
+    await this.clearAttempts(email);
     return await this.issueTokens(user);
   }
 
@@ -210,34 +268,34 @@ export class AuthService {
   }
 
   // Admin: unlock user by clearing their login attempts
-  unlockUser(email: string): boolean {
-    loginAttempts.delete(email);
+  async unlockUser(email: string): Promise<boolean> {
+    await this.prisma.loginAttempt.deleteMany({ where: { email } });
     return true;
   }
 
   // Get lockout status for a user
-  getLockoutStatus(email: string) {
+  async getLockoutStatus(email: string) {
     return this.getLockoutInfo(email);
   }
 
   // Get all locked users (admin)
-  getLockedUsers(): { email: string; remainingSeconds: number }[] {
-    const locked: { email: string; remainingSeconds: number }[] = [];
-    const now = Date.now();
-    loginAttempts.forEach((record, email) => {
-      if (record.lockedUntil > now) {
-        locked.push({
-          email,
-          remainingSeconds: Math.ceil((record.lockedUntil - now) / 1000),
-        });
-      }
+  async getLockedUsers(): Promise<{ email: string; remainingSeconds: number }[]> {
+    const now = new Date();
+    const lockedRecords = await this.prisma.loginAttempt.findMany({
+      where: {
+        locked_until: { gt: now },
+      },
     });
-    return locked;
+
+    return lockedRecords.map((record) => ({
+      email: record.email,
+      remainingSeconds: Math.ceil((record.locked_until!.getTime() - Date.now()) / 1000),
+    }));
   }
 
   async firebaseSync(firebaseToken: string) {
     // Verify Firebase token via Google's tokeninfo endpoint
-    const response = await fetch(https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=);
+    const response = await fetch('https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + firebaseToken);
     if (!response.ok) {
       throw new UnauthorizedException('Token de Firebase invalido');
     }
@@ -247,17 +305,20 @@ export class AuthService {
     const firebaseUid = payload.sub;
 
     // Find or create user
-    let user = await this.prisma.user.findFirst({ where: { email } });
+    let user = await this.prisma.user.findFirst({ where: { email, deleted_at: null } });
     if (!user) {
+      const clientRole = await this.prisma.role.findUnique({ where: { name: 'client' } });
       user = await this.prisma.user.create({
         data: {
           email,
           full_name: name,
           password: '',
-          role_id: 4, // client role
+          role_id: clientRole?.id ?? 1,
           provider: 'firebase',
           firebase_uid: firebaseUid,
           avatar_url: payload.picture || null,
+          dni: 0,
+          phone_1: '',
         },
       });
     } else if (!user.firebase_uid) {
@@ -269,8 +330,8 @@ export class AuthService {
     }
 
     // Generate our own JWT
-    const tokens = await this.generateTokens(user.id, user.email, user.role_id);
-    return { access_token: tokens.accessToken, user };
+    const tokens = await this.issueTokens(user);
+    return { access_token: tokens.access_token, user };
   }}
 
 

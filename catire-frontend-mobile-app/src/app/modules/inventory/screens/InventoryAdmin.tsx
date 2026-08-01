@@ -18,8 +18,7 @@ const EMOJI = {
 
 const BRANCHES = [
   { id: 1, name: 'Barrio Sucre' },
-  { id: 2, name: 'Carabobo' },
-  { id: 3, name: 'El Malec\u00F3n' },
+    { id: 3, name: 'El Malec\u00F3n' },
   { id: 4, name: 'Prados del Este' },
   { id: 11, name: 'Barrio Obrero' },
   { id: 12, name: 'La Asogata' },

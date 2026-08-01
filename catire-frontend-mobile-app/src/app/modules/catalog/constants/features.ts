@@ -24,7 +24,7 @@ export const FEATURE_CONFIG: Record<string, FeatureOption[]> = {
       title: 'TAMAÑO',
       icon: '📏',
       isMulti: false,
-      options: ['Pan mini', 'Normal']
+      options: ['Pan pequeno', 'Pan normal']
     },
     {
       tag: 'TOPPINGS',
@@ -38,7 +38,7 @@ export const FEATURE_CONFIG: Record<string, FeatureOption[]> = {
       title: 'TIPO DE SALCHICHA',
       icon: '⭐',
       isMulti: false,
-      options: ['Mini Frankfurt', 'Catirota', 'CatireHot', 'Chicken', 'Chesse', 'Salchicatire', 'Chistorra', 'Uruguayo', 'Antioqueño', 'Choricatire', 'Chori Frito']
+      options: ['Mini Frankfurt', 'Catirota', 'Catire Hot', 'Chicken', 'Cheese Salchicatire', 'Salchicatire', 'Chistorra', 'Urugayo', 'Antioqueno', 'Choricatire', 'Chorifrito']
     },
     {
       tag: 'SAUCE',
@@ -98,7 +98,7 @@ export const FEATURE_CONFIG: Record<string, FeatureOption[]> = {
       title: 'TIPO DE SALCHICHA',
       icon: '⭐',
       isMulti: true,
-      options: ['Catirota', 'CatireHot', 'Chicken', 'Chesse', 'Salchicatire', 'Chistorra', 'Uruguayo', 'Antioqueño', 'Choricatire', 'Chori Frito']
+      options: ['Catirota', 'Catire Hot', 'Chicken', 'Cheese Salchicatire', 'Salchicatire', 'Chistorra', 'Urugayo', 'Antioqueno', 'Choricatire', 'Chorifrito']
     },
     {
       tag: 'SAUCE',

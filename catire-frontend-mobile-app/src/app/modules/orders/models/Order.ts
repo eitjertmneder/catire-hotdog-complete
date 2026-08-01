@@ -2,9 +2,9 @@ import { NameTag, OrderStatusType } from "../../../shared/api/enums";
 import { User } from "../../auth/models/User";
 
 export interface OrderAddress {
-  street: number;
-  avenue: number;
-  house_number: number;
+  street: string;
+  avenue: string;
+  house_number: string;
   reference?: string;
 }
 

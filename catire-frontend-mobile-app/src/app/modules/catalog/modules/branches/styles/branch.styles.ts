@@ -1,10 +1,10 @@
 import { StyleSheet, Dimensions } from 'react-native';
-import { theme } from '../../../../../shared/styles/theme';
+import { lightTheme } from '../../../../../shared/styles/theme';
 
-export const styles = StyleSheet.create({
+export const getStyles = (colors: typeof lightTheme.colors) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: colors.background,
   },
   container: {
     flex: 1,
@@ -19,19 +19,19 @@ export const styles = StyleSheet.create({
   headerLoading: {
     fontSize: 22,
     fontWeight: '700',
-    color: theme.colors.textPrimary,
+    color: colors.textPrimary,
     textAlign: 'center',
     marginBottom: 16,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: '800',
-    color: theme.colors.textPrimary,
+    color: colors.textPrimary,
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: theme.colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 20,
   },
   
@@ -39,7 +39,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: theme.colors.white,
+    backgroundColor: colors.white,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -52,7 +52,7 @@ export const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: theme.colors.white,
+    backgroundColor: colors.white,
     borderRadius: 14,
     padding: 20,
     marginBottom: 12,
@@ -65,38 +65,38 @@ export const styles = StyleSheet.create({
   branchName: {
     fontSize: 18,
     fontWeight: '700',
-    color: theme.colors.textPrimary,
+    color: colors.textPrimary,
     marginBottom: 4,
   },
   branchInfo: {
     fontSize: 13,
-    color: theme.colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 14,
   },
 
   buttonPrimary: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: 10,
     paddingVertical: 12,
     alignItems: 'center',
   },
   buttonSecondary: {
-    backgroundColor: theme.colors.white,
+    backgroundColor: colors.white,
     borderRadius: 10,
     paddingVertical: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: colors.border,
   },
   buttonTextPrimary: {
-    color: theme.colors.white,
+    color: colors.white,
     fontWeight: '700',
     fontSize: 14,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   buttonTextSecondary: {
-    color: theme.colors.textPrimary,
+    color: colors.textPrimary,
     fontWeight: '600',
     fontSize: 14,
     textTransform: 'uppercase',

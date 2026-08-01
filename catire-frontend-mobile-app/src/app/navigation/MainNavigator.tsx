@@ -2,13 +2,14 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AuthScreen from '../modules/auth/modules/auth/screens/AuthScreen';
-import { FirebaseLoginScreen } from '../modules/auth/modules/auth/screens/FirebaseLoginScreen';
+import { GoogleSignInScreen } from '../modules/auth/modules/auth/screens/GoogleSignInScreen';
 import BranchList from '../modules/catalog/modules/branches/screens/BranchList';
 import { OrdersScreen } from '../modules/orders/modules/orders/screens/OrdersScreen';
 import BranchesMap from '../modules/catalog/modules/branches/screens/BranchesMap';
 import ProductDetails from '../modules/catalog/modules/products/screens/ProductDetails';
 import PurchasesList from '../modules/finance/modules/purchases/screens/PurchasesList';
 import { useAuthStore } from '../shared/store/auth.store';
+import { useOnboardingStore } from '../shared/store/onboarding.store';
 import { MenuList } from '../modules/catalog/modules/menu/screens/MenuList';
 import { Navbar } from '../shared/components/Navbar';
 import { CartScreen } from '../modules/catalog/modules/products/screens/CartScreen';
@@ -57,130 +58,133 @@ import { DeliveryPartnersScreen } from '../shared/screens/DeliveryPartnersScreen
 import { SupplierScreen } from '../shared/screens/SupplierScreen';
 import { GamificationScreen } from '../shared/screens/GamificationScreen';
 import { TwoFAScreen } from '../shared/screens/TwoFAScreen';
-
 import { EmailTemplatesScreen } from '../shared/screens/EmailTemplatesScreen';
 import { SessionsScreen } from '../shared/screens/SessionsScreen';
 import { AuditDashboardScreen } from '../shared/screens/AuditDashboardScreen';
 import { PDFReportsScreen } from '../shared/screens/PDFReportsScreen';
 import { GoogleMapsScreen } from '../shared/screens/GoogleMapsScreen';
 import { PaymentsScreen } from '../shared/screens/PaymentsScreen';
+import { TableManagementScreen } from '../modules/inventory/screens/TableManagementScreen';
+import { AdminReviewsScreen } from '../shared/screens/AdminReviewsScreen';
+import { MyReviewsScreen } from '../shared/screens/MyReviewsScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function MainNavigator() {
   const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
+  const hasCompletedOnboarding = useOnboardingStore((s) => s.hasCompletedOnboarding);
 
   return (
     <NavigationContainer>
       <Stack.Navigator>
         {!token ? (
           <>
-            <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
+            {!hasCompletedOnboarding && (
+              <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
+            )}
             <Stack.Screen name="Login" component={AuthScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="FirebaseLogin" component={FirebaseLoginScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="GoogleSignIn" component={GoogleSignInScreen} options={{ headerShown: false }} />
           </>
         ) : (
           <Stack.Group screenOptions={{ header: () => <Navbar /> }}>
-            {
-              user?.role.name === 'client' && (
-                <>
-                  <Stack.Screen name="BranchesMap" component={BranchesMap} />
-                  <Stack.Screen name="Branches" component={BranchList} />
-                  <Stack.Screen name="Home" component={HomeScreen} />
-                  <Stack.Screen name="Menu" component={MenuScreen} />
-                  <Stack.Screen name="BuildOrder" component={BuildOrderScreen} />
-                  <Stack.Screen name="MenuList" component={MenuList} />
-                  <Stack.Screen name="ProductDetails" component={ProductDetails} />
-                  <Stack.Screen name="VoiceOrder" component={VoiceOrderScreen} />
-                  <Stack.Screen name="Cart" component={CartScreen} />
-                </>
-              )
-            }
+            {/* Client screens */}
+            {user?.role.name === 'client' && (
+              <>
+                <Stack.Screen name="BranchesMap" component={BranchesMap} />
+                <Stack.Screen name="Branches" component={BranchList} />
+                <Stack.Screen name="Home" component={HomeScreen} />
+                <Stack.Screen name="Menu" component={MenuScreen} />
+                <Stack.Screen name="BuildOrder" component={BuildOrderScreen} />
+                <Stack.Screen name="MenuList" component={MenuList} />
+                <Stack.Screen name="ProductDetails" component={ProductDetails} />
+                <Stack.Screen name="VoiceOrder" component={VoiceOrderScreen} />
+                <Stack.Screen name="Cart" component={CartScreen} />
+              </>
+            )}
 
-            {
-              user?.role.name === 'employee' && (
-                <>
-                  <Stack.Screen name="EmployeeOrders" component={EmployeeOrdersScreen} />
-                  <Stack.Screen name="Shift" component={ShiftScreen} />
-                  <Stack.Screen name="InventoryAdmin" component={InventoryAdmin} />
-                  <Stack.Screen name="EmployeeMenuAdmin" component={MenuAdmin} />
-                  <Stack.Screen name="ProductsAdmin" component={ProductsAdmin} />
-                  <Stack.Screen name="MenuForm" component={MenuForm} />
-                  <Stack.Screen name="ProductForm" component={ProductForm} />
-                </>
-              )
-            }
+            {/* Employee screens */}
+            {user?.role.name === 'employee' && (
+              <>
+                <Stack.Screen name="EmployeeOrders" component={EmployeeOrdersScreen} />
+                <Stack.Screen name="Shift" component={ShiftScreen} />
+                <Stack.Screen name="InventoryAdmin" component={InventoryAdmin} />
+                <Stack.Screen name="EmployeeMenuAdmin" component={MenuAdmin} />
+                <Stack.Screen name="ProductsAdmin" component={ProductsAdmin} />
+                <Stack.Screen name="ReportsScreen" component={ReportsScreen} />
+                <Stack.Screen name="MenuForm" component={MenuForm} />
+                <Stack.Screen name="ProductForm" component={ProductForm} />
+              </>
+            )}
 
-            {
-              user?.role.name === 'admin' && (
-                <>
-                  <Stack.Screen name="AdminScreen" component={AdminScreen} />
+            {/* Admin screens */}
+            {user?.role.name === 'admin' && (
+              <>
+                <Stack.Screen name="AdminScreen" component={AdminScreen} />
+                <Stack.Screen name="EmployeeMenuAdmin" component={MenuAdmin} />
+                <Stack.Screen name="MenuAdmin" component={MenuAdmin} />
+                <Stack.Screen name="BranchAdmin" component={BranchAdmin} />
+                <Stack.Screen name="ProductsAdmin" component={ProductsAdmin} />
+                <Stack.Screen name="OrdersAdmin" component={OrdersAdmin} />
+                <Stack.Screen name="UsersAdmin" component={UsersAdmin} />
+                <Stack.Screen name="CreateCajero" component={CreateCajeroScreen} />
+                <Stack.Screen name="InventoryAdmin" component={InventoryAdmin} />
+                <Stack.Screen name="NightlyClosure" component={NightlyClosureScreen} />
+                <Stack.Screen name="ReportsScreen" component={ReportsScreen} />
+                <Stack.Screen name="Dashboard" component={DashboardScreen} />
+                <Stack.Screen name="Analytics" component={AnalyticsScreen} />
+                <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
+                <Stack.Screen name="Recipes" component={RecipesScreen} />
+                <Stack.Screen name="AdvancedReports" component={AdvancedReportsScreen} />
+                <Stack.Screen name="EmployeeShift" component={EmployeeShiftScreen} />
+                <Stack.Screen name="OrderTracking" component={OrderTrackingScreen} />
+                <Stack.Screen name="FeedbackAnalytics" component={FeedbackAnalyticsScreen} />
+                <Stack.Screen name="Transfers" component={TransferScreen} />
+                <Stack.Screen name="KitchenDisplay" component={KitchenDisplayScreen} />
+                <Stack.Screen name="DeliveryPartners" component={DeliveryPartnersScreen} />
+                <Stack.Screen name="Suppliers" component={SupplierScreen} />
+                <Stack.Screen name="Gamification" component={GamificationScreen} />
+                <Stack.Screen name="TwoFA" component={TwoFAScreen} />
+                <Stack.Screen name="Settings" component={SettingsScreen} />
+                <Stack.Screen name="Referrals" component={ReferralsScreen} />
+                <Stack.Screen name="CurrencyRates" component={CurrencyRatesScreen} />
+                <Stack.Screen name="PaymentConfig" component={PaymentConfigScreen} />
+                <Stack.Screen name="EmailTemplates" component={EmailTemplatesScreen} />
+                <Stack.Screen name="Sessions" component={SessionsScreen} />
+                <Stack.Screen name="AuditLogs" component={AuditDashboardScreen} />
+                <Stack.Screen name="PDFReports" component={PDFReportsScreen} />
+                <Stack.Screen name="GoogleMaps" component={GoogleMapsScreen} />
+                <Stack.Screen name="Payments" component={PaymentsScreen} />
+                <Stack.Screen name="MenuForm" component={MenuForm} />
+                <Stack.Screen name="BranchForm" component={BranchForm} />
+                <Stack.Screen name="ProductForm" component={ProductForm} />
+                <Stack.Screen name="UserForm" component={UserForm} />
+                <Stack.Screen name="TableManagement" component={TableManagementScreen} />
+                <Stack.Screen name="AdminReviews" component={AdminReviewsScreen} />
+              </>
+            )}
 
-                  <Stack.Screen name="EmployeeMenuAdmin" component={MenuAdmin} />
-                  <Stack.Screen name="MenuAdmin" component={MenuAdmin} />
-                  <Stack.Screen name="BranchAdmin" component={BranchAdmin} />
-                  <Stack.Screen name="ProductsAdmin" component={ProductsAdmin} />
-                  <Stack.Screen name="OrdersAdmin" component={OrdersAdmin} />
-                  <Stack.Screen name="UsersAdmin" component={UsersAdmin} />
-                  <Stack.Screen name="CreateCajero" component={CreateCajeroScreen} />
-                  <Stack.Screen name="InventoryAdmin" component={InventoryAdmin} />
-                  <Stack.Screen name="NightlyClosure" component={NightlyClosureScreen} />
-                  <Stack.Screen name="ReportsScreen" component={ReportsScreen} />
-                  <Stack.Screen name="Dashboard" component={DashboardScreen} />
-                  <Stack.Screen name="Analytics" component={AnalyticsScreen} />
-                  <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
-                  <Stack.Screen name="Recipes" component={RecipesScreen} />
-                  <Stack.Screen name="AdvancedReports" component={AdvancedReportsScreen} />
-                  <Stack.Screen name="EmployeeShift" component={EmployeeShiftScreen} />
-                  <Stack.Screen name="OrderTracking" component={OrderTrackingScreen} />
-                  <Stack.Screen name="FeedbackAnalytics" component={FeedbackAnalyticsScreen} />
-                  <Stack.Screen name="Transfers" component={TransferScreen} />
-                  <Stack.Screen name="KitchenDisplay" component={KitchenDisplayScreen} />
-                  <Stack.Screen name="DeliveryPartners" component={DeliveryPartnersScreen} />
-                  <Stack.Screen name="Suppliers" component={SupplierScreen} />
-                  <Stack.Screen name="Gamification" component={GamificationScreen} />
-                  <Stack.Screen name="TwoFA" component={TwoFAScreen} />
-                  <Stack.Screen name="Settings" component={SettingsScreen} />
-                  <Stack.Screen name="Referrals" component={ReferralsScreen} />
-                  <Stack.Screen name="CurrencyRates" component={CurrencyRatesScreen} />
-                  <Stack.Screen name="PaymentConfig" component={PaymentConfigScreen} />
-        <Stack.Screen name="EmailTemplates" component={EmailTemplatesScreen} />
-        <Stack.Screen name="Sessions" component={SessionsScreen} />
-        <Stack.Screen name="AuditLogs" component={AuditDashboardScreen} />
-        <Stack.Screen name="PDFReports" component={PDFReportsScreen} />
-        <Stack.Screen name="GoogleMaps" component={GoogleMapsScreen} />
-        <Stack.Screen name="Payments" component={PaymentsScreen} />
+            {/* Guest screens */}
+            {user?.role.name === 'guest' && (
+              <>
+                <Stack.Screen name="BranchesMap" component={BranchesMap} />
+                <Stack.Screen name="Branches" component={BranchList} />
+                <Stack.Screen name="Home" component={HomeScreen} />
+                <Stack.Screen name="Menu" component={MenuScreen} />
+                <Stack.Screen name="BuildOrder" component={BuildOrderScreen} />
+                <Stack.Screen name="MenuList" component={MenuList} />
+                <Stack.Screen name="ProductDetails" component={ProductDetails} />
+                <Stack.Screen name="Cart" component={CartScreen} />
+              </>
+            )}
 
-
-                  <Stack.Screen name="MenuForm" component={MenuForm} />
-                  <Stack.Screen name="BranchForm" component={BranchForm} />
-                  <Stack.Screen name="ProductForm" component={ProductForm} />
-                  <Stack.Screen name="UserForm" component={UserForm} />
-                </>
-              )
-            }
-            
-            
-            {
-              user?.role.name === 'guest' && (
-                <>
-                  <Stack.Screen name="BranchesMap" component={BranchesMap} />
-                  <Stack.Screen name="Branches" component={BranchList} />
-                  <Stack.Screen name="Home" component={HomeScreen} />
-                  <Stack.Screen name="Menu" component={MenuScreen} />
-                  <Stack.Screen name="BuildOrder" component={BuildOrderScreen} />
-                  <Stack.Screen name="MenuList" component={MenuList} />
-                  <Stack.Screen name="ProductDetails" component={ProductDetails} />
-                  <Stack.Screen name="Cart" component={CartScreen} />
-                </>
-              )
-            }
+            {/* Shared screens */}
             <Stack.Screen name="Chat" component={ChatScreen} />
-                  <Stack.Screen name="Review" component={ReviewScreen} />
-                  <Stack.Screen name="Promotions" component={PromotionsScreen} />
-                  <Stack.Screen name="Loyalty" component={LoyaltyScreen} />
-                  <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="Review" component={ReviewScreen} />
+            <Stack.Screen name="MyReviews" component={MyReviewsScreen} />
+            <Stack.Screen name="Promotions" component={PromotionsScreen} />
+            <Stack.Screen name="Loyalty" component={LoyaltyScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen name="Orders" component={OrdersScreen} />
             <Stack.Screen name="OrderDetails" component={OrderDetails} />
             <Stack.Screen name="Purchases" component={PurchasesList} />
@@ -190,40 +194,3 @@ export default function MainNavigator() {
     </NavigationContainer>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

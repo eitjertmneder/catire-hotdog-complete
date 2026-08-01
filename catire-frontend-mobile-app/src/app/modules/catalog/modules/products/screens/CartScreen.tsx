@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, TextInput, Switch, Alert, Modal, ActivityIndicator, Image, ScrollView
 } from 'react-native';
@@ -10,7 +10,7 @@ import { useOrdersStore } from '../../../../orders/store/orders.store';
 import { useAuthStore } from '../../../../../shared/store/auth.store';
 import { useExchangeRateStore } from '../../../../../shared/store/exchange-rate.store';
 import financeApi from '../../../../finance/api/finance.api';
-import { styles } from '../styles/cart.styles';
+import { createCartStyles } from '../styles/cart.styles';
 import { CartItemAccordion } from '../components/CartItemAccordion';
 import { useAppTheme } from '../../../../../shared/contexts/ThemeContext';
 
@@ -24,6 +24,7 @@ export const CartScreen = () => {
 
   const [isDelivery, setIsDelivery] = useState(false);
   const { isDark, colors } = useAppTheme();
+  const styles = useMemo(() => createCartStyles(colors), [colors]);
   const [notes, setNotes] = useState('');
   const [address, setAddress] = useState({
     street: '', avenue: '', house_number: '', reference: ''

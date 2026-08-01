@@ -18,6 +18,7 @@ async function main() {
         Users: ['update'],
         Roles: [],
         Ingredients: ['read'],
+        Reviews: ['create', 'read'],
       },
       employee: {
         Menus: ['create', 'read', 'update', 'delete'],
@@ -28,6 +29,7 @@ async function main() {
         Users: ['read'],
         Roles: [],
         Ingredients: ['read'],
+        Reviews: ['read'],
       },
       admin: {
         Branches: ['create', 'read', 'update', 'delete'],
@@ -38,6 +40,7 @@ async function main() {
         Orders: ['create', 'read', 'update', 'delete'],
         Purchases: ['create', 'read', 'update', 'delete'],
         Ingredients: ['create', 'read', 'update', 'delete'],
+        Reviews: ['create', 'read', 'delete'],
       },
     };
 

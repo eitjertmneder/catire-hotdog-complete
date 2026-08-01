@@ -57,7 +57,7 @@ export class CreateUserDto {
   @IsString({ message: 'password: La clave debe ser texto' })
   @IsNotEmpty({ message: 'password: La clave es requerida' })
   @MinLength(8, {
-    message: 'password: La clave debe tener un mínimo de 6 caracteres.',
+    message: 'password: La clave debe tener un minimo de 8 caracteres.',
   })
   password!: string;
 }

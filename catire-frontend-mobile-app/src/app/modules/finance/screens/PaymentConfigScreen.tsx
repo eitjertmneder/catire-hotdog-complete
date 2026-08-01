@@ -4,11 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../../shared/store/auth.store';
 import financeApi from '../api/finance.api';
-import { theme } from '../../../shared/styles/theme';
+import { useAppTheme } from '../../../shared/contexts/ThemeContext';
 
 export const PaymentConfigScreen = () => {
   const navigation = useNavigation();
   const { token } = useAuthStore();
+  const { colors } = useAppTheme();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [config, setConfig] = useState<any>(null);
@@ -60,25 +61,25 @@ export const PaymentConfigScreen = () => {
 
   if (loading) {
     return (
-      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background }}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={{
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+        backgroundColor: colors.white,
+        borderBottomWidth: 1, borderBottomColor: colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>← Volver</Text>
+          <Text style={{ fontSize: 16, color: colors.primary, fontWeight: '600' }}>← Volver</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginLeft: 12 }}>
           💳 Datos de Pago Móvil
         </Text>
       </View>
@@ -87,33 +88,33 @@ export const PaymentConfigScreen = () => {
         {/* Vista actual */}
         {config && !isEditing && (
           <View style={{
-            backgroundColor: theme.colors.white,
+            backgroundColor: colors.white,
             borderRadius: 16, padding: 20,
             marginBottom: 20,
             shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
           }}>
-            <Text style={{ fontSize: 16, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 16 }}>
+            <Text style={{ fontSize: 16, fontWeight: '700', color: colors.textPrimary, marginBottom: 16 }}>
               Datos Actuales
             </Text>
 
             <View style={{ marginBottom: 12 }}>
-              <Text style={{ fontSize: 11, color: theme.colors.textMuted, textTransform: 'uppercase' }}>Titular</Text>
-              <Text style={{ fontSize: 16, fontWeight: '600', color: theme.colors.textPrimary }}>{config.holder_name}</Text>
+              <Text style={{ fontSize: 11, color: colors.textMuted, textTransform: 'uppercase' }}>Titular</Text>
+              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.textPrimary }}>{config.holder_name}</Text>
             </View>
 
             <View style={{ marginBottom: 12 }}>
-              <Text style={{ fontSize: 11, color: theme.colors.textMuted, textTransform: 'uppercase' }}>Cédula</Text>
-              <Text style={{ fontSize: 16, fontWeight: '600', color: theme.colors.textPrimary }}>{config.holder_dni}</Text>
+              <Text style={{ fontSize: 11, color: colors.textMuted, textTransform: 'uppercase' }}>Cédula</Text>
+              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.textPrimary }}>{config.holder_dni}</Text>
             </View>
 
             <View style={{ marginBottom: 12 }}>
-              <Text style={{ fontSize: 11, color: theme.colors.textMuted, textTransform: 'uppercase' }}>Teléfono</Text>
-              <Text style={{ fontSize: 16, fontWeight: '600', color: theme.colors.textPrimary }}>{config.phone}</Text>
+              <Text style={{ fontSize: 11, color: colors.textMuted, textTransform: 'uppercase' }}>Teléfono</Text>
+              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.textPrimary }}>{config.phone}</Text>
             </View>
 
             <View style={{ marginBottom: 20 }}>
-              <Text style={{ fontSize: 11, color: theme.colors.textMuted, textTransform: 'uppercase' }}>Banco</Text>
-              <Text style={{ fontSize: 16, fontWeight: '600', color: theme.colors.textPrimary }}>{config.bank}</Text>
+              <Text style={{ fontSize: 11, color: colors.textMuted, textTransform: 'uppercase' }}>Banco</Text>
+              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.textPrimary }}>{config.bank}</Text>
             </View>
 
             <TouchableOpacity
@@ -123,7 +124,7 @@ export const PaymentConfigScreen = () => {
               }}
               onPress={() => setIsEditing(true)}
             >
-              <Text style={{ color: theme.colors.primary, fontWeight: '700', fontSize: 15 }}>Editar Datos</Text>
+              <Text style={{ color: colors.primary, fontWeight: '700', fontSize: 15 }}>Editar Datos</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -131,12 +132,12 @@ export const PaymentConfigScreen = () => {
         {/* Formulario de edición */}
         {(!config || isEditing) && (
           <View style={{
-            backgroundColor: theme.colors.white,
+            backgroundColor: colors.white,
             borderRadius: 16, padding: 20,
             marginBottom: 20,
             shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
           }}>
-            <Text style={{ fontSize: 16, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 16 }}>
+            <Text style={{ fontSize: 16, fontWeight: '700', color: colors.textPrimary, marginBottom: 16 }}>
               {config ? 'Editar Datos de Pago' : 'Configurar Datos de Pago'}
             </Text>
 
@@ -147,14 +148,14 @@ export const PaymentConfigScreen = () => {
               { key: 'bank', label: 'Banco', placeholder: 'Ej: Vicentenario' },
             ].map(({ key, label, placeholder }) => (
               <View key={key} style={{ marginBottom: 16 }}>
-                <Text style={{ fontSize: 12, fontWeight: '700', color: theme.colors.textMuted, marginBottom: 6, textTransform: 'uppercase' }}>
+                <Text style={{ fontSize: 12, fontWeight: '700', color: colors.textMuted, marginBottom: 6, textTransform: 'uppercase' }}>
                   {label}
                 </Text>
                 <TextInput
                   style={{
-                    borderWidth: 1, borderColor: theme.colors.border, borderRadius: 10,
+                    borderWidth: 1, borderColor: colors.border, borderRadius: 10,
                     padding: 14, fontSize: 15,
-                    color: theme.colors.textPrimary, backgroundColor: theme.colors.background,
+                    color: colors.textPrimary, backgroundColor: colors.background,
                   }}
                   placeholder={placeholder}
                   placeholderTextColor="#9E9E9E"
@@ -169,17 +170,17 @@ export const PaymentConfigScreen = () => {
                 <TouchableOpacity
                   style={{
                     flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center',
-                    backgroundColor: theme.colors.borderLight,
+                    backgroundColor: colors.borderLight,
                   }}
                   onPress={() => setIsEditing(false)}
                 >
-                  <Text style={{ color: theme.colors.textSecondary, fontWeight: '600', fontSize: 15 }}>Cancelar</Text>
+                  <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: 15 }}>Cancelar</Text>
                 </TouchableOpacity>
               )}
               <TouchableOpacity
                 style={{
                   flex: 2, paddingVertical: 14, borderRadius: 12, alignItems: 'center',
-                  backgroundColor: theme.colors.primary,
+                  backgroundColor: colors.primary,
                   opacity: saving ? 0.7 : 1,
                 }}
                 onPress={handleSave}

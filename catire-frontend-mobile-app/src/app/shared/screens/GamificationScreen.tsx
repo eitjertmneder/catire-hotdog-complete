@@ -9,6 +9,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useAppTheme } from '../contexts/ThemeContext';
 
 interface Challenge {
   id: string;
@@ -34,6 +35,7 @@ const BRANCH_OPTIONS = [
 
 export const GamificationScreen = () => {
   const navigation = useNavigation();
+  const { colors } = useAppTheme();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [name, setName] = useState('');
@@ -71,7 +73,7 @@ export const GamificationScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F5F5' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View
         style={{
@@ -79,7 +81,7 @@ export const GamificationScreen = () => {
           alignItems: 'center',
           paddingHorizontal: 16,
           paddingVertical: 14,
-          backgroundColor: '#EC3137',
+          backgroundColor: colors.primary,
         }}
       >
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 12 }}>
@@ -95,7 +97,7 @@ export const GamificationScreen = () => {
         <TouchableOpacity
           onPress={() => setModalVisible(true)}
           style={{
-            backgroundColor: '#EC3137',
+            backgroundColor: colors.primary,
             borderRadius: 12,
             paddingVertical: 14,
             alignItems: 'center',
@@ -111,7 +113,7 @@ export const GamificationScreen = () => {
         {challenges.length === 0 ? (
           <View style={{ alignItems: 'center', paddingVertical: 60 }}>
             <Text style={{ fontSize: 48 }}>{'\uD83C\uDFAF'}</Text>
-            <Text style={{ fontSize: 15, color: '#999999', marginTop: 12 }}>
+            <Text style={{ fontSize: 15, color: colors.textMuted, marginTop: 12 }}>
               No hay retos creados
             </Text>
           </View>
@@ -120,12 +122,12 @@ export const GamificationScreen = () => {
             <View
               key={challenge.id}
               style={{
-                backgroundColor: challenge.status === 'completed' ? '#E8F5E9' : '#FFFFFF',
+                backgroundColor: challenge.status === 'completed' ? '#1A3A1A' : colors.surface,
                 borderRadius: 12,
                 padding: 16,
                 marginBottom: 12,
                 borderWidth: 1,
-                borderColor: challenge.status === 'completed' ? '#4CAF50' : '#E0E0E0',
+                borderColor: challenge.status === 'completed' ? '#4CAF50' : colors.border,
               }}
             >
               <View
@@ -136,7 +138,7 @@ export const GamificationScreen = () => {
                   marginBottom: 6,
                 }}
               >
-                <Text style={{ fontSize: 17, fontWeight: '700', color: '#333333', flex: 1 }}>
+                <Text style={{ fontSize: 17, fontWeight: '700', color: colors.textPrimary, flex: 1 }}>
                   {challenge.name}
                 </Text>
                 <View
@@ -153,12 +155,12 @@ export const GamificationScreen = () => {
                 </View>
               </View>
 
-              <Text style={{ fontSize: 13, color: '#666666', marginBottom: 10, lineHeight: 18 }}>
+              <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 10, lineHeight: 18 }}>
                 {challenge.description}
               </Text>
 
               <View style={{ flexDirection: 'row', marginBottom: 6 }}>
-                <Text style={{ fontSize: 13, color: '#EC3137', fontWeight: '700' }}>
+                <Text style={{ fontSize: 13, color: colors.primary, fontWeight: '700' }}>
                   {'\u2B50'} {challenge.points} pts
                 </Text>
               </View>
@@ -181,7 +183,7 @@ export const GamificationScreen = () => {
                 ))}
               </View>
 
-              <Text style={{ fontSize: 12, color: '#999999' }}>
+              <Text style={{ fontSize: 12, color: colors.textMuted }}>
                 {'\u23F0'} Expira: {challenge.expiryDate}
               </Text>
             </View>
@@ -205,7 +207,7 @@ export const GamificationScreen = () => {
         >
           <View
             style={{
-              backgroundColor: '#FFFFFF',
+              backgroundColor: colors.surface,
               borderTopLeftRadius: 20,
               borderTopRightRadius: 20,
               paddingHorizontal: 20,
@@ -222,82 +224,85 @@ export const GamificationScreen = () => {
                 marginBottom: 18,
               }}
             >
-              <Text style={{ fontSize: 19, fontWeight: '700', color: '#333333' }}>
+              <Text style={{ fontSize: 19, fontWeight: '700', color: colors.textPrimary }}>
                 {'\uD83C\uDFAF'} Crear Reto
               </Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Text style={{ fontSize: 24, color: '#999999' }}>{'\u2715'}</Text>
+                <Text style={{ fontSize: 24, color: colors.textMuted }}>{'\u2715'}</Text>
               </TouchableOpacity>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
               {/* Name */}
-              <Text style={{ fontSize: 13, fontWeight: '600', color: '#333333', marginBottom: 6 }}>
+              <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary, marginBottom: 6 }}>
                 Nombre del reto
               </Text>
               <TextInput
                 value={name}
                 onChangeText={setName}
                 placeholder="Ej: Venta del mes"
-                placeholderTextColor="#BBBBBB"
+                placeholderTextColor={colors.textMuted}
                 style={{
                   borderWidth: 1,
-                  borderColor: '#E0E0E0',
+                  borderColor: colors.border,
                   borderRadius: 10,
                   padding: 12,
                   fontSize: 14,
                   marginBottom: 16,
-                  color: '#333333',
+                  color: colors.textPrimary,
+                  backgroundColor: colors.background,
                 }}
               />
 
               {/* Description */}
-              <Text style={{ fontSize: 13, fontWeight: '600', color: '#333333', marginBottom: 6 }}>
+              <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary, marginBottom: 6 }}>
                 Descripcion
               </Text>
               <TextInput
                 value={description}
                 onChangeText={setDescription}
                 placeholder="Descripcion del reto..."
-                placeholderTextColor="#BBBBBB"
+                placeholderTextColor={colors.textMuted}
                 multiline
                 numberOfLines={3}
                 style={{
                   borderWidth: 1,
-                  borderColor: '#E0E0E0',
+                  borderColor: colors.border,
                   borderRadius: 10,
                   padding: 12,
                   fontSize: 14,
                   marginBottom: 16,
-                  color: '#333333',
+                  color: colors.textPrimary,
+                  backgroundColor: colors.background,
                   textAlignVertical: 'top',
                   minHeight: 80,
                 }}
               />
 
               {/* Points */}
-              <Text style={{ fontSize: 13, fontWeight: '600', color: '#333333', marginBottom: 6 }}>
+              <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary, marginBottom: 6 }}>
                 Puntos de recompensa
               </Text>
               <TextInput
                 value={points}
                 onChangeText={setPoints}
                 placeholder="Ej: 100"
-                placeholderTextColor="#BBBBBB"
+                placeholderTextColor={colors.textMuted}
                 keyboardType="numeric"
                 style={{
                   borderWidth: 1,
-                  borderColor: '#E0E0E0',
+                  borderColor: colors.border,
                   borderRadius: 10,
                   padding: 12,
                   fontSize: 14,
                   marginBottom: 16,
-                  color: '#333333',
+                  color: colors.textPrimary,
+                  backgroundColor: colors.background,
                 }}
               />
 
               {/* Branches */}
-              <Text style={{ fontSize: 13, fontWeight: '600', color: '#333333', marginBottom: 8 }}>
+              <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 }}>
                 Sedes participantes
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 16 }}>
@@ -308,20 +313,20 @@ export const GamificationScreen = () => {
                       key={branch}
                       onPress={() => toggleBranch(branch)}
                       style={{
-                        backgroundColor: isSelected ? '#EC3137' : '#F5F5F5',
+                        backgroundColor: isSelected ? colors.primary : colors.background,
                         borderRadius: 8,
                         paddingHorizontal: 12,
                         paddingVertical: 8,
                         marginRight: 8,
                         marginBottom: 8,
                         borderWidth: 1,
-                        borderColor: isSelected ? '#EC3137' : '#E0E0E0',
+                        borderColor: isSelected ? colors.primary : colors.border,
                       }}
                     >
                       <Text
                         style={{
                           fontSize: 13,
-                          color: isSelected ? '#FFFFFF' : '#555555',
+                          color: isSelected ? '#FFFFFF' : colors.textSecondary,
                           fontWeight: isSelected ? '700' : '400',
                         }}
                       >
@@ -333,22 +338,23 @@ export const GamificationScreen = () => {
               </View>
 
               {/* Expiry Date */}
-              <Text style={{ fontSize: 13, fontWeight: '600', color: '#333333', marginBottom: 6 }}>
+              <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary, marginBottom: 6 }}>
                 Fecha de expiracion
               </Text>
               <TextInput
                 value={expiryDate}
                 onChangeText={setExpiryDate}
                 placeholder="DD/MM/AAAA"
-                placeholderTextColor="#BBBBBB"
+                placeholderTextColor={colors.textMuted}
                 style={{
                   borderWidth: 1,
-                  borderColor: '#E0E0E0',
+                  borderColor: colors.border,
                   borderRadius: 10,
                   padding: 12,
                   fontSize: 14,
                   marginBottom: 20,
-                  color: '#333333',
+                  color: colors.textPrimary,
+                  backgroundColor: colors.background,
                 }}
               />
 
@@ -356,7 +362,7 @@ export const GamificationScreen = () => {
               <TouchableOpacity
                 onPress={handleCreate}
                 style={{
-                  backgroundColor: '#EC3137',
+                  backgroundColor: colors.primary,
                   borderRadius: 12,
                   paddingVertical: 15,
                   alignItems: 'center',

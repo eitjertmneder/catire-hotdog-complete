@@ -46,9 +46,9 @@ export const OnboardingScreen = () => {
 
   const renderItem = ({ item, index }: { item: typeof onboardingSteps[0]; index: number }) => (
     <View style={[styles.slide, { backgroundColor: item.color }]}>
-      <Text style={styles.emoji}>{item.image}</Text>
-      <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.description}>{item.description}</Text>
+      <Text style={[styles.emoji, { color: item.textColor }]}>{item.image}</Text>
+      <Text style={[styles.title, { color: item.textColor }]}>{item.title}</Text>
+      <Text style={[styles.description, { color: item.subtitleColor }]}>{item.description}</Text>
     </View>
   );
 
@@ -85,7 +85,10 @@ export const OnboardingScreen = () => {
             key={index}
             style={[
               styles.dot,
-              { backgroundColor: index === currentIndex ? '#fff' : 'rgba(255,255,255,0.5)' },
+              {
+                backgroundColor: index === currentIndex ? '#EC3137' : '#FFC107',
+                width: index === currentIndex ? 24 : 10,
+              },
             ]}
           />
         ))}
@@ -113,7 +116,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   skipText: {
-    color: '#fff',
+    color: '#EC3137',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -125,19 +128,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   emoji: {
-    fontSize: 36, fontWeight: '900', color: '#fff', letterSpacing: 2,
+    fontSize: 36, fontWeight: '900', letterSpacing: 2,
     marginBottom: 30,
   },
   title: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#fff',
     textAlign: 'center',
     marginBottom: 16,
   },
   description: {
     fontSize: 18,
-    color: 'rgba(255,255,255,0.9)',
     textAlign: 'center',
     lineHeight: 26,
   },
@@ -148,23 +149,27 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   dot: {
-    width: 10,
     height: 10,
     borderRadius: 5,
     marginHorizontal: 5,
   },
   nextButton: {
-    backgroundColor: '#fff',
+    backgroundColor: '#EC3137',
     marginHorizontal: 40,
     paddingVertical: 16,
     borderRadius: 30,
     alignItems: 'center',
     marginBottom: 40,
+    shadowColor: '#EC3137',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   nextText: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#333',
+    color: '#FFFFFF',
   },
 });
 

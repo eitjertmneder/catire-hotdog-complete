@@ -16,7 +16,6 @@ export class OrdersReportController {
   constructor(private service: OrdersService) {}
 
   @Get('report')
-  @UseGuards(PermissionGuard)
   @CheckPermission('Orders', 'read')
   async report(
     @Request() req: TypedRequest,

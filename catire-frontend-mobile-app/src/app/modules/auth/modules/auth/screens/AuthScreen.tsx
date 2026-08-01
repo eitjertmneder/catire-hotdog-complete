@@ -13,6 +13,7 @@ import { useFinanceStore } from '../../../../finance/store/finance.store';
 import { useAuthStore } from '../../../../../shared/store/auth.store';
 import { authenticate, checkBiometricsAvailability } from '../../../api/auth.local';
 import ScrollInfinitoSuave from '../../../../../shared/components/ScrollInfinitoSuave';
+import { useAuditStore } from '../../../../../shared/store/audit.store';
 
 const Logo = require('@assets/logo.png');
 const { width, height } = Dimensions.get('window');
@@ -20,7 +21,7 @@ const { width, height } = Dimensions.get('window');
 export default function AuthScreen() { const navigation = useNavigation<any>();
   const [isLogin, setIsLogin] = useState(true);
   const [canUseBiometrics, setCanUseBiometrics] = useState(false);
-  const { loginWithBiometrics, loading, login } = useAuthStore();
+  const { loginWithBiometrics, loading, login, error, clearAuthError } = useAuthStore();
 
   useEffect(() => {
     useCatalogStore.persist.clearStorage();
@@ -32,15 +33,18 @@ export default function AuthScreen() { const navigation = useNavigation<any>();
         const available = await checkBiometricsAvailability();
         const enabled = (await SecureStore.getItemAsync('biometric_enabled')) || 'false';
         setCanUseBiometrics(available && enabled === 'true');
-      } catch {}
+      } catch (e) { console.warn('Operation failed:', e); }
     }
     checkBiometrics();
   }, []);
 
   const handleBiometricPress = async () => {
     try {
+      clearAuthError();
       const valid = await authenticate();
-      if (valid) await loginWithBiometrics();
+      if (valid) {
+        await loginWithBiometrics();
+      }
     } catch (e) {
       console.error('Error:', e);
     }
@@ -141,6 +145,11 @@ export default function AuthScreen() { const navigation = useNavigation<any>();
                     {loading ? 'Verificando...' : 'Usar huella digital'}
                   </Text>
                 </TouchableOpacity>
+                {error && (
+                  <Text style={{ color: '#DC2626', fontSize: 12, marginTop: 8, textAlign: 'center' }}>
+                    {error}
+                  </Text>
+                )}
               </View>
             )}
 
@@ -192,20 +201,23 @@ export default function AuthScreen() { const navigation = useNavigation<any>();
             </Text>
           </TouchableOpacity>
 
-          {/* Firebase Login button */}
+          {/* Google Sign-In button */}
           <TouchableOpacity
-            onPress={() => navigation.navigate('FirebaseLogin')}
+            onPress={() => navigation.navigate('GoogleSignIn')}
             style={{
               width: '100%',
               paddingVertical: 16,
               borderRadius: 16,
-              backgroundColor: '#1A73E8',
+              backgroundColor: '#4285F4',
               alignItems: 'center',
               marginTop: 12,
+              flexDirection: 'row',
+              justifyContent: 'center',
+              gap: 10,
             }}
           >
             <Text style={{ fontSize: 14, color: '#fff', fontWeight: '700', letterSpacing: 0.3 }}>
-              Login con Firebase
+              Continuar con Google
             </Text>
           </TouchableOpacity>
 

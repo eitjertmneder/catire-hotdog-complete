@@ -6,7 +6,8 @@ export type Module =
   | 'Products'
   | 'Menus'
   | 'Orders'
-  | 'Purchases';
+  | 'Purchases'
+  | 'Reviews';
 export type Permission = 'create' | 'read' | 'update' | 'delete';
 
 export type ModulesPermissions = {

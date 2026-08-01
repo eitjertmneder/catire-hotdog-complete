@@ -23,21 +23,18 @@ export class BranchesController {
   constructor(private readonly branchesService: BranchesService) {}
 
   @Post()
-  @UseGuards(PermissionGuard)
   @CheckPermission('Branches', 'create')
   async create(@Body() createBranchDto: CreateBranchDTO): Promise<Branch> {
     return await this.branchesService.create(createBranchDto);
   }
 
   @Get()
-  @UseGuards(PermissionGuard)
   @CheckPermission('Branches', 'read')
   async findAll(): Promise<Branch[]> {
     return await this.branchesService.getAll();
   }
 
   @Get(':id')
-  @UseGuards(PermissionGuard)
   @CheckPermission('Branches', 'read')
   async findOne(@Param('id') id: number): Promise<Branch | null> {
     const branch = await this.branchesService.findOne(id);
@@ -47,7 +44,6 @@ export class BranchesController {
   }
 
   @Patch(':id')
-  @UseGuards(PermissionGuard)
   @CheckPermission('Branches', 'update')
   async update(
     @Param('id') id: number,
@@ -59,7 +55,6 @@ export class BranchesController {
   }
 
   @Delete(':id')
-  @UseGuards(PermissionGuard)
   @CheckPermission('Branches', 'delete')
   async remove(@Param('id') id: number): Promise<void> {
     const branch = await this.branchesService.remove(id);

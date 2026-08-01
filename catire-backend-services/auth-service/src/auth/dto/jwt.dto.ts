@@ -62,10 +62,10 @@ export class PermissionCheckDTO {
     message: 'module: El módulo es requerido.',
   })
   @IsIn(
-    ['Users', 'Roles', 'Branches', 'Products', 'Menus', 'Orders', 'Purchases'],
+    ['Users', 'Roles', 'Branches', 'Products', 'Menus', 'Orders', 'Purchases', 'Ingredients', 'Reviews'],
     {
       message:
-        'module: El módulo debe ser uno de los siguientes: Users, Roles, Branches, Products, Menus, Orders, Purchases.',
+        'module: El módulo debe ser uno de los siguientes: Users, Roles, Branches, Products, Menus, Orders, Purchases, Ingredients, Reviews.',
     },
   )
   module!: string;

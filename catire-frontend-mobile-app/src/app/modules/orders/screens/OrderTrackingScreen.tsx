@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useETAStore } from '../../../shared/store/eta.store';
 import { useChatStore } from '../../../shared/store/chat.store';
-import { theme } from '../../../shared/styles/theme';
+import { useAppTheme } from '../../../shared/contexts/ThemeContext';
 
 const statusSteps = [
   { key: 'PENDING', label: 'Pendiente', icon: '\u231B', description: 'Esperando confirmaci\u00f3n' },
@@ -20,6 +20,7 @@ export const OrderTrackingScreen = () => {
   const navigation = useNavigation<any>();
   const { getETA } = useETAStore();
   const { getMessages } = useChatStore();
+  const { colors } = useAppTheme();
   
   const orderId = route.params?.orderId || '';
   const currentStatus = route.params?.status || 'PENDING';
@@ -43,18 +44,18 @@ export const OrderTrackingScreen = () => {
   const timeRemaining = getTimeRemaining();
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={{
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+        backgroundColor: colors.white,
+        borderBottomWidth: 1, borderBottomColor: colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
+          <Text style={{ fontSize: 16, color: colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginLeft: 12 }}>
           Seguimiento - #{orderId.slice(0, 8)}
         </Text>
       </View>
@@ -63,7 +64,7 @@ export const OrderTrackingScreen = () => {
         {/* ETA Card */}
         {eta && currentStatus !== 'DELIVERED' && currentStatus !== 'CANCELLED' && (
           <View style={{
-            backgroundColor: theme.colors.primary,
+            backgroundColor: colors.primary,
             borderRadius: 16,
             padding: 20,
             marginBottom: 20,
@@ -95,12 +96,12 @@ export const OrderTrackingScreen = () => {
 
         {/* Status Progress */}
         <View style={{
-          backgroundColor: theme.colors.white,
+          backgroundColor: colors.white,
           borderRadius: 12,
           padding: 16,
           marginBottom: 16,
         }}>
-          <Text style={{ fontSize: 16, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 16 }}>
+          <Text style={{ fontSize: 16, fontWeight: '700', color: colors.textPrimary, marginBottom: 16 }}>
             Estado del Pedido
           </Text>
 
@@ -115,7 +116,7 @@ export const OrderTrackingScreen = () => {
                 <View style={{ alignItems: 'center', width: 40 }}>
                   <View style={{
                     width: 36, height: 36, borderRadius: 18,
-                    backgroundColor: isCompleted ? '#10B981' : isFuture ? '#E5E7EB' : theme.colors.primary,
+                    backgroundColor: isCompleted ? '#10B981' : isFuture ? '#E5E7EB' : colors.primary,
                     justifyContent: 'center', alignItems: 'center',
                     borderWidth: isCurrent ? 3 : 0,
                     borderColor: isCurrent ? '#D1FAE5' : 'transparent',
@@ -138,13 +139,13 @@ export const OrderTrackingScreen = () => {
                   <Text style={{
                     fontSize: 15,
                     fontWeight: isCurrent ? '700' : '600',
-                    color: isCompleted ? '#10B981' : isFuture ? '#9CA3AF' : theme.colors.textPrimary,
+                    color: isCompleted ? '#10B981' : isFuture ? '#9CA3AF' : colors.textPrimary,
                   }}>
                     {step.label}
                   </Text>
                   <Text style={{
                     fontSize: 13,
-                    color: isCurrent ? theme.colors.textSecondary : '#9CA3AF',
+                    color: isCurrent ? colors.textSecondary : '#9CA3AF',
                     marginTop: 2,
                   }}>
                     {step.description}
@@ -189,7 +190,7 @@ export const OrderTrackingScreen = () => {
         {/* Chat Button */}
         <TouchableOpacity
           style={{
-            backgroundColor: theme.colors.white,
+            backgroundColor: colors.white,
             borderRadius: 12,
             padding: 16,
             flexDirection: 'row',
@@ -201,10 +202,10 @@ export const OrderTrackingScreen = () => {
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Text style={{ fontSize: 24, marginRight: 12 }}>{'\u{1F4AC}'}</Text>
             <View>
-              <Text style={{ fontSize: 16, fontWeight: '600', color: theme.colors.textPrimary }}>
+              <Text style={{ fontSize: 16, fontWeight: '600', color: colors.textPrimary }}>
                 Chat con {isDelivery ? 'Repartidor' : 'Trabajador'}
               </Text>
-              <Text style={{ fontSize: 13, color: theme.colors.textMuted }}>
+              <Text style={{ fontSize: 13, color: colors.textMuted }}>
                 {unreadCount > 0 ? `${unreadCount} mensajes nuevos` : 'Mensajes'}
               </Text>
             </View>

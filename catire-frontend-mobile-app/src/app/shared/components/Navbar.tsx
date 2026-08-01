@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, Modal, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '../store/auth.store';
 import { useCartStore } from '../store/cart.store';
 import { useOrdersStore } from '../../modules/orders/store/orders.store';
-import { theme } from '../styles/theme';
+import { useCatalogStore } from '../../modules/catalog/store/catalog.store';
 import { useAppTheme } from '../contexts/ThemeContext';
 
 const SECTION_HEADER_HEIGHT = 32;
@@ -22,13 +22,14 @@ const DrawerDivider = ({ isDark }: { isDark: boolean }) => (
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isDark, colors } = useAppTheme();
+  const { isDark, colors, toggleTheme } = useAppTheme();
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   
-  const { user, logout } = useAuthStore();
+  const { user, token, logout } = useAuthStore();
   const { getTotalItems } = useCartStore();
   const { orders } = useOrdersStore(); 
+  const { branches, fetchBranches } = useCatalogStore();
   
   const totalItems = getTotalItems();
   const pendingOrdersCount = orders?.filter((o: any) => o.status === 'PENDING').length || 0;
@@ -50,27 +51,35 @@ export const Navbar = () => {
   const roleLabel = role === 'admin' ? 'Administrador' : role === 'employee' ? 'Cajero' : 'Cliente';
   const roleColor = role === 'admin' ? '#8B5CF6' : role === 'employee' ? '#F59E0B' : '#3B82F6';
 
+  useEffect(() => {
+    if (role === 'client' && token) {
+      fetchBranches(token);
+    }
+  }, [role, token]);
+
   return (
     <>
       {/* Header */}
       <View style={[styles.navContainer, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity onPress={roleNavigation} style={styles.logoRow}>
-          <Image source={require('@assets/logo.png')} style={styles.logo} resizeMode="contain" />
-          <Text style={styles.brandText}>Catire Hot Dog</Text>
-        </TouchableOpacity>
+        <View style={styles.brandColumn}>
+          <TouchableOpacity onPress={roleNavigation} style={styles.logoRow}>
+            <Image source={require('@assets/logo.png')} style={styles.logo} resizeMode="contain" />
+            <Text style={styles.brandText}>Catire Hot Dog</Text>
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.rightActions}>
           {role === 'client' && (
             <>
               <TouchableOpacity style={styles.cartButton} onPress={() => navigation.navigate('Orders')}>
-                <Text style={{ fontSize: 22 }}>P</Text>
+                <Text style={{ fontSize: 22 }}>{'\u{1F4CB}'}</Text>
                 {pendingOrdersCount > 0 && (
                   <View style={styles.badge}><Text style={styles.badgeText}>{pendingOrdersCount}</Text></View>
                 )}
               </TouchableOpacity>
-              
+
               <TouchableOpacity style={styles.cartButton} onPress={() => navigation.navigate('Cart')}>
-                <Text style={{ fontSize: 22 }}>C</Text>
+                <Text style={{ fontSize: 22 }}>{'\u{1F6D2}'}</Text>
                 {totalItems > 0 && (
                   <View style={styles.badge}><Text style={styles.badgeText}>{totalItems}</Text></View>
                 )}
@@ -87,6 +96,30 @@ export const Navbar = () => {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Branch count bar - centered below header */}
+      {role === 'client' && (
+        <TouchableOpacity
+          style={styles.branchBar}
+          onPress={() => handleNavigation('BranchesMap')}
+          activeOpacity={0.85}
+        >
+          <View style={styles.branchBarInner}>
+            <View style={styles.branchBarIconContainer}>
+              <Text style={styles.branchBarIcon}>{'\u{1F4CD}'}</Text>
+            </View>
+            <View style={styles.branchBarTextContainer}>
+              <Text style={styles.branchBarText}>
+                {branches.length || 8} sucursales disponibles
+              </Text>
+              <Text style={styles.branchBarSubtext}>Toca para ver el mapa</Text>
+            </View>
+            <View style={styles.branchBarArrowContainer}>
+              <Text style={styles.branchBarArrow}>{'\u203A'}</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      )}
 
       {/* Drawer */}
       <Modal visible={isMenuOpen} transparent animationType="fade" onRequestClose={() => setIsMenuOpen(false)}>
@@ -123,7 +156,7 @@ export const Navbar = () => {
                 <>
                   <TouchableOpacity style={[styles.drawerItem, { backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB' }]} onPress={() => handleNavigation('Orders')}>
                     <Text style={styles.menuEmoji}>{'\u{1F4CB}'}</Text>
-                    <Text style={[styles.drawerItemText, { color: colors.textPrimary }]}>Mis \u00D3rdenes</Text>
+                    <Text style={[styles.drawerItemText, { color: colors.textPrimary }]}>Mis Órdenes</Text>
                     {pendingOrdersCount > 0 && (
                       <View style={styles.miniBadge}><Text style={styles.miniBadgeText}>{pendingOrdersCount}</Text></View>
                     )}
@@ -141,7 +174,12 @@ export const Navbar = () => {
                   </TouchableOpacity>
                   <TouchableOpacity style={[styles.drawerItem, { backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB' }]} onPress={() => handleNavigation('EmployeeOrders')}>
                     <Text style={styles.menuEmoji}>{'\u{1F4E6}'}</Text>
-                    <Text style={[styles.drawerItemText, { color: colors.textPrimary }]}>Panel de \u00D3rdenes</Text>
+                    <Text style={[styles.drawerItemText, { color: colors.textPrimary }]}>Panel de Órdenes</Text>
+                    <Text style={styles.chevron}>{'\u276F'}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.drawerItem, { backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB' }]} onPress={() => handleNavigation('ReportsScreen')}>
+                    <Text style={styles.menuEmoji}>{'\u{1F4CA}'}</Text>
+                    <Text style={[styles.drawerItemText, { color: colors.textPrimary }]}>Reportes</Text>
                     <Text style={styles.chevron}>{'\u276F'}</Text>
                   </TouchableOpacity>
                 </>
@@ -160,7 +198,7 @@ export const Navbar = () => {
               <DrawerDivider isDark={isDark} />
 
               {/* Seccion: Navegacion */}
-              <SectionHeader title="NAVEGACI\u00D3N" isDark={isDark} />
+              <SectionHeader title="NAVEGACIÓN" isDark={isDark} />
 
               {role === 'client' && (
                 <>
@@ -179,30 +217,24 @@ export const Navbar = () => {
                     <Text style={[styles.drawerItemText, { color: colors.textPrimary }]}>Inventario</Text>
                     <Text style={styles.chevron}>{'\u276F'}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.drawerItem, { backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB' }]} onPress={() => handleNavigation('MenuAdmin')}>
-                    <Text style={styles.menuEmoji}>{'\u{1F4DD}'}</Text>
-                    <Text style={[styles.drawerItemText, { color: colors.textPrimary }]}>Gesti\u00F3n de Men\u00FAs</Text>
-                    <Text style={styles.chevron}>{'\u276F'}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.drawerItem, { backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB' }]} onPress={() => handleNavigation('ProductsAdmin')}>
-                    <Text style={styles.menuEmoji}>{'\u{1F32E}'}</Text>
-                    <Text style={[styles.drawerItemText, { color: colors.textPrimary }]}>Gesti\u00F3n de Productos</Text>
-                    <Text style={styles.chevron}>{'\u276F'}</Text>
-                  </TouchableOpacity>
                 </>
               )}
 
               <DrawerDivider isDark={isDark} />
 
-              {/* Seccion: Configuracion */}
-              <SectionHeader title="CONFIGURACI\u00D3N" isDark={isDark} />
-              <TouchableOpacity style={[styles.drawerItem, { backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB' }]} onPress={() => handleNavigation('Settings')}>
-                <Text style={styles.menuEmoji}>{'\u{2699}'}</Text>
-                <Text style={[styles.drawerItemText, { color: colors.textPrimary }]}>Configuraci\u00F3n</Text>
-                <Text style={styles.chevron}>{'\u276F'}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.drawerItem, { backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB' }]} onPress={() => handleNavigation('Settings')}>
-                <Text style={styles.menuEmoji}>{isDark ? '\u{1F319}' : '\u{2600}'}</Text>
+              {/* Seccion: Configuracion - Solo admin */}
+              {role === 'admin' && (
+                <>
+                  <SectionHeader title="CONFIGURACIÓN" isDark={isDark} />
+                  <TouchableOpacity style={[styles.drawerItem, { backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB' }]} onPress={() => handleNavigation('Settings')}>
+                    <Text style={styles.menuEmoji}>{'\u{2699}'}</Text>
+                    <Text style={[styles.drawerItemText, { color: colors.textPrimary }]}>Configuración</Text>
+                    <Text style={styles.chevron}>{'\u276F'}</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+              <TouchableOpacity style={[styles.drawerItem, { backgroundColor: isDark ? '#2A2A2A' : '#F9FAFB' }]} onPress={() => { setIsMenuOpen(false); toggleTheme(!isDark); }}>
+                <Text style={styles.menuEmoji}>{isDark ? '\u{2600}\uFE0F' : '\u{1F319}'}</Text>
                 <Text style={[styles.drawerItemText, { color: colors.textPrimary }]}>{isDark ? 'Modo Claro' : 'Modo Oscuro'}</Text>
                 <Text style={styles.chevron}>{'\u276F'}</Text>
               </TouchableOpacity>
@@ -214,7 +246,7 @@ export const Navbar = () => {
                   onPress={() => { setIsMenuOpen(false); logout?.(); }}
                 >
                   <Text style={styles.logoutEmoji}>{'\u{1F6AA}'}</Text>
-                  <Text style={styles.logoutText}>Cerrar Sesi\u00F3n</Text>
+                  <Text style={styles.logoutText}>Cerrar Sesión</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>
@@ -232,14 +264,98 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingBottom: 12,
-    backgroundColor: theme.colors.primary,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
+    backgroundColor: '#EC3137',
   },
   logoRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+  },
+  brandColumn: {
+    flex: 1,
+    marginRight: 8,
+  },
+  branchBar: {
+    backgroundColor: '#D32F2F',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  branchBarInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  branchBarIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+  },
+  branchBarIcon: {
+    fontSize: 22,
+  },
+  branchBarTextContainer: {
+    flex: 1,
+  },
+  branchBarText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  branchBarSubtext: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  branchBarArrowContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+  },
+  branchBarArrow: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    fontWeight: '600',
+  },
+  branchMiniMenu: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+  },
+  branchMiniIcon: {
+    fontSize: 18,
+    marginRight: 8,
+  },
+  branchMiniText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  branchMiniArrow: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    lineHeight: 18,
+    marginLeft: 8,
   },
   logo: {
     width: 40,
@@ -248,7 +364,7 @@ const styles = StyleSheet.create({
   brandText: {
     fontSize: 16,
     fontWeight: '700',
-    color: theme.colors.white,
+    color: '#FFFFFF',
   },
   rightActions: {
     flexDirection: 'row',
@@ -268,14 +384,14 @@ const styles = StyleSheet.create({
   hamburgerLine: {
     width: 22,
     height: 2.5,
-    backgroundColor: theme.colors.white,
+    backgroundColor: '#FFFFFF',
     borderRadius: 2,
   },
   badge: {
     position: 'absolute',
     top: 2,
     right: 2,
-    backgroundColor: theme.colors.white,
+    backgroundColor: '#FFFFFF',
     borderRadius: 10,
     minWidth: 18,
     height: 18,
@@ -284,7 +400,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   badgeText: {
-    color: theme.colors.primary,
+    color: '#EC3137',
     fontSize: 10,
     fontWeight: '700',
   },
@@ -300,7 +416,7 @@ const styles = StyleSheet.create({
   },
   drawerContainer: {
     width: '80%',
-    backgroundColor: theme.colors.white,
+    backgroundColor: '#FFFFFF',
     height: '100%',
     shadowColor: '#000',
     shadowOffset: { width: -4, height: 0 },
@@ -311,7 +427,7 @@ const styles = StyleSheet.create({
 
   // Drawer Header
   drawerHeader: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: '#EC3137',
     alignItems: 'center',
     paddingVertical: 28,
     paddingHorizontal: 20,
@@ -339,10 +455,10 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 28,
     fontWeight: '700',
-    color: theme.colors.white,
+    color: '#FFFFFF',
   },
   drawerUserName: {
-    color: theme.colors.white,
+    color: '#FFFFFF',
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 2,
@@ -358,7 +474,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   roleBadgeText: {
-    color: theme.colors.white,
+    color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '700',
     letterSpacing: 0.5,
@@ -417,7 +533,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   miniBadge: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: '#EC3137',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 10,
@@ -425,7 +541,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   miniBadgeText: {
-    color: theme.colors.white,
+    color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '700',
   },

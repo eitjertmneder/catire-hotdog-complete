@@ -1,16 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Linking } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Linking, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../../../../shared/store/auth.store';
+import { useOrdersStore } from '../../../store/orders.store';
 import { Api } from '../../../../../shared/api/api';
-import { theme } from '../../../../../shared/styles/theme';
+import { useAppTheme } from '../../../../../shared/contexts/ThemeContext';
+import { generateAndSharePDF, buildDailyReportHTML, buildSummaryReportHTML } from '../../../../../shared/utils/pdf';
 
 const api = new Api();
 
+const BRANCHES = [
+  { id: 1, name: 'Barrio Sucre' },
+  { id: 3, name: 'El Malecón' },
+  { id: 4, name: 'Prados del Este' },
+  { id: 11, name: 'Barrio Obrero' },
+  { id: 12, name: 'La Asogata' },
+  { id: 13, name: 'La Grita' },
+  { id: 16, name: 'Sambil' },
+  { id: 17, name: 'Mestizos' },
+];
+
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: 'Pendientes',
+  PAID: 'Pagadas',
+  PREPARING: 'Preparando',
+  READY: 'Listas',
+  ON_THE_WAY: 'En Camino',
+  DELIVERED: 'Entregadas',
+  CANCELLED: 'Canceladas',
+};
+
 export const ReportsScreen = () => {
   const navigation = useNavigation();
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
+  const { orders, fetchOrders } = useOrdersStore();
+  const { colors } = useAppTheme();
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState<any>(null);
   const [period, setPeriod] = useState<'today' | 'week' | 'month'>('today');
@@ -44,7 +69,87 @@ export const ReportsScreen = () => {
 
   useEffect(() => {
     fetchReport();
+    if (token) fetchOrders(token);
   }, [period]);
+
+  const branchName = BRANCHES.find(b => b.id === user?.branch_id)?.name || `Sucursal ${user?.branch_id || 'N/A'}`;
+
+  const generateDailyReport = () => {
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    const ordersByStatus: Record<string, number> = {};
+    const todayOrders = orders.filter((o: any) => {
+      const orderDate = new Date(o.created_at);
+      return orderDate.toDateString() === today.toDateString();
+    });
+
+    todayOrders.forEach((o: any) => {
+      ordersByStatus[o.status] = (ordersByStatus[o.status] || 0) + 1;
+    });
+
+    const totalRevenue = todayOrders.reduce((sum: number, o: any) => {
+      const orderTotal = (o.items || []).reduce((itemSum: number, item: any) => {
+        return itemSum + (item.base_price || 0) * (item.quantity || 1);
+      }, 0);
+      return sum + orderTotal;
+    }, 0);
+
+    const statusLines = Object.entries(ordersByStatus)
+      .map(([status, count]) => `  - ${STATUS_LABELS[status] || status}: ${count}`)
+      .join('\n');
+
+    const text = [
+      `*Reporte Diario - Catire Hot Dog*`,
+      `Fecha: ${dateStr}`,
+      `Sucursal: ${branchName}`,
+      ``,
+      `Total de ordenes: ${todayOrders.length}`,
+      `Ingresos totales: $${totalRevenue.toFixed(2)}`,
+      ``,
+      `Ordenes por estado:`,
+      statusLines || '  - Sin ordenes hoy',
+    ].join('\n');
+
+    Alert.alert('Reporte Diario', 'Como deseas compartir el reporte?', [
+      { 
+        text: 'WhatsApp', 
+        onPress: () => {
+          const phoneNumber = '584127995855';
+          const encodedText = encodeURIComponent(text);
+          const url = `https://wa.me/${phoneNumber}?text=${encodedText}`;
+          
+          Linking.canOpenURL(url).then((supported) => {
+            if (supported) {
+              Linking.openURL(url);
+            } else {
+              const altUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodedText}`;
+              Linking.openURL(altUrl).catch(() => {
+                Alert.alert('Error', 'No se pudo abrir WhatsApp.');
+              });
+            }
+          });
+        }
+      },
+      { 
+        text: 'PDF', 
+        onPress: () => {
+          generateAndSharePDF(
+            `Reporte Diario - ${dateStr}`,
+            buildDailyReportHTML({
+              branchName,
+              totalOrders: todayOrders.length,
+              totalRevenue,
+              averageOrder: todayOrders.length > 0 ? totalRevenue / todayOrders.length : 0,
+              ordersByStatus,
+              statusLabels: STATUS_LABELS,
+            }),
+          );
+        }
+      },
+      { text: 'Cancelar', style: 'cancel' },
+    ]);
+  };
 
   const shareViaWhatsApp = () => {
     const periodLabel = period === 'today' ? 'Hoy' : period === 'week' ? 'Semana' : 'Mes';
@@ -52,7 +157,7 @@ export const ReportsScreen = () => {
       `*Reporte Catire Hot Dog*`,
       `Periodo: ${periodLabel}`,
       ``,
-      `Total de órdenes: ${report?.totalOrders || 0}`,
+      `Total de ordenes: ${report?.totalOrders || 0}`,
       `Ingresos totales: $${(report?.totalRevenue || 0).toFixed(2)}`,
       `Orden promedio: $${(report?.averageOrder || 0).toFixed(2)}`,
     ].join('\n');
@@ -61,18 +166,43 @@ export const ReportsScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      {/* Header con botón volver */}
-      <View style={{ 
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      {/* Header con boton volver */}
+      <View style={{
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+        backgroundColor: colors.white,
+        borderBottomWidth: 1, borderBottomColor: colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>← Volver</Text>
+          <Text style={{ fontSize: 16, color: colors.primary, fontWeight: '600' }}>{'<-'} Volver</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>📊 Reportes</Text>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginLeft: 12 }}>{'\uD83D\uDCCA'} Reportes</Text>
+      </View>
+
+      {/* Daily Report Button */}
+      <View style={{ padding: 16, paddingBottom: 8 }}>
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#25D366',
+            paddingVertical: 16,
+            borderRadius: 12,
+            alignItems: 'center',
+            shadowColor: '#25D366',
+            shadowOffset: { width: 0, height: 3 },
+            shadowOpacity: 0.3,
+            shadowRadius: 6,
+            elevation: 4,
+          }}
+          onPress={generateDailyReport}
+        >
+          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>
+            {'\uD83D\uDCC4'} Generar Reporte Diario
+          </Text>
+          <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, marginTop: 4 }}>
+            Enviar resumen del dia por WhatsApp
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Period Selector */}
@@ -84,7 +214,7 @@ export const ReportsScreen = () => {
               flex: 1,
               padding: 10,
               borderRadius: 10,
-              backgroundColor: period === p ? theme.colors.primary : theme.colors.white,
+              backgroundColor: period === p ? colors.primary : colors.white,
               alignItems: 'center',
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 1 },
@@ -94,7 +224,7 @@ export const ReportsScreen = () => {
             }}
             onPress={() => setPeriod(p)}
           >
-            <Text style={{ color: period === p ? '#fff' : theme.colors.textSecondary, fontWeight: '600', fontSize: 13 }}>
+            <Text style={{ color: period === p ? '#fff' : colors.textSecondary, fontWeight: '600', fontSize: 13 }}>
               {p === 'today' ? 'Hoy' : p === 'week' ? 'Semana' : 'Mes'}
             </Text>
           </TouchableOpacity>
@@ -103,30 +233,30 @@ export const ReportsScreen = () => {
 
       {loading ? (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
         <ScrollView contentContainerStyle={{ padding: 16 }}>
           {report ? (
-            <View style={{ 
-              backgroundColor: theme.colors.white, borderRadius: 16, padding: 20, 
-              shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 
+            <View style={{
+              backgroundColor: colors.white, borderRadius: 16, padding: 20,
+              shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2
             }}>
-              <Text style={{ fontSize: 18, fontWeight: '700', marginBottom: 16, color: theme.colors.textPrimary }}>Resumen</Text>
-              
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: theme.colors.border }}>
-                <Text style={{ color: theme.colors.textSecondary }}>Total de órdenes:</Text>
-                <Text style={{ fontWeight: '700', color: theme.colors.textPrimary }}>{report.totalOrders || 0}</Text>
+              <Text style={{ fontSize: 18, fontWeight: '700', marginBottom: 16, color: colors.textPrimary }}>Resumen</Text>
+
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+                <Text style={{ color: colors.textSecondary }}>Total de ordenes:</Text>
+                <Text style={{ fontWeight: '700', color: colors.textPrimary }}>{report.totalOrders || 0}</Text>
               </View>
-              
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: theme.colors.border }}>
-                <Text style={{ color: theme.colors.textSecondary }}>Ingresos totales:</Text>
-                <Text style={{ fontWeight: '700', color: theme.colors.success }}>${(report.totalRevenue || 0).toFixed(2)}</Text>
+
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+                <Text style={{ color: colors.textSecondary }}>Ingresos totales:</Text>
+                <Text style={{ fontWeight: '700', color: colors.success }}>${(report.totalRevenue || 0).toFixed(2)}</Text>
               </View>
-              
+
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Text style={{ color: theme.colors.textSecondary }}>Orden promedio:</Text>
-                <Text style={{ fontWeight: '700', color: theme.colors.textPrimary }}>${(report.averageOrder || 0).toFixed(2)}</Text>
+                <Text style={{ color: colors.textSecondary }}>Orden promedio:</Text>
+                <Text style={{ fontWeight: '700', color: colors.textPrimary }}>${(report.averageOrder || 0).toFixed(2)}</Text>
               </View>
 
               <TouchableOpacity
@@ -143,11 +273,36 @@ export const ReportsScreen = () => {
                   Enviar por WhatsApp
                 </Text>
               </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: colors.primary,
+                  marginTop: 10,
+                  paddingVertical: 14,
+                  borderRadius: 12,
+                  alignItems: 'center',
+                }}
+                onPress={() => {
+                  const periodLabel = period === 'today' ? 'Hoy' : period === 'week' ? 'Semana' : 'Mes';
+                  generateAndSharePDF(
+                    `Reporte Catire Hot Dog - ${periodLabel}`,
+                    buildSummaryReportHTML({
+                      totalOrders: report?.totalOrders || 0,
+                      totalRevenue: report?.totalRevenue || 0,
+                      averageOrder: report?.averageOrder || 0,
+                      periodLabel,
+                    }),
+                  );
+                }}
+              >
+                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>
+                  {'\uD83D\uDCC4'} Generar PDF
+                </Text>
+              </TouchableOpacity>
             </View>
           ) : (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 40 }}>
-              <Text style={{ fontSize: 48, marginBottom: 12 }}>📊</Text>
-              <Text style={{ fontSize: 15, color: theme.colors.textMuted }}>No hay datos disponibles</Text>
+              <Text style={{ fontSize: 48, marginBottom: 12 }}>{'\uD83D\uDCCA'}</Text>
+              <Text style={{ fontSize: 15, color: colors.textMuted }}>No hay datos disponibles</Text>
             </View>
           )}
         </ScrollView>

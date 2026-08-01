@@ -10,6 +10,7 @@ import {
   Switch,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useAppTheme } from '../contexts/ThemeContext';
 
 interface DeliveryPartner {
   id: string;
@@ -52,6 +53,7 @@ const initialPartners: DeliveryPartner[] = [
 
 export const DeliveryPartnersScreen = () => {
   const navigation = useNavigation();
+  const { colors } = useAppTheme();
   const [partners, setPartners] = useState<DeliveryPartner[]>(initialPartners);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingPartner, setEditingPartner] = useState<DeliveryPartner | null>(null);
@@ -101,7 +103,7 @@ export const DeliveryPartnersScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F5F5' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View
         style={{
@@ -109,7 +111,7 @@ export const DeliveryPartnersScreen = () => {
           alignItems: 'center',
           paddingHorizontal: 16,
           paddingVertical: 16,
-          backgroundColor: '#EC3137',
+          backgroundColor: colors.primary,
         }}
       >
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -132,7 +134,7 @@ export const DeliveryPartnersScreen = () => {
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {partners.length === 0 ? (
           <View style={{ alignItems: 'center', marginTop: 40 }}>
-            <Text style={{ fontSize: 16, color: '#888888' }}>
+            <Text style={{ fontSize: 16, color: colors.textMuted }}>
               No hay apps de delivery configuradas.
             </Text>
           </View>
@@ -142,12 +144,12 @@ export const DeliveryPartnersScreen = () => {
               key={partner.id}
               onPress={() => openEditModal(partner)}
               style={{
-                backgroundColor: '#FFFFFF',
+                backgroundColor: colors.surface,
                 borderRadius: 12,
                 padding: 16,
                 marginBottom: 12,
                 borderWidth: 1,
-                borderColor: partner.active ? '#10B981' : '#E0E0E0',
+                borderColor: partner.active ? '#10B981' : colors.border,
               }}
             >
               <View
@@ -162,30 +164,30 @@ export const DeliveryPartnersScreen = () => {
                     style={{
                       fontSize: 16,
                       fontWeight: '700',
-                      color: '#333333',
+                      color: colors.textPrimary,
                       marginBottom: 4,
                     }}
                   >
                     {partner.name}
                   </Text>
-                  <Text style={{ fontSize: 13, color: '#666666' }}>
+                  <Text style={{ fontSize: 13, color: colors.textSecondary }}>
                     Comisi\u00F3n: {partner.commissionRate}%
                   </Text>
-                  <Text style={{ fontSize: 13, color: '#666666' }}>
+                  <Text style={{ fontSize: 13, color: colors.textSecondary }}>
                     Tiempo estimado: {partner.estimatedDeliveryTime} min
                   </Text>
                 </View>
                 <Switch
                   value={partner.active}
                   onValueChange={() => togglePartnerActive(partner.id)}
-                  trackColor={{ false: '#E0E0E0', true: '#D1FAE5' }}
-                  thumbColor={partner.active ? '#10B981' : '#f4f3f4'}
+                  trackColor={{ false: colors.border, true: '#D1FAE5' }}
+                  thumbColor={partner.active ? '#10B981' : colors.borderLight}
                   style={{ marginRight: 12 }}
                 />
                 <TouchableOpacity
                   onPress={() => openEditModal(partner)}
                   style={{
-                    backgroundColor: '#EC3137',
+                    backgroundColor: colors.primary,
                     borderRadius: 8,
                     paddingVertical: 6,
                     paddingHorizontal: 12,
@@ -219,7 +221,7 @@ export const DeliveryPartnersScreen = () => {
           <View
             style={{
               width: '85%',
-              backgroundColor: '#FFFFFF',
+              backgroundColor: colors.surface,
               borderRadius: 16,
               padding: 20,
             }}
@@ -228,7 +230,7 @@ export const DeliveryPartnersScreen = () => {
               style={{
                 fontSize: 18,
                 fontWeight: '700',
-                color: '#333333',
+                color: colors.textPrimary,
                 marginBottom: 16,
                 textAlign: 'center',
               }}
@@ -236,56 +238,65 @@ export const DeliveryPartnersScreen = () => {
               Editar {editingPartner?.name}
             </Text>
 
-            <Text style={{ fontSize: 14, color: '#666666', marginBottom: 4 }}>
+            <Text style={{ fontSize: 14, color: colors.textSecondary, marginBottom: 4 }}>
               Nombre del servicio
             </Text>
             <TextInput
               style={{
                 borderWidth: 1,
-                borderColor: '#E0E0E0',
+                borderColor: colors.border,
                 borderRadius: 8,
                 padding: 10,
                 fontSize: 16,
                 marginBottom: 12,
+                color: colors.textPrimary,
+                backgroundColor: colors.background,
               }}
               value={serviceName}
               onChangeText={setServiceName}
               placeholder="Nombre del servicio"
+              placeholderTextColor={colors.textMuted}
             />
 
-            <Text style={{ fontSize: 14, color: '#666666', marginBottom: 4 }}>
+            <Text style={{ fontSize: 14, color: colors.textSecondary, marginBottom: 4 }}>
               Comisi\u00F3n (%)
             </Text>
             <TextInput
               style={{
                 borderWidth: 1,
-                borderColor: '#E0E0E0',
+                borderColor: colors.border,
                 borderRadius: 8,
                 padding: 10,
                 fontSize: 16,
                 marginBottom: 12,
+                color: colors.textPrimary,
+                backgroundColor: colors.background,
               }}
               value={commissionRate}
               onChangeText={setCommissionRate}
               placeholder="15"
+              placeholderTextColor={colors.textMuted}
               keyboardType="numeric"
             />
 
-            <Text style={{ fontSize: 14, color: '#666666', marginBottom: 4 }}>
+            <Text style={{ fontSize: 14, color: colors.textSecondary, marginBottom: 4 }}>
               Tiempo estimado (minutos)
             </Text>
             <TextInput
               style={{
                 borderWidth: 1,
-                borderColor: '#E0E0E0',
+                borderColor: colors.border,
                 borderRadius: 8,
                 padding: 10,
                 fontSize: 16,
                 marginBottom: 12,
+                color: colors.textPrimary,
+                backgroundColor: colors.background,
               }}
               value={estimatedDeliveryTime}
               onChangeText={setEstimatedDeliveryTime}
               placeholder="30"
+              placeholderTextColor={colors.textMuted}
               keyboardType="numeric"
             />
 
@@ -297,12 +308,12 @@ export const DeliveryPartnersScreen = () => {
                 marginBottom: 20,
               }}
             >
-              <Text style={{ fontSize: 14, color: '#666666' }}>Activo</Text>
+              <Text style={{ fontSize: 14, color: colors.textSecondary }}>Activo</Text>
               <Switch
                 value={active}
                 onValueChange={setActive}
-                trackColor={{ false: '#E0E0E0', true: '#D1FAE5' }}
-                thumbColor={active ? '#10B981' : '#f4f3f4'}
+                trackColor={{ false: colors.border, true: '#D1FAE5' }}
+                thumbColor={active ? '#10B981' : colors.borderLight}
               />
             </View>
 
@@ -311,14 +322,14 @@ export const DeliveryPartnersScreen = () => {
                 onPress={() => setEditModalVisible(false)}
                 style={{
                   flex: 1,
-                  backgroundColor: '#E0E0E0',
+                  backgroundColor: colors.borderLight,
                   borderRadius: 8,
                   paddingVertical: 12,
                   alignItems: 'center',
                   marginRight: 8,
                 }}
               >
-                <Text style={{ fontSize: 16, color: '#333333', fontWeight: '600' }}>
+                <Text style={{ fontSize: 16, color: colors.textSecondary, fontWeight: '600' }}>
                   Cancelar
                 </Text>
               </TouchableOpacity>
@@ -326,7 +337,7 @@ export const DeliveryPartnersScreen = () => {
                 onPress={savePartner}
                 style={{
                   flex: 1,
-                  backgroundColor: '#EC3137',
+                  backgroundColor: colors.primary,
                   borderRadius: 8,
                   paddingVertical: 12,
                   alignItems: 'center',

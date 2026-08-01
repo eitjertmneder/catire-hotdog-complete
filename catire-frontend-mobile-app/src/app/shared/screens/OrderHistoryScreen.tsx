@@ -77,7 +77,7 @@ export const OrderHistoryScreen = () => {
           shadowRadius: 8,
           elevation: 2,
         }}
-        onPress={() => navigation.navigate('OrderDetails', { orderId: item.id })}
+        onPress={() => navigation.navigate('OrderDetails', { order: item })}
       >
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
           <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary }}>
@@ -128,7 +128,6 @@ export const OrderHistoryScreen = () => {
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 16, paddingVertical: 16,
         backgroundColor: colors.surface,
-        borderBottomWidth: 1, borderBottomColor: colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={{ fontSize: 16, color: colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
@@ -143,7 +142,6 @@ export const OrderHistoryScreen = () => {
         paddingHorizontal: 16,
         paddingVertical: 12,
         backgroundColor: colors.surface,
-        borderBottomWidth: 1, borderBottomColor: colors.border,
         gap: 8,
       }}>
         {filters.map(filter => (

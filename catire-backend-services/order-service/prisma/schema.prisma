@@ -19,6 +19,7 @@ model Order {
   payment_proof  String?
   cancel_reason String?
   items        OrderDetails[]
+  reviews      Review[]
   status       OrderStatusType? @default(PENDING)
   created_at   DateTime    @default(now())
   updated_at   DateTime    @updatedAt
@@ -54,6 +55,22 @@ model UserAccess {
   @@map ("user_access")
 }
 
+model Review {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  order_id   String    @db.ObjectId
+  user_id    Int
+  user_name  String
+  rating     Int
+  comment    String?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+  order      Order     @relation(fields: [order_id], references: [id])
+
+  @@unique([order_id, user_id])
+  @@map("reviews")
+}
+
 enum OrderStatusType {
   PENDING
   PAID
@@ -62,6 +79,21 @@ enum OrderStatusType {
   ON_THE_WAY
   DELIVERED
   CANCELLED
+}
+
+model AuditLog {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  type        String   // login_success, login_fail, order_change, inventory, system
+  action      String   // What happened
+  description String   // Details
+  user_email  String?  // Who did it
+  user_id     Int?     // User ID if applicable
+  branch_id   Int?     // Branch if applicable
+  severity    String   // info, warning, success, error
+  metadata    Json?    // Extra data
+  created_at  DateTime @default(now())
+
+  @@map("audit_logs")
 }
 
 enum NameTag {

@@ -1,4 +1,4 @@
-export type Module = 'Branches' | 'Menus' | 'Products' | 'Purchases' | 'Users' | 'Roles' | 'Orders' | 'Ingredients';
+export type Module = 'Branches' | 'Menus' | 'Products' | 'Purchases' | 'Users' | 'Roles' | 'Orders' | 'Ingredients' | 'Reviews';
 
 export type OrderStatusType = 'PENDING' | 'PAID' | 'PREPARING' | 'READY' | 'ON_THE_WAY' | 'DELIVERED' | 'CANCELLED';
 

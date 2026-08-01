@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
-import { styles } from '../styles/cart.styles';
+import React, { useState, useMemo } from 'react';
+import { createCartStyles } from '../styles/cart.styles';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { FEATURE_TRANSLATION } from '../../../constants/features';
+import { useAppTheme } from '../../../../../shared/contexts/ThemeContext';
 
 export const CartItemAccordion = ({ item, updateQuantity, removeItem }: any) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createCartStyles(colors), [colors]);
 
   return (
     <View style={styles.cartItemWrapper}>

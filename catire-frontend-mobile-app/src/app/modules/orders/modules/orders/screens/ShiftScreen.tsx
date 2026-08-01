@@ -4,11 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../../../../shared/store/auth.store';
 import { useOrdersStore } from '../../../store/orders.store';
-import { theme } from '../../../../../shared/styles/theme';
+import { useAppTheme } from '../../../../../shared/contexts/ThemeContext';
 
 export const ShiftScreen = () => {
   const navigation = useNavigation<any>();
   const { user } = useAuthStore();
+  const { colors } = useAppTheme();
   const { orders, fetchOrders } = useOrdersStore();
   
   const [shiftActive, setShiftActive] = useState(false);
@@ -72,18 +73,18 @@ export const ShiftScreen = () => {
   const stats = getShiftStats();
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={{ 
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+        backgroundColor: colors.white,
+        borderBottomWidth: 1, borderBottomColor: colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>← Volver</Text>
+          <Text style={{ fontSize: 16, color: colors.primary, fontWeight: '600' }}>← Volver</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginLeft: 12 }}>
           Mi Turno
         </Text>
       </View>
@@ -91,16 +92,16 @@ export const ShiftScreen = () => {
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {/* Info del Cajero */}
         <View style={{ 
-          backgroundColor: theme.colors.white, 
+          backgroundColor: colors.white, 
           borderRadius: 16, 
           padding: 20, 
           marginBottom: 16,
           shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 
         }}>
-          <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 8 }}>
+          <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginBottom: 8 }}>
             {user?.full_name}
           </Text>
-          <Text style={{ fontSize: 14, color: theme.colors.textSecondary }}>
+          <Text style={{ fontSize: 14, color: colors.textSecondary }}>
             Cajero - Sucursal asignada
           </Text>
         </View>
@@ -122,7 +123,7 @@ export const ShiftScreen = () => {
             {shiftActive ? 'Turno Activo' : 'Turno Inactivo'}
           </Text>
           {shiftStartTime && (
-            <Text style={{ fontSize: 13, color: theme.colors.textSecondary }}>
+            <Text style={{ fontSize: 13, color: colors.textSecondary }}>
               Inicio: {shiftStartTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
             </Text>
           )}
@@ -131,29 +132,29 @@ export const ShiftScreen = () => {
         {/* Estadísticas del Turno */}
         {shiftActive && (
           <View style={{ 
-            backgroundColor: theme.colors.white, 
+            backgroundColor: colors.white, 
             borderRadius: 16, 
             padding: 20, 
             marginBottom: 16,
             shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 
           }}>
-            <Text style={{ fontSize: 16, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 16 }}>
+            <Text style={{ fontSize: 16, fontWeight: '700', color: colors.textPrimary, marginBottom: 16 }}>
               Resumen del Turno
             </Text>
             
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-              <Text style={{ color: theme.colors.textSecondary }}>Pedidos atendidos:</Text>
-              <Text style={{ fontWeight: '700', color: theme.colors.textPrimary }}>{stats.totalOrders}</Text>
+              <Text style={{ color: colors.textSecondary }}>Pedidos atendidos:</Text>
+              <Text style={{ fontWeight: '700', color: colors.textPrimary }}>{stats.totalOrders}</Text>
             </View>
             
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-              <Text style={{ color: theme.colors.textSecondary }}>Ingresos totales:</Text>
-              <Text style={{ fontWeight: '700', color: theme.colors.success }}>${stats.totalRevenue.toFixed(2)}</Text>
+              <Text style={{ color: colors.textSecondary }}>Ingresos totales:</Text>
+              <Text style={{ fontWeight: '700', color: colors.success }}>${stats.totalRevenue.toFixed(2)}</Text>
             </View>
             
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Text style={{ color: theme.colors.textSecondary }}>Pedidos pendientes:</Text>
-              <Text style={{ fontWeight: '700', color: stats.pendingOrders > 0 ? theme.colors.warning : theme.colors.textPrimary }}>
+              <Text style={{ color: colors.textSecondary }}>Pedidos pendientes:</Text>
+              <Text style={{ fontWeight: '700', color: stats.pendingOrders > 0 ? colors.warning : colors.textPrimary }}>
                 {stats.pendingOrders}
               </Text>
             </View>

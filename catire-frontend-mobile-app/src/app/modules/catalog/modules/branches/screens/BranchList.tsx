@@ -5,13 +5,15 @@ import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../../../../shared/store/auth.store';
 import { useCatalogStore } from '../../../store/catalog.store';
 import { Branch } from '../../../models/Branch';
-import { styles } from '../styles/branch.styles';
-import { theme } from '../../../../../shared/styles/theme';
+import { getStyles } from '../styles/branch.styles';
+import { useAppTheme } from '../../../../../shared/contexts/ThemeContext';
 
 export default function BranchList() {
   const navigation = useNavigation<any>();
   const token = useAuthStore((s) => s.token);
   const { branches, loading, fetchBranches, error } = useCatalogStore();
+  const { colors } = useAppTheme();
+  const styles = getStyles(colors);
 
   useEffect(() => {
     if (token) {
@@ -53,7 +55,7 @@ export default function BranchList() {
         </TouchableOpacity>
 
         {loading && !branches.length ? (
-          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         ) : (
           <FlatList
             data={branches}

@@ -52,11 +52,11 @@ export const useExchangeRateStore = create<ExchangeRateState>()(
       isLoading: false,
       error: null,
       supportedCurrencies: [
-        { from: 'USD', to: 'VES', name: 'Dólar ? Bolívar', symbol: 'Bs.' },
-        { from: 'USD', to: 'COP', name: 'Dólar ? Peso Colombiano', symbol: '$' },
-        { from: 'USD', to: 'EUR', name: 'Dólar ? Euro', symbol: '€' },
-        { from: 'USD', to: 'GBP', name: 'Dólar ? Libra', symbol: '£' },
-        { from: 'USD', to: 'BRL', name: 'Dólar ? Real', symbol: 'R$' },
+        { from: 'USD', to: 'VES', name: 'Dolar - Bolivar', symbol: 'Bs.' },
+        { from: 'USD', to: 'COP', name: 'Dolar - Peso Colombiano', symbol: '$' },
+        { from: 'USD', to: 'EUR', name: 'Dolar - Euro', symbol: 'EUR' },
+        { from: 'USD', to: 'GBP', name: 'Dolar - Libra', symbol: 'GBP' },
+        { from: 'USD', to: 'BRL', name: 'Dolar - Real', symbol: 'R$' },
       ],
 
       fetchRates: async () => {
@@ -144,13 +144,12 @@ export const useExchangeRateStore = create<ExchangeRateState>()(
       },
 
       formatCurrency: (amount, currency) => {
-        const { rates } = get();
         const symbols: Record<string, string> = {
           USD: '$',
           VES: 'Bs.',
           COP: '$',
-          EUR: '€',
-          GBP: '£',
+          EUR: 'EUR',
+          GBP: 'GBP',
           BRL: 'R$',
         };
 
@@ -183,4 +182,3 @@ export const useExchangeRateStore = create<ExchangeRateState>()(
     }
   )
 );
-

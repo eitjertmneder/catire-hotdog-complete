@@ -25,14 +25,12 @@ export class PurchasesController {
   constructor(private service: PurchasesService) {}
 
   @Get()
-  @UseGuards(PermissionGuard)
   @CheckPermission('Purchases', 'read')
   async findAll(): Promise<Purchase[]> {
     return await this.service.findAll();
   }
 
   @Get(':id')
-  @UseGuards(PermissionGuard)
   @CheckPermission('Purchases', 'read')
   async findOne(
     @Request() req: TypedRequest,
@@ -44,7 +42,6 @@ export class PurchasesController {
   }
 
   @Post()
-  @UseGuards(PermissionGuard)
   @CheckPermission('Purchases', 'create')
   async create(
     @Body() body: CreatePurchaseDTO,
@@ -54,7 +51,6 @@ export class PurchasesController {
   }
 
   @Patch(':id')
-  @UseGuards(PermissionGuard)
   @CheckPermission('Purchases', 'update')
   async update(
     @Param('id') id: string,
@@ -66,7 +62,6 @@ export class PurchasesController {
   }
 
   @Delete(':id')
-  @UseGuards(PermissionGuard)
   @CheckPermission('Purchases', 'delete')
   async remove(@Param('id') id: string): Promise<void> {
     const purchase = await this.service.remove(id);

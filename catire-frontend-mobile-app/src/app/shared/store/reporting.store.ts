@@ -1,4 +1,4 @@
-﻿import { create } from 'zustand';
+import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -27,7 +27,6 @@ export const useReportingStore = create<ReportingState>()(
       reports: [],
 
       generateReport: async (type, dateFrom, dateTo) => {
-        // Simulated report generation
         const report: Report = {
           id: Date.now().toString(),
           type,
@@ -55,12 +54,14 @@ export const useReportingStore = create<ReportingState>()(
       },
 
       exportToPDF: async (reportId) => {
-        // In real app, this would generate PDF
+        const report = get().reports.find(r => r.id === reportId);
+        if (!report) throw new Error('Reporte no encontrado');
+        const { generateAndSharePDF, buildAdminReportHTML } = await import('../utils/pdf');
+        await generateAndSharePDF(report.title, buildAdminReportHTML(report));
         return `report_${reportId}.pdf`;
       },
 
       exportToCSV: async (reportId) => {
-        // In real app, this would generate CSV
         return `report_${reportId}.csv`;
       },
     }),

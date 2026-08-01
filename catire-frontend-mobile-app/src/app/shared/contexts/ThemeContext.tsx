@@ -7,7 +7,7 @@ type ThemeColors = typeof lightTheme.colors;
 interface ThemeContextType {
   isDark: boolean;
   colors: ThemeColors;
-  toggleTheme: () => void;
+  toggleTheme: (value?: boolean) => void;
   setDarkMode: (value: boolean) => void;
 }
 
@@ -29,8 +29,8 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
-  const toggleTheme = () => {
-    const newValue = !isDark;
+  const toggleTheme = (value?: boolean) => {
+    const newValue = value !== undefined ? value : !isDark;
     setIsDark(newValue);
     AsyncStorage.setItem(THEME_KEY, String(newValue));
   };

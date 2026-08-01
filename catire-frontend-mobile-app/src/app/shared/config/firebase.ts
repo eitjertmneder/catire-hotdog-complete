@@ -1,36 +1,16 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import {
-  GoogleAuthProvider,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-} from 'firebase/auth';
-
-// Suppress Firebase AsyncStorage warning BEFORE getAuth
-const originalWarn = console.warn;
-console.warn = (...args: any[]) => {
-  if (args[0]?.includes?.('AsyncStorage')) return;
-  originalWarn(...args);
-};
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyDwiGh8TgOyEY6mhjZgzhxCzlWhcW55o5k',
-  authDomain: 'el-catire-hot-dog.firebaseapp.com',
-  projectId: 'el-catire-hot-dog',
-  storageBucket: 'el-catire-hot-dog.firebasestorage.app',
-  messagingSenderId: '778480594998',
-  appId: '1:778480594998:web:aec168d0ec62901818a897',
-  measurementId: 'G-5HK8GT712W',
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || '',
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || '',
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || '',
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || '',
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || '',
 };
 
-const firebaseApp = initializeApp(firebaseConfig);
-const auth = getAuth(firebaseApp);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-export {
-  auth,
-  GoogleAuthProvider,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-};
-
-export default firebaseApp;
+export { auth, app };

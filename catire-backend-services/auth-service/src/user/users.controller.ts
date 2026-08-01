@@ -17,17 +17,33 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionGuard } from '../auth/permission.guard';
 import { CheckPermission } from '../auth/permission.decorator';
 
-@UseGuards(JwtAuthGuard, PermissionGuard)
 @Controller('users')
 export class UsersController {
   constructor(private service: UserService) {}
 
+  // Internal endpoint for service-to-service communication (no auth required)
+  @Get('internal/:id')
+  async findUserInternal(@Param('id') id: number) {
+    const user = await this.service.getUserById(id);
+    if (!user) return null;
+    // Return only safe fields
+    return {
+      id: user.id,
+      full_name: user.full_name,
+      email: user.email,
+      role_id: user.role_id,
+      branch_id: user.branch_id,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   @Get()
   @CheckPermission('Users', 'read')
   async findAll(): Promise<User[]> {
     return this.service.findAllUsers();
   }
 
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   @Get(':id')
   @CheckPermission('Users', 'read')
   async findOne(@Param('id') id: number): Promise<User | null> {

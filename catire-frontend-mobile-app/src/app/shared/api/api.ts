@@ -43,6 +43,11 @@ export class Api {
         data: res.data
       }
     } catch (error) {
+      if (error instanceof AxiosError && error.response?.data) {
+        const data = error.response.data as Record<string, unknown>;
+        const msg = Array.isArray(data.message) ? data.message.join(', ') : data.message;
+        return { error: true, message: String(msg ?? error.message), data: null };
+      }
       return {
         error: true,
         message: error instanceof AxiosError ? error.message : error as string,
@@ -70,6 +75,11 @@ export class Api {
         data: res.data as R
       }
     } catch (error) {
+      if (error instanceof AxiosError && error.response?.data) {
+        const data = error.response.data as Record<string, unknown>;
+        const msg = Array.isArray(data.message) ? data.message.join(', ') : data.message;
+        return { error: true, message: String(msg ?? error.message), data: null };
+      }
       return {
         error: true,
         message: error instanceof AxiosError ? error.message : error as string,

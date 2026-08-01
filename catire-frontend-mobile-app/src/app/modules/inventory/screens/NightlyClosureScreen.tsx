@@ -4,14 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../../shared/store/auth.store';
 import { Api } from '../../../shared/api/api';
-import { theme } from '../../../shared/styles/theme';
+import { useAppTheme } from '../../../shared/contexts/ThemeContext';
 
 const api = new Api();
 
 const BRANCHES = [
   { id: 1, name: 'Barrio Sucre' },
-  { id: 2, name: 'Carabobo' },
-  { id: 3, name: 'El Malec�n' },
+  { id: 3, name: 'El Malecon' },
   { id: 4, name: 'Prados del Este' },
   { id: 11, name: 'Barrio Obrero' },
   { id: 12, name: 'La Asogata' },
@@ -34,6 +33,7 @@ interface ClosureItem {
 export const NightlyClosureScreen = () => {
   const navigation = useNavigation();
   const { token, user } = useAuthStore();
+  const { colors } = useAppTheme();
   const [selectedBranch, setSelectedBranch] = useState(BRANCHES[0]);
   const [items, setItems] = useState<ClosureItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -112,18 +112,18 @@ export const NightlyClosureScreen = () => {
   const categories = [...new Set(items.map(i => i.category))];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={{ 
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+        backgroundColor: colors.white,
+        borderBottomWidth: 1, borderBottomColor: colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>← Volver</Text>
+          <Text style={{ fontSize: 16, color: colors.primary, fontWeight: '600' }}>← Volver</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginLeft: 12 }}>
           🌙 Cierre de Noche
         </Text>
       </View>
@@ -134,17 +134,17 @@ export const NightlyClosureScreen = () => {
         data={BRANCHES}
         keyExtractor={(item) => String(item.id)}
         showsHorizontalScrollIndicator={false}
-        style={{ maxHeight: 48, backgroundColor: theme.colors.white, borderBottomWidth: 1, borderBottomColor: theme.colors.border }}
+        style={{ maxHeight: 48, backgroundColor: colors.white, borderBottomWidth: 1, borderBottomColor: colors.border }}
         contentContainerStyle={{ paddingHorizontal: 12, gap: 6, paddingVertical: 8 }}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={{
               paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20,
-              backgroundColor: selectedBranch.id === item.id ? theme.colors.primary : theme.colors.borderLight,
+              backgroundColor: selectedBranch.id === item.id ? colors.primary : colors.borderLight,
             }}
             onPress={() => setSelectedBranch(item)}
           >
-            <Text style={{ color: selectedBranch.id === item.id ? '#fff' : theme.colors.textPrimary, fontWeight: '600', fontSize: 12 }}>
+            <Text style={{ color: selectedBranch.id === item.id ? '#fff' : colors.textPrimary, fontWeight: '600', fontSize: 12 }}>
               {item.name}
             </Text>
           </TouchableOpacity>
@@ -152,28 +152,28 @@ export const NightlyClosureScreen = () => {
       />
 
       {/* Date */}
-      <View style={{ padding: 12, backgroundColor: theme.colors.white, borderBottomWidth: 1, borderBottomColor: theme.colors.border }}>
-        <Text style={{ fontSize: 14, color: theme.colors.textSecondary, textAlign: 'center' }}>
+      <View style={{ padding: 12, backgroundColor: colors.white, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+        <Text style={{ fontSize: 14, color: colors.textSecondary, textAlign: 'center' }}>
           📅 Fecha: {date}
         </Text>
       </View>
 
       {loading ? (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
         <ScrollView style={{ flex: 1 }}>
           {categories.map(category => (
             <View key={category} style={{ marginBottom: 16 }}>
-              <Text style={{ fontSize: 15, fontWeight: '700', color: theme.colors.textPrimary, paddingHorizontal: 16, paddingVertical: 8 }}>
+              <Text style={{ fontSize: 15, fontWeight: '700', color: colors.textPrimary, paddingHorizontal: 16, paddingVertical: 8 }}>
                 {category}
               </Text>
               {items.filter(i => i.category === category).map(item => {
                 const diff = item.physical ? parseFloat(item.physical) - item.theoretical : null;
                 return (
                   <View key={item.ingredient_id} style={{ 
-                    backgroundColor: theme.colors.white, 
+                    backgroundColor: colors.white, 
                     marginHorizontal: 12, 
                     marginBottom: 6, 
                     borderRadius: 12, 
@@ -181,28 +181,28 @@ export const NightlyClosureScreen = () => {
                     shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 
                   }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <Text style={{ fontWeight: '600', color: theme.colors.textPrimary, flex: 1 }}>{item.name}</Text>
-                      <Text style={{ color: theme.colors.textSecondary, fontSize: 12 }}>{item.unit}</Text>
+                      <Text style={{ fontWeight: '600', color: colors.textPrimary, flex: 1 }}>{item.name}</Text>
+                      <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{item.unit}</Text>
                     </View>
                     
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
                       <View style={{ flex: 1 }}>
-                        <Text style={{ fontSize: 11, color: theme.colors.textMuted }}>Teórico:</Text>
-                        <Text style={{ fontWeight: '700', color: theme.colors.textPrimary }}>{item.theoretical}</Text>
+                        <Text style={{ fontSize: 11, color: colors.textMuted }}>Teórico:</Text>
+                        <Text style={{ fontWeight: '700', color: colors.textPrimary }}>{item.theoretical}</Text>
                       </View>
                       <View style={{ flex: 1 }}>
-                        <Text style={{ fontSize: 11, color: theme.colors.textMuted }}>Físico:</Text>
+                        <Text style={{ fontSize: 11, color: colors.textMuted }}>Físico:</Text>
                         <TextInput
                           style={{ 
                             borderWidth: 1, 
-                            borderColor: diff !== null && diff !== 0 ? theme.colors.warning : theme.colors.border, 
+                            borderColor: diff !== null && diff !== 0 ? colors.warning : colors.border, 
                             borderRadius: 8, 
                             paddingHorizontal: 10, 
                             paddingVertical: 4, 
                             fontSize: 14,
                             fontWeight: '700',
-                            color: theme.colors.textPrimary,
-                            backgroundColor: theme.colors.background,
+                            color: colors.textPrimary,
+                            backgroundColor: colors.background,
                           }}
                           placeholder="Conteo real"
                           keyboardType="numeric"
@@ -212,10 +212,10 @@ export const NightlyClosureScreen = () => {
                       </View>
                       {diff !== null && diff !== 0 && (
                         <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                          <Text style={{ fontSize: 11, color: theme.colors.textMuted }}>Diferencia:</Text>
+                          <Text style={{ fontSize: 11, color: colors.textMuted }}>Diferencia:</Text>
                           <Text style={{ 
                             fontWeight: '700', 
-                            color: diff > 0 ? theme.colors.success : theme.colors.error 
+                            color: diff > 0 ? colors.success : colors.error 
                           }}>
                             {diff > 0 ? '+' : ''}{diff.toFixed(0)}
                           </Text>
@@ -225,10 +225,10 @@ export const NightlyClosureScreen = () => {
 
                     <TextInput
                       style={{ 
-                        borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, 
+                        borderWidth: 1, borderColor: colors.border, borderRadius: 8, 
                         paddingHorizontal: 10, paddingVertical: 4, fontSize: 12,
-                        color: theme.colors.textSecondary,
-                        backgroundColor: theme.colors.background,
+                        color: colors.textSecondary,
+                        backgroundColor: colors.background,
                       }}
                       placeholder="Notas (opcional)"
                       value={item.notes}
@@ -246,13 +246,13 @@ export const NightlyClosureScreen = () => {
       {/* Save Button */}
       <View style={{ 
         position: 'absolute', bottom: 0, left: 0, right: 0,
-        backgroundColor: theme.colors.white, padding: 16,
-        borderTopWidth: 1, borderTopColor: theme.colors.border,
+        backgroundColor: colors.white, padding: 16,
+        borderTopWidth: 1, borderTopColor: colors.border,
         shadowColor: '#000', shadowOffset: { width: 0, height: -2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 5,
       }}>
         <TouchableOpacity
           style={{ 
-            backgroundColor: theme.colors.primary, 
+            backgroundColor: colors.primary, 
             paddingVertical: 14, 
             borderRadius: 10, 
             alignItems: 'center',

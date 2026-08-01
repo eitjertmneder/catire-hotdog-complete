@@ -1,1 +1,179 @@
-import React, { useState } from 'react'; import { View, Text, TouchableOpacity, Alert, TextInput, Modal } from 'react-native'; import { SafeAreaView } from 'react-native-safe-area-context'; import { useNavigation } from '@react-navigation/native'; import { useAuthStore } from '../store/auth.store'; import { useTwoFAStore } from '../store/two-fa.store'; import { theme } from '../styles/theme';  export const TwoFAScreen = () => {   const navigation = useNavigation();   const { user } = useAuthStore();   const { enable2FA, disable2FA, is2FAEnabled, sendVerificationCode, verifyCode, getBackupCodes } = useTwoFAStore();      const [isEnabled, setIsEnabled] = useState(is2FAEnabled(user?.id || 0));   const [showSetupModal, setShowSetupModal] = useState(false);   const [showVerifyModal, setShowVerifyModal] = useState(false);   const [verificationCode, setVerificationCode] = useState('');   const [method, setMethod] = useState<'sms' | 'email'>('sms');   const [contact, setContact] = useState(user?.phone_1 || user?.email || '');   const [backupCodes, setBackupCodes] = useState<string[]>([]);   const [sentCode, setSentCode] = useState('');    const handleEnable = () => {     setShowSetupModal(true);   };    const handleDisable = () => {     Alert.alert(       'Desactivar 2FA',       '¿Estás seguro de que quieres desactivar la autenticación de dos factores?',       [         { text: 'Cancelar', style: 'cancel' },         {           text: 'Desactivar',           style: 'destructive',           onPress: () => {             disable2FA(user?.id || 0);             setIsEnabled(false);             Alert.alert('Éxito', '2FA desactivado');           },         },       ]     );   };    const handleSendCode = () => {     const code = sendVerificationCode(user?.id || 0);     setSentCode(code);     Alert.alert('Código enviado', `Se envió un código de verificación a ${contact}`);   };    const handleVerify = () => {     if (verificationCode === sentCode || verifyCode(user?.id || 0, verificationCode)) {       const session = enable2FA(user?.id || 0, method, contact);       setBackupCodes(session.backup_codes);       setShowSetupModal(false);       setIsEnabled(true);       setShowVerifyModal(true);       Alert.alert('Éxito', '2FA activado correctamente');     } else {       Alert.alert('Error', 'Código de verificación incorrecto');     }   };    return (     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>       {/* Header */}       <View style={{         flexDirection: 'row', alignItems: 'center',         paddingHorizontal: 16, paddingVertical: 16,         backgroundColor: theme.colors.white,         borderBottomWidth: 1, borderBottomColor: theme.colors.border,       }}>         <TouchableOpacity onPress={() => navigation.goBack()}>           <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}> Volver</Text>         </TouchableOpacity>         <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>           [ON] Autenticación 2FA         </Text>       </View>        <View style={{ padding: 16 }}>         {/* Status Card */}         <View style={{           backgroundColor: theme.colors.white,           borderRadius: 16,           padding: 24,           marginBottom: 20,           alignItems: 'center',         }}>           <Text style={{ fontSize: 64, marginBottom: 16 }}>             {isEnabled ? '[ON]' : '[OFF]'}           </Text>           <Text style={{ fontSize: 20, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 8 }}>             {isEnabled ? '2FA Activado' : '2FA Desactivado'}           </Text>           <Text style={{ fontSize: 14, color: theme.colors.textSecondary, textAlign: 'center' }}>             {isEnabled                ? 'Tu cuenta está protegida con autenticación de dos factores'               : 'Activa 2FA para agregar una capa extra de seguridad'             }           </Text>         </View>          {/* Enable/Disable Button */}         <TouchableOpacity           style={{             backgroundColor: isEnabled ? '#FEE2E2' : theme.colors.primary,             borderRadius: 12,             paddingVertical: 16,             alignItems: 'center',             marginBottom: 20,           }}           onPress={isEnabled ? handleDisable : handleEnable}         >           <Text style={{             fontSize: 16,             fontWeight: '700',             color: isEnabled ? '#D32F2F' : '#fff',           }}>             {isEnabled ? 'Desactivar 2FA' : 'Activar 2FA'}           </Text>         </TouchableOpacity>          {/* Info */}         <View style={{           backgroundColor: '#F0F9FF',           borderRadius: 12,           padding: 16,         }}>           <Text style={{ fontSize: 14, fontWeight: '700', color: '#0369A1', marginBottom: 12 }}>             ¿Qué es 2FA?           </Text>           <Text style={{ fontSize: 13, color: '#0C4A6E', lineHeight: 20 }}>             La autenticación de dos factores agrega una capa extra de seguridad a tu cuenta. Además de tu contraseña, necesitarás un código de verificación para iniciar sesión.           </Text>           <Text style={{ fontSize: 13, color: '#0C4A6E', lineHeight: 20, marginTop: 8 }}>             Métodos disponibles:           </Text>           <Text style={{ fontSize: 13, color: '#0C4A6E', lineHeight: 20 }}>             • SMS: Recibe el código por mensaje de texto{'\n'}             • Email: Recibe el código por correo electrónico           </Text>         </View>       </View>        {/* Setup Modal */}       <Modal visible={showSetupModal} transparent animationType="slide">         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>           <View style={{             backgroundColor: theme.colors.white,             borderTopLeftRadius: 20,             borderTopRightRadius: 20,             padding: 20,           }}>             <Text style={{ fontSize: 18, fontWeight: '700', marginBottom: 16 }}>Configurar 2FA</Text>              <Text style={{ fontSize: 12, color: theme.colors.textMuted, marginBottom: 4 }}>MÉTODO DE VERIFICACIÓN</Text>             <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>               <TouchableOpacity                 style={{                   flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center',                   backgroundColor: method === 'sms' ? theme.colors.primary : theme.colors.background,                   borderWidth: 1, borderColor: method === 'sms' ? theme.colors.primary : theme.colors.border,                 }}                 onPress={() => setMethod('sms')}               >                 <Text style={{ fontSize: 13, fontWeight: '600', color: method === 'sms' ? '#fff' : theme.colors.textPrimary }}>                   [2FA] SMS                 </Text>               </TouchableOpacity>               <TouchableOpacity                 style={{                   flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center',                   backgroundColor: method === 'email' ? theme.colors.primary : theme.colors.background,                   borderWidth: 1, borderColor: method === 'email' ? theme.colors.primary : theme.colors.border,                 }}                 onPress={() => setMethod('email')}               >                 <Text style={{ fontSize: 13, fontWeight: '600', color: method === 'email' ? '#fff' : theme.colors.textPrimary }}>                   [EMAIL] Email                 </Text>               </TouchableOpacity>             </View>              <Text style={{ fontSize: 12, color: theme.colors.textMuted, marginBottom: 4 }}>               {method === 'sms' ? 'TELÉFONO' : 'CORREO ELECTRÓNICO'}             </Text>             <TextInput               style={{                 borderWidth: 1, borderColor: theme.colors.border, borderRadius: 10,                 padding: 14, fontSize: 16, marginBottom: 16,               }}               placeholder={method === 'sms' ? '0412-1234567' : 'correo@email.com'}               value={contact}               onChangeText={setContact}               keyboardType={method === 'sms' ? 'phone-pad' : 'email-address'}             />              <TouchableOpacity               style={{                 backgroundColor: theme.colors.primary,                 borderRadius: 10,                 paddingVertical: 14,                 alignItems: 'center',                 marginBottom: 10,               }}               onPress={handleSendCode}             >               <Text style={{ color: '#fff', fontWeight: '700' }}>Enviar Código</Text>             </TouchableOpacity>              <Text style={{ fontSize: 12, color: theme.colors.textMuted, marginBottom: 4 }}>CÓDIGO DE VERIFICACIÓN</Text>             <TextInput               style={{                 borderWidth: 1, borderColor: theme.colors.border, borderRadius: 10,                 padding: 14, fontSize: 16, marginBottom: 16, textAlign: 'center', letterSpacing: 4,               }}               placeholder="000000"               value={verificationCode}               onChangeText={setVerificationCode}               keyboardType="number-pad"               maxLength={6}             />              <View style={{ flexDirection: 'row', gap: 10 }}>               <TouchableOpacity                 style={{ flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center', backgroundColor: theme.colors.borderLight }}                 onPress={() => setShowSetupModal(false)}               >                 <Text style={{ color: theme.colors.textSecondary }}>Cancelar</Text>               </TouchableOpacity>               <TouchableOpacity                 style={{ flex: 2, paddingVertical: 14, borderRadius: 12, alignItems: 'center', backgroundColor: theme.colors.primary }}                 onPress={handleVerify}               >                 <Text style={{ color: '#fff', fontWeight: '700' }}>Verificar y Activar</Text>               </TouchableOpacity>             </View>           </View>         </View>       </Modal>        {/* Backup Codes Modal */}       <Modal visible={showVerifyModal} transparent animationType="slide">         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>           <View style={{             backgroundColor: theme.colors.white,             borderTopLeftRadius: 20,             borderTopRightRadius: 20,             padding: 20,           }}>             <Text style={{ fontSize: 18, fontWeight: '700', marginBottom: 16 }}>[ON] Códigos de Respaldo</Text>                          <View style={{               backgroundColor: '#FEF3C7',               borderRadius: 12,               padding: 16,               marginBottom: 16,             }}>               <Text style={{ fontSize: 14, fontWeight: '600', color: '#92400E', marginBottom: 8 }}>                 [!] Guarda estos códigos en un lugar seguro               </Text>               <Text style={{ fontSize: 13, color: '#78350F' }}>                 Estos códigos se pueden usar para acceder a tu cuenta si pierdes acceso a tu teléfono o email. Cada código solo se puede usar una vez.               </Text>             </View>              <View style={{               backgroundColor: theme.colors.background,               borderRadius: 12,               padding: 16,               marginBottom: 16,             }}>               {backupCodes.map((code, index) => (                 <Text key={index} style={{                   fontSize: 16,                   fontFamily: 'monospace',                   fontWeight: '600',                   marginBottom: 8,                   color: theme.colors.textPrimary,                 }}>                   {index + 1}. {code}                 </Text>               ))}             </View>              <TouchableOpacity               style={{                 backgroundColor: theme.colors.primary,                 borderRadius: 12,                 paddingVertical: 14,                 alignItems: 'center',               }}               onPress={() => setShowVerifyModal(false)}             >               <Text style={{ color: '#fff', fontWeight: '700' }}>Entendido, Guardar Códigos</Text>             </TouchableOpacity>           </View>         </View>       </Modal>     </SafeAreaView>   ); };
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Alert, Modal, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { useAuthStore } from '../store/auth.store';
+import { useTwoFAStore } from '../store/two-fa.store';
+import { useAppTheme } from '../contexts/ThemeContext';
+
+export const TwoFAScreen = () => {
+  const navigation = useNavigation();
+  const { user } = useAuthStore();
+  const { enable2FA, disable2FA, is2FAEnabled, getBackupCodes } = useTwoFAStore();
+  const { colors } = useAppTheme();
+
+  const [isEnabled, setIsEnabled] = useState(is2FAEnabled(user?.id || 0));
+  const [showSetupModal, setShowSetupModal] = useState(false);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [backupCodes, setBackupCodes] = useState<string[]>([]);
+
+  const handleEnable = () => {
+    setShowSetupModal(true);
+  };
+
+  const handleDisable = () => {
+    Alert.alert(
+      'Desactivar 2FA',
+      '¿Estás seguro de que quieres desactivar la autenticación de dos factores?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Desactivar',
+          style: 'destructive',
+          onPress: () => {
+            disable2FA(user?.id || 0);
+            setIsEnabled(false);
+            Alert.alert('Éxito', '2FA desactivado');
+          },
+        },
+      ]
+    );
+  };
+
+  const handleActivate = () => {
+    enable2FA(user?.id || 0, 'authenticator', '');
+    setIsEnabled(true);
+    setShowSetupModal(false);
+    setShowVerifyModal(true);
+    setBackupCodes(getBackupCodes(user?.id || 0));
+    Alert.alert('Éxito', '2FA con Google Authenticator activado correctamente');
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      <View style={{ flex: 1, padding: 20 }}>
+        <Text style={{ fontSize: 24, fontWeight: '700', color: colors.textPrimary, marginBottom: 20 }}>
+          Autenticación de Dos Factores
+        </Text>
+
+        <View style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 20, marginBottom: 20 }}>
+          <Text style={{ fontSize: 16, color: colors.textPrimary, marginBottom: 10 }}>
+            Estado: {isEnabled ? 'Activado' : 'Desactivado'}
+          </Text>
+          <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 16 }}>
+            Método: Google Authenticator (TOTP)
+          </Text>
+
+          {isEnabled ? (
+            <TouchableOpacity
+              onPress={handleDisable}
+              style={{ backgroundColor: '#EF4444', padding: 15, borderRadius: 8, alignItems: 'center' }}
+            >
+              <Text style={{ color: '#fff', fontWeight: '600' }}>Desactivar 2FA</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={handleEnable}
+              style={{ backgroundColor: '#10B981', padding: 15, borderRadius: 8, alignItems: 'center' }}
+            >
+              <Text style={{ color: '#fff', fontWeight: '600' }}>Activar 2FA</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Setup Modal - Google Authenticator */}
+        <Modal visible={showSetupModal} animationType="slide">
+          <SafeAreaView style={{ flex: 1, backgroundColor: colors.background, padding: 20 }}>
+            <ScrollView>
+              <Text style={{ fontSize: 20, fontWeight: '700', color: colors.textPrimary, marginBottom: 20 }}>
+                Configurar Google Authenticator
+              </Text>
+
+              <View style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 20, marginBottom: 16 }}>
+                <Text style={{ fontSize: 15, fontWeight: '600', color: colors.textPrimary, marginBottom: 12 }}>
+                  Paso 1: Descarga la app
+                </Text>
+                <Text style={{ fontSize: 14, color: colors.textSecondary, lineHeight: 22 }}>
+                  Descarga Google Authenticator desde la App Store o Google Play Store en tu teléfono.
+                </Text>
+              </View>
+
+              <View style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 20, marginBottom: 16 }}>
+                <Text style={{ fontSize: 15, fontWeight: '600', color: colors.textPrimary, marginBottom: 12 }}>
+                  Paso 2: Escanea el código QR
+                </Text>
+                <View style={{
+                  width: 200, height: 200, backgroundColor: colors.borderLight, borderRadius: 12,
+                  alignSelf: 'center', justifyContent: 'center', alignItems: 'center', marginBottom: 12,
+                  borderWidth: 2, borderColor: colors.border, borderStyle: 'dashed',
+                }}>
+                  <Text style={{ fontSize: 48, marginBottom: 8 }}>{'\uD83D\uDD10'}</Text>
+                  <Text style={{ fontSize: 12, color: colors.textMuted, textAlign: 'center' }}>
+                    Código QR{'\n'}(Próximamente)
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 13, color: colors.textSecondary, textAlign: 'center' }}>
+                  Abre Google Authenticator y escanea este código QR
+                </Text>
+              </View>
+
+              <View style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 20, marginBottom: 16 }}>
+                <Text style={{ fontSize: 15, fontWeight: '600', color: colors.textPrimary, marginBottom: 12 }}>
+                  Paso 3: Verifica tu código
+                </Text>
+                <Text style={{ fontSize: 14, color: colors.textSecondary, lineHeight: 22 }}>
+                  Ingresa el código de 6 dígitos que aparece en tu app de Google Authenticator para verificar la configuración.
+                </Text>
+              </View>
+
+              <View style={{ backgroundColor: '#FEF3C7', borderRadius: 12, padding: 16, marginBottom: 20 }}>
+                <Text style={{ fontSize: 13, color: '#92400E', lineHeight: 20 }}>
+                  Nota: Los métodos SMS y Gmail ya no están disponibles. Solo se utiliza Google Authenticator para mayor seguridad.
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={handleActivate}
+                style={{ backgroundColor: '#10B981', padding: 15, borderRadius: 8, alignItems: 'center', marginBottom: 10 }}
+              >
+                <Text style={{ color: '#fff', fontWeight: '600' }}>Activar Google Authenticator</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => setShowSetupModal(false)}
+                style={{ padding: 15, alignItems: 'center' }}
+              >
+                <Text style={{ color: colors.textSecondary }}>Cancelar</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </SafeAreaView>
+        </Modal>
+
+        {/* Backup Codes Modal */}
+        <Modal visible={showVerifyModal} animationType="slide">
+          <SafeAreaView style={{ flex: 1, backgroundColor: colors.background, padding: 20 }}>
+            <Text style={{ fontSize: 20, fontWeight: '700', color: colors.textPrimary, marginBottom: 20 }}>
+              Códigos de respaldo
+            </Text>
+            <Text style={{ fontSize: 14, color: colors.textSecondary, marginBottom: 20 }}>
+              Guarda estos códigos en un lugar seguro. Podrás usarlos si pierdes acceso a Google Authenticator.
+            </Text>
+
+            {backupCodes.map((code, index) => (
+              <View key={index} style={{ backgroundColor: colors.surface, padding: 15, borderRadius: 8, marginBottom: 8 }}>
+                <Text style={{ fontFamily: 'monospace', fontSize: 16, color: colors.textPrimary }}>{code}</Text>
+              </View>
+            ))}
+
+            <TouchableOpacity
+              onPress={() => { setShowVerifyModal(false); navigation.goBack(); }}
+              style={{ backgroundColor: colors.primary, padding: 15, borderRadius: 8, alignItems: 'center', marginTop: 20 }}
+            >
+              <Text style={{ color: '#fff', fontWeight: '600' }}>Entendido</Text>
+            </TouchableOpacity>
+          </SafeAreaView>
+        </Modal>
+      </View>
+    </SafeAreaView>
+  );
+};

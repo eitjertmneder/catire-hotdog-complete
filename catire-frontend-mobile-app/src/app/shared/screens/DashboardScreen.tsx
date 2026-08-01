@@ -6,7 +6,6 @@ import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../store/auth.store';
 import { useCurrencyStore } from '../store/currency.store';
 import { Api } from '../api/api';
-import { theme } from '../styles/theme';
 import { useAppTheme } from '../contexts/ThemeContext';
 
 const api = new Api();
@@ -23,8 +22,7 @@ interface DashboardStats {
 
 const BRANCHES = [
   { name: 'Barrio Sucre', country: 'Venezuela', lat: 10.4806, lng: -66.9036, status: 'Activa' },
-  { name: 'Carabobo', country: 'Venezuela', lat: 10.4680, lng: -66.9520, status: 'Activa' },
-  { name: 'El Malecon', country: 'Colombia', lat: 7.8891, lng: -72.4967, status: 'Activa' },
+  { name: 'El Malecón', country: 'Colombia', lat: 7.8891, lng: -72.4967, status: 'Activa' },
   { name: 'Prados del Este', country: 'Colombia', lat: 7.7669, lng: -72.3350, status: 'Activa' },
   { name: 'Barrio Obrero', country: 'Venezuela', lat: 10.4916, lng: -66.8790, status: 'Activa' },
   { name: 'La Asogata', country: 'Venezuela', lat: 10.4520, lng: -66.9320, status: 'Activa' },
@@ -98,7 +96,7 @@ export const DashboardScreen = () => {
   if (loading) {
     return (
       <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <ActivityIndicator size="large" color={colors.primary} />
       </SafeAreaView>
     );
   }
@@ -110,10 +108,9 @@ export const DashboardScreen = () => {
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 16, paddingVertical: 16,
         backgroundColor: colors.surface,
-        borderBottomWidth: 1, borderBottomColor: colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
+          <Text style={{ fontSize: 16, color: colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
         </TouchableOpacity>
         <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginLeft: 12 }}>
           Dashboard
@@ -134,6 +131,7 @@ export const DashboardScreen = () => {
             isDark={isDark}
             surfaceColor={colors.surface}
             textColor={colors.textPrimary}
+            textMutedColor={colors.textMuted}
           />
           <StatCard
             icon={'\u{23F3}'}
@@ -143,6 +141,7 @@ export const DashboardScreen = () => {
             isDark={isDark}
             surfaceColor={colors.surface}
             textColor={colors.textPrimary}
+            textMutedColor={colors.textMuted}
           />
           <StatCard
             icon={'\u{2705}'}
@@ -152,6 +151,7 @@ export const DashboardScreen = () => {
             isDark={isDark}
             surfaceColor={colors.surface}
             textColor={colors.textPrimary}
+            textMutedColor={colors.textMuted}
           />
           <StatCard
             icon={'\u{1F4B0}'}
@@ -161,6 +161,7 @@ export const DashboardScreen = () => {
             isDark={isDark}
             surfaceColor={colors.surface}
             textColor={colors.textPrimary}
+            textMutedColor={colors.textMuted}
           />
           <StatCard
             icon={'\u{1F37D}'}
@@ -170,6 +171,7 @@ export const DashboardScreen = () => {
             isDark={isDark}
             surfaceColor={colors.surface}
             textColor={colors.textPrimary}
+            textMutedColor={colors.textMuted}
           />
           <StatCard
             icon={'\u{1F9CA}'}
@@ -179,6 +181,7 @@ export const DashboardScreen = () => {
             isDark={isDark}
             surfaceColor={colors.surface}
             textColor={colors.textPrimary}
+            textMutedColor={colors.textMuted}
           />
         </View>
 
@@ -258,7 +261,7 @@ export const DashboardScreen = () => {
             borderColor: colors.border,
           }}>
             {/* Table Header */}
-            <View style={[styles.tableHeader, { backgroundColor: theme.colors.primary }]}>
+            <View style={[styles.tableHeader, { backgroundColor: colors.primary }]}>
               <Text style={[styles.tableHeaderText, { flex: 2.2 }]}>Sucursal</Text>
               <Text style={[styles.tableHeaderText, { flex: 1.3 }]}>Pa\u00EDs</Text>
               <Text style={[styles.tableHeaderText, { flex: 1.8, textAlign: 'right' }]}>Coordenadas</Text>
@@ -308,10 +311,10 @@ export const DashboardScreen = () => {
 };
 
 const StatCard = ({
-  icon, title, value, color, isDark, surfaceColor, textColor
+  icon, title, value, color, isDark, surfaceColor, textColor, textMutedColor
 }: {
   icon: string; title: string; value: any; color: string;
-  isDark: boolean; surfaceColor: string; textColor: string;
+  isDark: boolean; surfaceColor: string; textColor: string; textMutedColor: string;
 }) => (
   <View style={{
     width: '48%',
@@ -328,7 +331,7 @@ const StatCard = ({
     borderColor: isDark ? '#333' : '#F3F4F6',
   }}>
     <Text style={{ fontSize: 24, marginBottom: 8 }}>{icon}</Text>
-    <Text style={{ fontSize: 12, color: isDark ? '#999' : theme.colors.textMuted, textTransform: 'uppercase' }}>{title}</Text>
+    <Text style={{ fontSize: 12, color: isDark ? '#999' : textMutedColor, textTransform: 'uppercase' }}>{title}</Text>
     <Text style={{ fontSize: 20, fontWeight: '700', color, marginTop: 4 }}>{value}</Text>
   </View>
 );

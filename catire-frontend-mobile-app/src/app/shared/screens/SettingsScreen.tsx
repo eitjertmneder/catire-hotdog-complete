@@ -17,7 +17,7 @@ export const SettingsScreen = () => {
       try {
         const enabled = await SecureStore.getItemAsync('biometric_enabled');
         setBiometric(enabled === 'true');
-      } catch {}
+      } catch (e) { console.warn('Operation failed:', e); }
     })();
   }, []);
 
@@ -29,7 +29,7 @@ export const SettingsScreen = () => {
       } else {
         await SecureStore.setItemAsync('biometric_enabled', 'false');
       }
-    } catch {}
+    } catch (e) { console.warn('Operation failed:', e); }
   };
 
   const handleLogout = () => {

@@ -14,8 +14,8 @@ const CATEGORIES = [
 // Sucursales que NO tienen hamburguesa
 const NO_HAMBURGUESA = [11, 16];
 
-// Sucursales que TIENEN Nestea
-const HAS_NESTEA = [1, 2, 3, 4, 11, 12, 13];
+// Sucursales que TIENEN Nestea: Barrio Obrero, Sambil, Colombia (Prados del Este)
+const HAS_NESTEA = [11, 16, 4];
 
 const PRODUCTS_BY_CATEGORY: Record<string, any[]> = {
   perros: [

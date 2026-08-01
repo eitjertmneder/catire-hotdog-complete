@@ -6,7 +6,7 @@ import { useCartStore } from '../../../shared/store/cart.store';
 import { useAppTheme } from '../../../shared/contexts/ThemeContext';
 
 const CATEGORIES = [
-  { id: 'perros', name: 'Perros Calientes', emoji: '\u{1F30D}', color: '#EF4444', bgColor: '#FEE2E2', description: 'Perros calientes con muchas opciones de salchicha', route: 'Menu' },
+  { id: 'perros', name: 'Perros Calientes', emoji: '\u{1F32D}', color: '#EF4444', bgColor: '#FEE2E2', description: 'Perros calientes con muchas opciones de salchicha', route: 'Menu' },
   { id: 'hamburguesas', name: 'Hamburguesas', emoji: '\u{1F354}', color: '#F59E0B', bgColor: '#FEF3C7', description: 'Hamburguesas sencillas y mixtas', route: 'Menu' },
   { id: 'salchipapas', name: 'Salchipapas', emoji: '\u{1F9C8}', color: '#10B981', bgColor: '#D1FAE5', description: 'Salchipapas junior y normales', route: 'Menu' },
   { id: 'bebidas', name: 'Bebidas', emoji: '\u{1F964}', color: '#3B82F6', bgColor: '#DBEAFE', description: 'Refrescos, jugos y mas', route: 'Menu' },

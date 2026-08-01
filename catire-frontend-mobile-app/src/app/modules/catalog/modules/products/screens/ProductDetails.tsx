@@ -32,11 +32,11 @@ export default function ProductDetails({ route }: any) {
     });
 
     if (category === 'Perros') {
-      defaults['SIZE'] = ['Pan mini'];
+      defaults['SIZE'] = ['Pan pequeno'];
       defaults['TYPE_SAUSAGE'] = ['Mini Frankfurt'];
     } else if (category === 'Salchipapas') {
       defaults['SIZE'] = ['Junior'];
-      defaults['TYPE_SAUSAGE'] = ['Chesse'];
+      defaults['TYPE_SAUSAGE'] = ['Cheese Salchicatire'];
     } else if (category === 'Hamburguesas') {
       defaults['SIZE'] = ['Sencilla'];
       defaults['TYPE_MEAT'] = ['Carne'];
@@ -53,7 +53,7 @@ export default function ProductDetails({ route }: any) {
 
     if (category === 'Perros') {
       const sausage = selectedSausages[0] || 'Mini Frankfurt';
-      if (['Catirota', 'CatireHot', 'Chicken'].includes(sausage)) {
+      if (['Catirota', 'Catire Hot', 'Chicken'].includes(sausage)) {
         return 5.0;
       }
       return 4.5;
@@ -88,11 +88,11 @@ export default function ProductDetails({ route }: any) {
     if (category === 'Salchipapas' && currentSize === 'Porción de papas' && tag !== 'SIZE') {
       return [];
     }
-    if (category === 'Perros' && tag === 'TYPE_SAUSAGE' && currentSize === 'Pan mini') {
+    if (category === 'Perros' && tag === 'TYPE_SAUSAGE' && currentSize === 'Pan pequeno') {
       return ['Mini Frankfurt'];
     }
     if (category === 'Salchipapas' && tag === 'TYPE_SAUSAGE' && currentSize === 'Junior') {
-      return ['Chesse'];
+      return ['Cheese Salchicatire'];
     }
     return options; 
   };
@@ -108,9 +108,9 @@ export default function ProductDetails({ route }: any) {
         const newSelections = { ...prev, SIZE: [option] };
         
         if (category === 'Perros') {
-          if (option === 'Pan mini') {
+          if (option === 'Pan pequeno') {
             newSelections['TYPE_SAUSAGE'] = ['Mini Frankfurt'];
-          } else if (option === 'Normal') {
+          } else if (option === 'Pan normal') {
             newSelections['TYPE_SAUSAGE'] = []; 
           }
         } 
@@ -121,11 +121,11 @@ export default function ProductDetails({ route }: any) {
             newSelections['SAUCE'] = [];
           } 
           else if (option === 'Junior') {
-            newSelections['TYPE_SAUSAGE'] = ['Chesse'];
+            newSelections['TYPE_SAUSAGE'] = ['Cheese Salchicatire'];
             const allSauces = productFeatures.find(f => f.tag === 'SAUCE')?.options || [];
             if (!prev['SAUCE'] || prev['SAUCE'].length === 0) newSelections['SAUCE'] = [...allSauces];
           } 
-          else if (option === 'Normal') {
+          else if (option === 'Pan normal') {
             newSelections['TYPE_SAUSAGE'] = ['Salchicatire']; 
             const allSauces = productFeatures.find(f => f.tag === 'SAUCE')?.options || [];
             if (!prev['SAUCE'] || prev['SAUCE'].length === 0) newSelections['SAUCE'] = [...allSauces];

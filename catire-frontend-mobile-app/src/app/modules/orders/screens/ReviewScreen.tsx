@@ -4,13 +4,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../../shared/store/auth.store';
 import { useReviewStore, Review } from '../../../shared/store/review.store';
-import { theme } from '../../../shared/styles/theme';
+import { useAppTheme } from '../../../shared/contexts/ThemeContext';
 
 export const ReviewScreen = () => {
   const route = useRoute<any>();
   const navigation = useNavigation();
   const { user } = useAuthStore();
   const { addReview, getReviewsByOrder, hasUserReviewedOrder } = useReviewStore();
+  const { colors } = useAppTheme();
   
   const orderId = route.params?.orderId || '';
   const [rating, setRating] = useState(0);
@@ -57,18 +58,18 @@ export const ReviewScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={{
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+        backgroundColor: colors.white,
+        borderBottomWidth: 1, borderBottomColor: colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
+          <Text style={{ fontSize: 16, color: colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginLeft: 12 }}>
           Reseñas - Pedido #{orderId.slice(0, 8)}
         </Text>
       </View>
@@ -80,12 +81,12 @@ export const ReviewScreen = () => {
         ListHeaderComponent={
           !hasReviewed ? (
             <View style={{
-              backgroundColor: theme.colors.white,
+              backgroundColor: colors.white,
               borderRadius: 12,
               padding: 16,
               marginBottom: 16,
             }}>
-              <Text style={{ fontSize: 16, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
+              <Text style={{ fontSize: 16, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 }}>
                 Califica tu experiencia
               </Text>
               
@@ -96,16 +97,16 @@ export const ReviewScreen = () => {
               <TextInput
                 style={{
                   borderWidth: 1,
-                  borderColor: theme.colors.border,
+                  borderColor: colors.border,
                   borderRadius: 10,
                   padding: 12,
                   fontSize: 14,
                   minHeight: 80,
                   textAlignVertical: 'top',
-                  backgroundColor: theme.colors.background,
+                  backgroundColor: colors.background,
                 }}
                 placeholder="Cuéntanos sobre tu experiencia (opcional)"
-                placeholderTextColor={theme.colors.textMuted}
+                placeholderTextColor={colors.textMuted}
                 value={comment}
                 onChangeText={setComment}
                 multiline
@@ -113,7 +114,7 @@ export const ReviewScreen = () => {
 
               <TouchableOpacity
                 style={{
-                  backgroundColor: theme.colors.primary,
+                  backgroundColor: colors.primary,
                   borderRadius: 10,
                   paddingVertical: 14,
                   alignItems: 'center',
@@ -141,22 +142,22 @@ export const ReviewScreen = () => {
         }
         renderItem={({ item }) => (
           <View style={{
-            backgroundColor: theme.colors.white,
+            backgroundColor: colors.white,
             borderRadius: 12,
             padding: 16,
             marginBottom: 10,
           }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-              <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary }}>
+              <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary }}>
                 {item.user_name}
               </Text>
-              <Text style={{ fontSize: 12, color: theme.colors.textMuted }}>
+              <Text style={{ fontSize: 12, color: colors.textMuted }}>
                 {new Date(item.created_at).toLocaleDateString()}
               </Text>
             </View>
             {renderStars(item.rating)}
             {item.comment ? (
-              <Text style={{ fontSize: 14, color: theme.colors.textSecondary, marginTop: 8 }}>
+              <Text style={{ fontSize: 14, color: colors.textSecondary, marginTop: 8 }}>
                 {item.comment}
               </Text>
             ) : null}
@@ -165,7 +166,7 @@ export const ReviewScreen = () => {
         ListEmptyComponent={
           <View style={{ alignItems: 'center', paddingTop: 40 }}>
             <Text style={{ fontSize: 48, marginBottom: 12 }}>{'\u{1F4DD}'}</Text>
-            <Text style={{ fontSize: 14, color: theme.colors.textMuted }}>No hay reseñas aún</Text>
+            <Text style={{ fontSize: 14, color: colors.textMuted }}>No hay reseñas aún</Text>
           </View>
         }
       />

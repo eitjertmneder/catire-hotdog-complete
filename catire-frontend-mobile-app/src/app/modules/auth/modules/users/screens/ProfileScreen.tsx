@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, Switch, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 import { useAuthStore } from '../../../../../shared/store/auth.store';
 import { useAppTheme } from '../../../../../shared/contexts/ThemeContext';
 
@@ -13,6 +15,15 @@ export const ProfileScreen = () => {
   const [fullName, setFullName] = useState(user?.full_name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [saving, setSaving] = useState(false);
+  const [biometric, setBiometric] = useState(false);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      SecureStore.getItemAsync('biometric_enabled').then(val => {
+        setBiometric(val === 'true');
+      });
+    }
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
@@ -99,6 +110,27 @@ export const ProfileScreen = () => {
               <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>Activa el tema oscuro en toda la app</Text>
             </View>
             <Switch value={isDark} onValueChange={toggleTheme} trackColor={{ false: '#E2E8F0', true: colors.primary }} thumbColor={isDark ? '#fff' : '#f4f3f4'} />
+          </View>
+        </View>
+
+        {/* Biometric toggle */}
+        <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 16, marginBottom: 16 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 15, fontWeight: '700', color: colors.textPrimary }}>{'\u{1F510}'} Login Biometrico</Text>
+              <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>Accede con huella dactilar o Face ID</Text>
+            </View>
+            <Switch
+              value={biometric}
+              onValueChange={async (val) => {
+                setBiometric(val);
+                if (Platform.OS !== 'web') {
+                  await SecureStore.setItemAsync('biometric_enabled', val ? 'true' : 'false');
+                }
+              }}
+              trackColor={{ false: '#E2E8F0', true: colors.primary }}
+              thumbColor={biometric ? '#fff' : '#f4f3f4'}
+            />
           </View>
         </View>
 

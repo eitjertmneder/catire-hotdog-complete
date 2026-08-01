@@ -5,7 +5,8 @@ type Module =
   | 'Products'
   | 'Menus'
   | 'Orders'
-  | 'Purchases';
+  | 'Purchases'
+  | 'Reviews';
 type Permission = 'create' | 'read' | 'update' | 'delete';
 
 type PermissionJson = {

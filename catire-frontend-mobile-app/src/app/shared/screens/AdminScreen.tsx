@@ -34,8 +34,6 @@ const MODULE_GROUPS = [
     modules: [
       { title: 'Inventario', icon: '\uD83D\uDCE6', route: 'InventoryAdmin', color: '#4F46E5' },
       { title: 'Transferencias', icon: '\uD83D\uDD04', route: 'Transfers', color: '#9333EA' },
-      { title: 'Turnos', icon: '\uD83D\uDD50', route: 'EmployeeShift', color: '#0D9488' },
-      { title: 'Cocina', icon: '\uD83D\uDC68\u200D\uD83C\uDF73', route: 'KitchenDisplay', color: '#EA580C' },
       { title: 'Delivery', icon: '\uD83D\uDE97', route: 'DeliveryPartners', color: '#2563EB' },
     ],
   },
@@ -47,9 +45,7 @@ const MODULE_GROUPS = [
       { title: 'Tasas de Cambio', icon: '\uD83D\uDCB1', route: 'CurrencyRates', color: '#059669' },
       { title: 'Pagos', icon: '\uD83D\uDCB0', route: 'Payments', color: '#DC2626' },
       { title: 'Pago Movil', icon: '\uD83D\uDCB3', route: 'PaymentConfig', color: '#2563EB' },
-      { title: 'Reportes', icon: '\uD83D\uDCC8', route: 'ReportsScreen', color: '#7C3AED' },
-      { title: 'Reportes+', icon: '\uD83D\uDCC1', route: 'AdvancedReports', color: '#4F46E5' },
-      { title: 'Reportes PDF', icon: '\uD83D\uDCC4', route: 'PDFReports', color: '#B91C1C' },
+      { title: 'Reportes', icon: '\uD83D\uDCC8', route: 'AdvancedReports', color: '#7C3AED' },
     ],
   },
   {
@@ -66,7 +62,7 @@ const MODULE_GROUPS = [
     subtitle: 'Datos para tomar decisiones',
     accent: '#0891B2',
     modules: [
-      { title: 'Analytics', icon: '\uD83D\uDCC9', route: 'Analytics', color: '#2563EB' },
+      { title: 'Analisis', icon: '\uD83D\uDCC9', route: 'Analytics', color: '#2563EB' },
       { title: 'Feedback', icon: '\uD83D\uDCAC', route: 'FeedbackAnalytics', color: '#7C3AED' },
       { title: 'Proveedores', icon: '\uD83C\uDFED', route: 'Suppliers', color: '#059669' },
     ],
@@ -242,7 +238,7 @@ export const AdminScreen = () => {
             Catire Hot Dog
           </Text>
           <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 4 }}>
-            Sistema de Gestion v2.0 | 34 Modulos
+            Sistema de Gestion v2.0 | 32 Modulos
           </Text>
           <Text style={{ fontSize: 11, color: colors.textSecondary, marginTop: 6 }}>
             Soporte: +584247038001

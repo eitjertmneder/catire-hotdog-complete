@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ImageStorageService } from '../image-storage/image-storage.service';
+import { AuditService } from '../audit/audit.service';
 import { CreateOrderDTO, CreateOrderItemDTO } from './dto/create-order.dto';
 import { UpdateOrderDTO } from './dto/update-order.dto';
 import axios from 'axios';
@@ -12,10 +13,44 @@ export class OrdersService {
   constructor(
     private prisma: PrismaService,
     private imageStorage: ImageStorageService,
+    private auditService: AuditService,
   ) {}
 
   async findAll(token: string, user?: any) {
+    // If user is an employee (cajero), only return orders from their branch
+    const where: any = {};
+    if (user && user.role?.name === 'employee' && user.branch_id) {
+      where.branch_id = user.branch_id;
+    }
+
     const orders = await this.prisma.order.findMany({
+      where,
+      include: { items: true },
+      orderBy: { created_at: 'desc' },
+    });
+
+    // Fetch user information for each order using internal endpoint (no auth required)
+    const authUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:3000';
+    const ordersWithUsers = await Promise.all(
+      orders.map(async (order) => {
+        try {
+          if (order.user_id) {
+            const userRes = await axios.get(`${authUrl}/users/internal/${order.user_id}`);
+            return { ...order, user: userRes.data };
+          }
+        } catch (e) {
+          // If user fetch fails, return order without user info
+        }
+        return { ...order, user: null };
+      })
+    );
+
+    return ordersWithUsers;
+  }
+
+  async findByBranch(branchId: number, token: string) {
+    const orders = await this.prisma.order.findMany({
+      where: { branch_id: branchId },
       include: { items: true },
       orderBy: { created_at: 'desc' },
     });
@@ -66,9 +101,16 @@ export class OrdersService {
     return order;
   }
 
-  async update(id: string, data: UpdateOrderDTO, token: string) {
+  async update(id: string, data: UpdateOrderDTO, token: string, user?: any) {
     const existingOrder = await this.findOne(id);
-    
+
+    // Validate that employees can only update orders from their branch
+    if (user && user.role?.name === 'employee') {
+      if (existingOrder.branch_id !== user.branch_id) {
+        throw new ForbiddenException('No puedes aprobar ordenes de otra sucursal');
+      }
+    }
+
     // Update order
     const updatedOrder = await this.prisma.order.update({
       where: { id },
@@ -76,14 +118,45 @@ export class OrdersService {
       include: { items: true },
     });
 
-    // Handle stock deduction when status changes to PAID
+    // Handle stock deduction when status changes to PAID (cajero approves)
     if (existingOrder.status !== 'PAID' && updatedOrder.status === 'PAID') {
       await this.deductStockForOrder(updatedOrder, updatedOrder.branch_id || 0, token);
     }
 
-    // Handle stock restoration when status changes to CANCELLED
-    if (existingOrder.status !== 'CANCELLED' && updatedOrder.status === 'CANCELLED') {
-      await this.restoreStockForOrder(updatedOrder, updatedOrder.branch_id || 0, token);
+    // Audit logging for status changes
+    if (existingOrder.status !== updatedOrder.status) {
+      const auditData = {
+        user_email: user?.email,
+        user_id: user?.id,
+        branch_id: updatedOrder.branch_id || undefined,
+        metadata: { order_id: id, previous_status: existingOrder.status, new_status: updatedOrder.status },
+      };
+
+      if (updatedOrder.status === 'PAID') {
+        await this.auditService.log({
+          type: 'order_change',
+          action: 'order_paid',
+          description: `Orden #${id} marcada como pagada`,
+          severity: 'success',
+          ...auditData,
+        });
+      } else if (updatedOrder.status === 'CANCELLED') {
+        await this.auditService.log({
+          type: 'order_change',
+          action: 'order_cancelled',
+          description: `Orden #${id} cancelada${updatedOrder.cancel_reason ? `: ${updatedOrder.cancel_reason}` : ''}`,
+          severity: 'warning',
+          ...auditData,
+        });
+      } else if (updatedOrder.status === 'DELIVERED') {
+        await this.auditService.log({
+          type: 'order_change',
+          action: 'order_delivered',
+          description: `Orden #${id} marcada como entregada`,
+          severity: 'success',
+          ...auditData,
+        });
+      }
     }
 
     return updatedOrder;
@@ -91,14 +164,17 @@ export class OrdersService {
 
   async remove(id: string) {
     const order = await this.findOne(id);
-    
-    // Restore stock if order was paid
-    if (order.status === 'PAID' || order.status === 'PREPARING' || order.status === 'READY') {
-      await this.restoreStockForOrder(order, order.branch_id || 0, '');
-    }
 
     await this.prisma.orderDetails.deleteMany({ where: { order_id: id } });
     return this.prisma.order.delete({ where: { id } });
+  }
+
+  private normalizeForMatch(str: string): string {
+    return str
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, '');
   }
 
   private async deductStockForOrder(order: any, branchId: number, token: string) {
@@ -127,10 +203,17 @@ export class OrdersService {
                 const ingredient = ingredients.find(
                   (ing: any) => ing.name_tag === feature.name_tag && ing.name.toLowerCase() === trimmed.toLowerCase()
                 ) || ingredients.find(
-                  (ing: any) => ing.name_tag === feature.name_tag && ing.name.toLowerCase().includes(trimmed.toLowerCase())
+                  (ing: any) => ing.name_tag === feature.name_tag && this.normalizeForMatch(ing.name) === this.normalizeForMatch(trimmed)
+                ) || ingredients.find(
+                  (ing: any) => ing.name_tag === feature.name_tag && (
+                    ing.name.toLowerCase().includes(trimmed.toLowerCase()) ||
+                    trimmed.toLowerCase().includes(ing.name.toLowerCase())
+                  )
                 );
                 if (ingredient) {
                   itemsToDeduct.push({ ingredient_id: ingredient.id, quantity: orderItem.quantity });
+                } else {
+                  console.warn(`No ingredient match for feature: name_tag=${feature.name_tag}, value="${trimmed}"`);
                 }
               }
             }
@@ -148,42 +231,4 @@ export class OrdersService {
       }
     }
   }
-
-  private async restoreStockForOrder(order: any, branchId: number, token: string) {
-    try {
-      const catalogUrl = process.env.CATALOG_SERVICE_URL;
-      const ingredientsRes = await axios.get(`${catalogUrl}/ingredients/internal/by-branch?branch_id=${branchId}`, { headers: { authorization: token } });
-      const ingredients = ingredientsRes.data;
-
-      const itemsToRestock: { ingredient_id: number; quantity: number }[] = [];
-
-      for (const orderItem of order.items) {
-        if (orderItem.features && Array.isArray(orderItem.features)) {
-          for (const feature of orderItem.features) {
-            if (!feature.value) continue;
-            const values = feature.value.split(',');
-            for (const val of values) {
-              const trimmed = val.trim();
-              if (!trimmed) continue;
-              const ingredient = ingredients.find(
-                (ing: any) => ing.name_tag === feature.name_tag && ing.name.toLowerCase().includes(trimmed.toLowerCase())
-              );
-              if (ingredient) {
-                itemsToRestock.push({ ingredient_id: ingredient.id, quantity: orderItem.quantity });
-              }
-            }
-          }
-        }
-      }
-
-      if (itemsToRestock.length > 0) {
-        await axios.post(`${catalogUrl}/ingredients/internal/batch-restock`, { items: itemsToRestock }, { headers: { authorization: token } });
-      }
-    } catch (error) {
-      console.error(`Error restoring stock for order ${order.id}:`, error);
-    }
-  }
 }
-
-
-

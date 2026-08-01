@@ -13,7 +13,6 @@ export class PurchasesReportController {
   constructor(private service: PurchasesService) {}
 
   @Get('report')
-  @UseGuards(PermissionGuard)
   @CheckPermission('Purchases', 'read')
   async report(@Res() res: Response): Promise<void> {
     const purchases = await this.service.findAll();

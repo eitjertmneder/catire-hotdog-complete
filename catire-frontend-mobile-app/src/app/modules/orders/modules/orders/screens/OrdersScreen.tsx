@@ -5,7 +5,6 @@ import { useAuthStore } from '../../../../../shared/store/auth.store';
 import { useOrdersStore } from '../../../store/orders.store';
 import { useNavigation } from '@react-navigation/core';
 import { OrderStatusType } from '../../../../../shared/api/enums';
-import { theme } from '../../../../../shared/styles/theme';
 import { useAppTheme } from '../../../../../shared/contexts/ThemeContext';
 
 type TabType = 'active' | 'completed' | 'cancelled';
@@ -27,7 +26,7 @@ const TABS: { key: TabType; label: string }[] = [
 ];
 
 export const OrdersScreen = () => {
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   const { orders, fetchOrders, loading } = useOrdersStore();
   const intervalRef = useRef<any>(null);
   const navigation = useNavigation<any>();
@@ -55,19 +54,23 @@ export const OrdersScreen = () => {
 
   const filteredOrders = useMemo(() => {
     if (!orders) return [];
+    // Filter by current user's orders only
+    const userOrders = user?.id
+      ? orders.filter((o: any) => String(o.user_id) === String(user.id))
+      : orders;
     switch (activeTab) {
       case 'active':
-        return orders.filter((o: any) => 
+        return userOrders.filter((o: any) => 
           ['PENDING', 'PAID', 'PREPARING', 'READY', 'ON_THE_WAY'].includes(o.status)
         );
       case 'completed':
-        return orders.filter((o: any) => o.status === 'DELIVERED');
+        return userOrders.filter((o: any) => o.status === 'DELIVERED');
       case 'cancelled':
-        return orders.filter((o: any) => o.status === 'CANCELLED');
+        return userOrders.filter((o: any) => o.status === 'CANCELLED');
       default:
         return [];
     }
-  }, [orders, activeTab]);
+  }, [orders, activeTab, user?.id]);
 
   const getStatusConfig = (status: OrderStatusType) => {
     return STATUS_CONFIG[status] || STATUS_CONFIG.PENDING;
@@ -83,7 +86,7 @@ export const OrdersScreen = () => {
     return (
       <TouchableOpacity
         style={{
-          backgroundColor: isDark ? colors.surface : theme.colors.white,
+          backgroundColor: colors.surface,
           borderRadius: 14,
           padding: 16,
           marginBottom: 10,
@@ -97,7 +100,7 @@ export const OrdersScreen = () => {
         onPress={() => navigation.navigate('OrderDetails', { order: item })}
       >
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary }}>
+          <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary }}>
             #{String(item.id).substring(0, 8).toUpperCase()}
           </Text>
           <View style={{ backgroundColor: statusConfig.bg, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}>
@@ -112,26 +115,26 @@ export const OrdersScreen = () => {
         </View>
 
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text style={{ color: theme.colors.textSecondary, fontSize: 13 }}>📅 {orderDate}</Text>
-          <Text style={{ fontWeight: '700', color: theme.colors.primary, fontSize: 15 }}>${total.toFixed(2)}</Text>
+          <Text style={{ color: colors.textSecondary, fontSize: 13 }}>📅 {orderDate}</Text>
+          <Text style={{ fontWeight: '700', color: colors.primary, fontSize: 15 }}>${total.toFixed(2)}</Text>
         </View>
 
         {item.items && item.items.length > 0 && (
-          <View style={{ marginTop: 8, borderTopWidth: 1, borderTopColor: theme.colors.border, paddingTop: 8 }}>
+          <View style={{ marginTop: 8, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 8 }}>
             {item.items.slice(0, 3).map((orderItem: any, idx: number) => (
-              <Text key={idx} style={{ color: theme.colors.textSecondary, fontSize: 12 }}>
+              <Text key={idx} style={{ color: colors.textSecondary, fontSize: 12 }}>
                 {orderItem.quantity}x {orderItem.product?.name || `Producto #${orderItem.product_id}`}
               </Text>
             ))}
             {item.items.length > 3 && (
-              <Text style={{ color: theme.colors.textMuted, fontSize: 12 }}>+{item.items.length - 3} más...</Text>
+              <Text style={{ color: colors.textMuted, fontSize: 12 }}>+{item.items.length - 3} más...</Text>
             )}
           </View>
         )}
 
         {item.cancel_reason && (
           <View style={{ marginTop: 8, padding: 8, backgroundColor: '#FEE2E2', borderRadius: 8 }}>
-            <Text style={{ fontSize: 11, fontWeight: '600', color: theme.colors.error }}>Motivo: {item.cancel_reason}</Text>
+            <Text style={{ fontSize: 11, fontWeight: '600', color: colors.error }}>Motivo: {item.cancel_reason}</Text>
           </View>
         )}
       </TouchableOpacity>
@@ -139,16 +142,15 @@ export const OrdersScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={{ 
         alignItems: 'center',
         paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: isDark ? colors.surface : theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: isDark ? colors.border : theme.colors.border,
+        backgroundColor: colors.surface,
       }}>
-        <Text style={{ fontSize: 22, fontWeight: '800', color: isDark ? colors.textPrimary : theme.colors.textPrimary }}>Mis Pedidos</Text>
-        <Text style={{ fontSize: 12, color: theme.colors.textMuted, marginTop: 4 }}>
+        <Text style={{ fontSize: 22, fontWeight: '800', color: colors.textPrimary }}>Mis Pedidos</Text>
+        <Text style={{ fontSize: 12, color: colors.textMuted, marginTop: 4 }}>
           🔄 Actualización automática cada 10 segundos
         </Text>
       </View>
@@ -156,17 +158,17 @@ export const OrdersScreen = () => {
       {/* Tabs */}
       <View style={{ 
         flexDirection: 'row', 
-        backgroundColor: isDark ? colors.surface : theme.colors.white,
+        backgroundColor: colors.surface,
         paddingHorizontal: 12, paddingVertical: 8,
-        borderBottomWidth: 1, borderBottomColor: isDark ? colors.border : theme.colors.border,
         gap: 6,
       }}>
         {TABS.map(tab => {
+          const userOrders = user?.id ? orders?.filter((o: any) => String(o.user_id) === String(user.id)) : orders;
           const count = tab.key === 'active' 
-            ? orders?.filter((o: any) => ['PENDING', 'PAID', 'PREPARING', 'READY', 'ON_THE_WAY'].includes(o.status)).length || 0
+            ? userOrders?.filter((o: any) => ['PENDING', 'PAID', 'PREPARING', 'READY', 'ON_THE_WAY'].includes(o.status)).length || 0
             : tab.key === 'completed'
-            ? orders?.filter((o: any) => o.status === 'DELIVERED').length || 0
-            : orders?.filter((o: any) => o.status === 'CANCELLED').length || 0;
+            ? userOrders?.filter((o: any) => o.status === 'DELIVERED').length || 0
+            : userOrders?.filter((o: any) => o.status === 'CANCELLED').length || 0;
 
           return (
             <TouchableOpacity
@@ -175,13 +177,13 @@ export const OrdersScreen = () => {
                 flex: 1,
                 paddingVertical: 10,
                 borderRadius: 10,
-                backgroundColor: activeTab === tab.key ? theme.colors.primary : theme.colors.borderLight,
+                backgroundColor: activeTab === tab.key ? colors.primary : colors.borderLight,
                 alignItems: 'center',
               }}
               onPress={() => setActiveTab(tab.key)}
             >
               <Text style={{ 
-                color: activeTab === tab.key ? '#fff' : theme.colors.textSecondary, 
+                color: activeTab === tab.key ? '#fff' : colors.textSecondary, 
                 fontWeight: '700', fontSize: 13 
               }}>
                 {tab.label} ({count})
@@ -194,7 +196,7 @@ export const OrdersScreen = () => {
       {/* Orders List */}
       {loading ? (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
         <FlatList
@@ -208,7 +210,7 @@ export const OrdersScreen = () => {
               <Text style={{ fontSize: 48, marginBottom: 12 }}>
                 {activeTab === 'active' ? '📭' : activeTab === 'completed' ? '✅' : '❌'}
               </Text>
-              <Text style={{ fontSize: 15, color: theme.colors.textMuted }}>
+              <Text style={{ fontSize: 15, color: colors.textMuted }}>
                 {activeTab === 'active' ? 'No tienes pedidos activos' : 
                  activeTab === 'completed' ? 'No hay pedidos completados' : 
                  'No hay pedidos cancelados'}

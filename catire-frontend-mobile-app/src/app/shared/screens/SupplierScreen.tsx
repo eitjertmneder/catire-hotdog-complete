@@ -1,13 +1,14 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Alert, FlatList, Modal, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useForecastingStore, Supplier } from '../store/forecasting.store';
-import { theme } from '../styles/theme';
+import { useAppTheme } from '../contexts/ThemeContext';
 
 export const SupplierScreen = () => {
   const navigation = useNavigation();
   const { suppliers, addSupplier, deleteSupplier } = useForecastingStore();
+  const { colors } = useAppTheme();
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -40,18 +41,18 @@ export const SupplierScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={{
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+        backgroundColor: colors.white,
+        borderBottomWidth: 1, borderBottomColor: colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>← Volver</Text>
+          <Text style={{ fontSize: 16, color: colors.primary, fontWeight: '600' }}>← Volver</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginLeft: 12 }}>
           📦 Proveedores
         </Text>
       </View>
@@ -59,7 +60,7 @@ export const SupplierScreen = () => {
       {/* Add Button */}
       <TouchableOpacity
         style={{
-          backgroundColor: theme.colors.primary,
+          backgroundColor: colors.primary,
           margin: 16,
           paddingVertical: 14,
           borderRadius: 12,
@@ -78,40 +79,40 @@ export const SupplierScreen = () => {
         ListEmptyComponent={
           <View style={{ alignItems: 'center', paddingTop: 60 }}>
             <Text style={{ fontSize: 48, marginBottom: 12 }}>📦</Text>
-            <Text style={{ fontSize: 16, color: theme.colors.textMuted }}>No hay proveedores registrados</Text>
+            <Text style={{ fontSize: 16, color: colors.textMuted }}>No hay proveedores registrados</Text>
           </View>
         }
         renderItem={({ item }) => (
           <View style={{
-            backgroundColor: theme.colors.white,
+            backgroundColor: colors.white,
             borderRadius: 12,
             padding: 16,
             marginBottom: 10,
           }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-              <Text style={{ fontSize: 16, fontWeight: '700', color: theme.colors.textPrimary }}>
+              <Text style={{ fontSize: 16, fontWeight: '700', color: colors.textPrimary }}>
                 {item.name}
               </Text>
               <Text style={{ fontSize: 14 }}>
                 {'⭐'.repeat(Math.floor(item.rating))}
               </Text>
             </View>
-            <Text style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: 4 }}>
+            <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 4 }}>
               📞 {item.phone}
             </Text>
             {item.email && (
-              <Text style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: 4 }}>
+              <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 4 }}>
                 ✉️ {item.email}
               </Text>
             )}
-            <Text style={{ fontSize: 12, color: theme.colors.textMuted, marginBottom: 4 }}>
+            <Text style={{ fontSize: 12, color: colors.textMuted, marginBottom: 4 }}>
               Productos: {item.products.join(', ')}
             </Text>
             <View style={{ flexDirection: 'row', gap: 16 }}>
-              <Text style={{ fontSize: 12, color: theme.colors.textMuted }}>
+              <Text style={{ fontSize: 12, color: colors.textMuted }}>
                 Entrega: {item.lead_time_days} días
               </Text>
-              <Text style={{ fontSize: 12, color: theme.colors.textMuted }}>
+              <Text style={{ fontSize: 12, color: colors.textMuted }}>
                 Mínimo: ${item.minimum_order}
               </Text>
             </View>
@@ -134,7 +135,7 @@ export const SupplierScreen = () => {
       <Modal visible={showModal} transparent animationType="slide">
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
           <View style={{
-            backgroundColor: theme.colors.white,
+            backgroundColor: colors.white,
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
             padding: 20,
@@ -150,10 +151,10 @@ export const SupplierScreen = () => {
               { key: 'minimum_order', label: 'Pedido mínimo ($)', placeholder: '100' },
             ].map(({ key, label, placeholder }) => (
               <View key={key} style={{ marginBottom: 12 }}>
-                <Text style={{ fontSize: 12, color: theme.colors.textMuted, marginBottom: 4 }}>{label.toUpperCase()}</Text>
+                <Text style={{ fontSize: 12, color: colors.textMuted, marginBottom: 4 }}>{label.toUpperCase()}</Text>
                 <TextInput
                   style={{
-                    borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8,
+                    borderWidth: 1, borderColor: colors.border, borderRadius: 8,
                     padding: 12, fontSize: 14,
                   }}
                   placeholder={placeholder}
@@ -166,13 +167,13 @@ export const SupplierScreen = () => {
 
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 8 }}>
               <TouchableOpacity
-                style={{ flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center', backgroundColor: theme.colors.borderLight }}
+                style={{ flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center', backgroundColor: colors.borderLight }}
                 onPress={() => setShowModal(false)}
               >
-                <Text style={{ color: theme.colors.textSecondary }}>Cancelar</Text>
+                <Text style={{ color: colors.textSecondary }}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={{ flex: 2, paddingVertical: 14, borderRadius: 12, alignItems: 'center', backgroundColor: theme.colors.primary }}
+                style={{ flex: 2, paddingVertical: 14, borderRadius: 12, alignItems: 'center', backgroundColor: colors.primary }}
                 onPress={handleSave}
               >
                 <Text style={{ color: '#fff', fontWeight: '700' }}>Guardar</Text>

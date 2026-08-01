@@ -5,11 +5,12 @@ import { useNavigation } from '@react-navigation/native';
 
 import { useVoiceStore } from '../../../shared/store/voice.store';
 import { useCartStore } from '../../../shared/store/cart.store';
-import { theme } from '../../../shared/styles/theme';
+import { useAppTheme } from '../../../shared/contexts/ThemeContext';
 
 export const VoiceOrderScreen = () => {
   const navigation = useNavigation<any>();
   const { isListening, startListening, stopListening, speak, parseOrder, setTranscript, transcript } = useVoiceStore();
+  const { colors } = useAppTheme();
   const { addItem } = useCartStore();
   const [pulseAnim] = useState(new Animated.Value(1));
   const [lastOrder, setLastOrder] = useState<string | null>(null);
@@ -36,7 +37,7 @@ export const VoiceOrderScreen = () => {
       processOrder(mockResult);
     } else {
       startListening();
-      speak('�Qu� quieres ordenar?');
+      speak('Que quieres ordenar?');
     }
   };
 
@@ -65,30 +66,30 @@ export const VoiceOrderScreen = () => {
                 features: [],
               });
               speak('Agregado al carrito');
-              Alert.alert('�xito', 'Producto agregado al carrito');
+              Alert.alert('Exito', 'Producto agregado al carrito');
             }
           },
         ]
       );
     } else {
-      speak('No entend� el producto. Por favor, intenta de nuevo.');
-      Alert.alert('No entend�', 'No pude identificar el producto. Intenta con: "Quiero 2 perros calientes"');
+      speak('No entendi el producto. Por favor, intenta de nuevo.');
+      Alert.alert('No entendi', 'No pude identificar el producto. Intenta con: "Quiero 2 perros calientes"');
     }
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={{
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: 16, paddingVertical: 16,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1, borderBottomColor: theme.colors.border,
+        backgroundColor: colors.white,
+        borderBottomWidth: 1, borderBottomColor: colors.border,
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={{ fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
+          <Text style={{ fontSize: 16, color: colors.primary, fontWeight: '600' }}>{'\u2190'} Volver</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: theme.colors.textPrimary, marginLeft: 12 }}>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginLeft: 12 }}>
           Pedido por Voz
         </Text>
       </View>
@@ -103,11 +104,11 @@ export const VoiceOrderScreen = () => {
             width: 150,
             height: 150,
             borderRadius: 75,
-            backgroundColor: isListening ? '#EF4444' : theme.colors.primary,
+            backgroundColor: isListening ? '#EF4444' : colors.primary,
             justifyContent: 'center',
             alignItems: 'center',
             transform: [{ scale: pulseAnim }],
-            shadowColor: isListening ? '#EF4444' : theme.colors.primary,
+            shadowColor: isListening ? '#EF4444' : colors.primary,
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.3,
             shadowRadius: 8,
@@ -120,7 +121,7 @@ export const VoiceOrderScreen = () => {
         <Text style={{
           fontSize: 18,
           fontWeight: '600',
-          color: isListening ? '#EF4444' : theme.colors.textPrimary,
+          color: isListening ? '#EF4444' : colors.textPrimary,
           textAlign: 'center',
           marginBottom: 20,
         }}>
@@ -130,14 +131,14 @@ export const VoiceOrderScreen = () => {
         {/* Transcript */}
         {transcript ? (
           <View style={{
-            backgroundColor: theme.colors.white,
+            backgroundColor: colors.white,
             borderRadius: 12,
             padding: 16,
             width: '100%',
             marginBottom: 20,
           }}>
-            <Text style={{ fontSize: 12, color: theme.colors.textMuted, marginBottom: 4 }}>LO QUE DIJISTE:</Text>
-            <Text style={{ fontSize: 16, color: theme.colors.textPrimary }}>{transcript}</Text>
+            <Text style={{ fontSize: 12, color: colors.textMuted, marginBottom: 4 }}>LO QUE DIJISTE:</Text>
+            <Text style={{ fontSize: 16, color: colors.textPrimary }}>{transcript}</Text>
           </View>
         ) : null}
 
@@ -160,24 +161,24 @@ export const VoiceOrderScreen = () => {
 
         {/* Instructions */}
         <View style={{
-          backgroundColor: theme.colors.white,
+          backgroundColor: colors.white,
           borderRadius: 12,
           padding: 16,
           width: '100%',
         }}>
-          <Text style={{ fontSize: 14, fontWeight: '700', color: theme.colors.textPrimary, marginBottom: 12 }}>
+          <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 }}>
             Ejemplos de pedidos:
           </Text>
-          <Text style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: 8 }}>
+          <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 8 }}>
             {'\u2022'} "Quiero 2 perros calientes"
           </Text>
-          <Text style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: 8 }}>
+          <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 8 }}>
             {'\u2022'} "Una hamburguesa sencilla"
           </Text>
-          <Text style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: 8 }}>
+          <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 8 }}>
             {'\u2022'} "3 salchipapas normales"
           </Text>
-          <Text style={{ fontSize: 13, color: theme.colors.textSecondary }}>
+          <Text style={{ fontSize: 13, color: colors.textSecondary }}>
             {'\u2022'} "Una coca cola 2 litros"
           </Text>
         </View>
@@ -187,20 +188,20 @@ export const VoiceOrderScreen = () => {
           <TouchableOpacity
             style={{
               flex: 1,
-              backgroundColor: theme.colors.white,
+              backgroundColor: colors.white,
               borderRadius: 12,
               padding: 16,
               alignItems: 'center',
             }}
-            onPress={() => speak('�Qu� quieres ordenar?')}
+            onPress={() => speak('Que quieres ordenar?')}
           >
             <Text style={{ fontSize: 24, marginBottom: 8 }}>{'\u{1F50A}'}</Text>
-            <Text style={{ fontSize: 12, color: theme.colors.textPrimary }}>Repetir</Text>
+            <Text style={{ fontSize: 12, color: colors.textPrimary }}>Repetir</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
               flex: 1,
-              backgroundColor: theme.colors.white,
+              backgroundColor: colors.white,
               borderRadius: 12,
               padding: 16,
               alignItems: 'center',
@@ -208,7 +209,7 @@ export const VoiceOrderScreen = () => {
             onPress={() => navigation.navigate('Cart' as any)}
           >
             <Text style={{ fontSize: 24, marginBottom: 8 }}>{'\u{1F6D2}'}</Text>
-            <Text style={{ fontSize: 12, color: theme.colors.textPrimary }}>Ver Carrito</Text>
+            <Text style={{ fontSize: 12, color: colors.textPrimary }}>Ver Carrito</Text>
           </TouchableOpacity>
         </View>
       </View>

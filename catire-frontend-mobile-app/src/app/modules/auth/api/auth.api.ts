@@ -19,4 +19,8 @@ const register = async (payload: UserDTO): Promise<ApiResponse<User>> => {
   return await client.post<UserDTO, User>('auth', 'register', payload);
 };
 
-export default { login, validate, register };
+const firebaseSync = async (firebaseToken: string): Promise<ApiResponse<{ access_token: string; user: User }>> => {
+  return await client.post<{ firebaseToken: string }, { access_token: string; user: User }>('auth', 'firebase-sync', { firebaseToken });
+};
+
+export default { login, validate, register, firebaseSync };

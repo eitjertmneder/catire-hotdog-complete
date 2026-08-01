@@ -105,7 +105,6 @@ export const useTwoFAStore = create<TwoFAState>()(
 
       sendVerificationCode: (userId) => {
         const code = Math.floor(100000 + Math.random() * 900000).toString();
-        console.log(`[2FA] Verification code for user ${userId}: ${code}`);
         return code;
       },
 

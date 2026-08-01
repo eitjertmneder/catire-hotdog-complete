@@ -1,28 +1,27 @@
 import { StyleSheet } from "react-native";
-import { theme } from "../../../../../shared/styles/theme";
 
-export const styles = StyleSheet.create({
+export const createCartStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1, 
     padding: 16,
     paddingTop: 0,
-    backgroundColor: theme.colors.background,
+    backgroundColor: colors.background,
   },
   title: {
     fontSize: 24,
     fontWeight: '800',
-    color: theme.colors.textPrimary,
+    color: colors.textPrimary,
     marginBottom: 12,
   },
   emptyText: {
     textAlign: 'center',
     fontSize: 15,
-    color: theme.colors.textMuted,
+    color: colors.textMuted,
     marginTop: 40,
   },
   
   cartItemWrapper: {
-    backgroundColor: theme.colors.white,
+    backgroundColor: colors.surface,
     borderRadius: 12,
     marginBottom: 8,
     shadowColor: '#000',
@@ -39,7 +38,7 @@ export const styles = StyleSheet.create({
   },
   expandText: {
     fontSize: 11,
-    color: theme.colors.primary,
+    color: colors.primary,
     fontWeight: '600',
     marginTop: 4,
   },
@@ -47,8 +46,8 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingBottom: 14,
     borderTopWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.background,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
   },
   featureSection: {
     marginTop: 8,
@@ -56,7 +55,7 @@ export const styles = StyleSheet.create({
   featureTitle: {
     fontSize: 11,
     fontWeight: '700',
-    color: theme.colors.textMuted,
+    color: colors.textMuted,
     marginBottom: 4,
     textTransform: 'uppercase',
   },
@@ -66,13 +65,13 @@ export const styles = StyleSheet.create({
     gap: 6,
   },
   readOnlyPill: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: colors.primary,
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 14,
   },
   readOnlyPillText: {
-    color: theme.colors.white,
+    color: colors.white,
     fontSize: 11,
     fontWeight: '600',
   },
@@ -84,10 +83,10 @@ export const styles = StyleSheet.create({
   itemName: {
     fontSize: 15,
     fontWeight: '600',
-    color: theme.colors.textPrimary,
+    color: colors.textPrimary,
   },
   itemPrice: {
-    color: theme.colors.success,
+    color: colors.success,
     marginTop: 2,
     fontWeight: '600',
     fontSize: 13,
@@ -102,28 +101,28 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
     width: 32,
     alignItems: 'center',
-    backgroundColor: theme.colors.borderLight,
+    backgroundColor: colors.borderLight,
   },
   actionBtnText: {
     fontSize: 16,
     fontWeight: '700',
-    color: theme.colors.textPrimary,
+    color: colors.textPrimary,
   },
   quantity: {
     fontSize: 15,
     fontWeight: '700',
-    color: theme.colors.textPrimary,
+    color: colors.textPrimary,
   },
   deleteBtn: {
     padding: 8,
   },
   deleteText: {
-    color: theme.colors.error,
+    color: colors.error,
     fontSize: 16,
   },
   checkoutSection: {
     borderTopWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: colors.border,
     paddingTop: 16,
     marginTop: 8,
   },
@@ -132,7 +131,7 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 12,
     textAlign: 'right',
-    color: theme.colors.textPrimary,
+    color: colors.textPrimary,
   },
   switchContainer: {
     flexDirection: 'row',
@@ -142,7 +141,7 @@ export const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    color: theme.colors.textPrimary,
+    color: colors.textPrimary,
   },
   addressForm: {
     gap: 8,
@@ -150,26 +149,27 @@ export const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.white,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
     padding: 12,
     borderRadius: 10,
     fontSize: 14,
+    color: colors.textPrimary,
   },
   confirmBtn: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: colors.primary,
     padding: 14,
     borderRadius: 10,
     alignItems: 'center',
     marginTop: 10,
-    shadowColor: theme.colors.primary,
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 3,
   },
   confirmBtnDisabled: {
-    backgroundColor: theme.colors.errorBg,
+    backgroundColor: colors.errorBg,
   },
   confirmBtnText: {
     color: 'white',
@@ -185,7 +185,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     padding: 28,
     borderRadius: 20,
     width: '85%',
@@ -204,17 +204,17 @@ export const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     marginBottom: 8,
-    color: theme.colors.textPrimary,
+    color: colors.textPrimary,
   },
   modalMessage: {
     fontSize: 14,
     textAlign: 'center',
-    color: theme.colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 20,
     lineHeight: 20,
   },
   modalBtn: {
-    backgroundColor: theme.colors.success,
+    backgroundColor: colors.success,
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 10,

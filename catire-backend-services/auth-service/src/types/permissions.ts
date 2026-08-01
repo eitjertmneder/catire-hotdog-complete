@@ -1,5 +1,5 @@
 export type Role = 'client' | 'employee' | 'admin';
-export type Module = 'Users' | 'Roles' | 'Branches' | 'Products' | 'Menus' | 'Orders' | 'Purchases';
+export type Module = 'Users' | 'Roles' | 'Branches' | 'Products' | 'Menus' | 'Orders' | 'Purchases' | 'Ingredients' | 'Reviews';
 export type Permission = 'create' | 'read' | 'update' | 'delete';
 
 export type ModulesPermissions = {

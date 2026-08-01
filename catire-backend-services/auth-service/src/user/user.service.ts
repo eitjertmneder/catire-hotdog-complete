@@ -1,19 +1,21 @@
-import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
 import { UpdateUserDTO } from './dto/update-user.dto';
 import { UserRole } from 'src/types/user';
+import { SecurityService } from '../security/security.service';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private securityService: SecurityService,
+  ) {}
 
   async createUser(body: CreateUserDto): Promise<User | null> {
     try {
-      const salts = await bcrypt.genSalt();
-      const hash = await bcrypt.hash(body.password, salts);
+      const hash = await this.securityService.hashPassword(body.password);
 
       const newUser = await this.prisma.user.create({
         data: {
@@ -77,8 +79,7 @@ export class UserService {
     try {
       let newPassword = data.password;
       if (data.password) {
-        const salts = await bcrypt.genSalt();
-        newPassword = await bcrypt.hash(data.password, salts);
+        newPassword = await this.securityService.hashPassword(data.password);
       }
 
       const updated = await this.prisma.user.update({
@@ -97,7 +98,6 @@ export class UserService {
 
   async deleteUser(id: number): Promise<boolean> {
     try {
-      // Soft delete: establecer deleted_at en lugar de eliminar
       await this.prisma.user.update({
         where: { id },
         data: { deleted_at: new Date() },
@@ -110,5 +110,3 @@ export class UserService {
     }
   }
 }
-
-

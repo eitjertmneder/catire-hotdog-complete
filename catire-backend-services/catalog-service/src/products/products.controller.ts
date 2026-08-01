@@ -24,14 +24,12 @@ export class ProductsController {
   constructor(private service: ProductsService) {}
 
   @Get()
-  @UseGuards(PermissionGuard)
   @CheckPermission('Products', 'read')
   async findAll(@Query('menuId') menuId?: string): Promise<Product[]> {
     return this.service.findAll(menuId ? Number(menuId) : undefined);
   }
 
   @Get(':id')
-  @UseGuards(PermissionGuard)
   @CheckPermission('Products', 'read')
   async findOne(@Param('id') id: number): Promise<Product | null> {
     const product = await this.service.findOne(id);
@@ -40,14 +38,12 @@ export class ProductsController {
   }
 
   @Post()
-  @UseGuards(PermissionGuard)
   @CheckPermission('Products', 'create')
   async create(@Body() body: CreateProductDTO): Promise<Product> {
     return this.service.create(body);
   }
 
   @Patch(':id')
-  @UseGuards(PermissionGuard)
   @CheckPermission('Products', 'update')
   async update(
     @Param('id') id: number,
@@ -59,7 +55,6 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  @UseGuards(PermissionGuard)
   @CheckPermission('Products', 'delete')
   async remove(@Param('id') id: number): Promise<void> {
     const product = await this.service.remove(id);

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useCartStore } from '../../../shared/store/cart.store';
+import { usePromotionStore } from '../../../shared/store/promotion.store';
 import { NameTag } from '../../../shared/api/enums';
 import { useAppTheme } from '../../../shared/contexts/ThemeContext';
 
@@ -10,15 +11,15 @@ import { useAppTheme } from '../../../shared/contexts/ThemeContext';
 const SAUSAGE_PRICES: Record<string, number> = {
   'Mini Frankfurt': 2.50,
   'Catirota': 5.00,
-  'CatireHot': 5.00,
+  'Catire Hot': 5.00,
   'Chicken': 5.00,
-  'Chesse': 4.50,
+  'Cheese Salchicatire': 4.50,
   'Salchicatire': 4.50,
   'Chistorra': 4.50,
-  'Uruguayo': 4.50,
-  'Antioqueño': 4.50,
+  'Urugayo': 4.50,
+  'Antioqueno': 4.50,
   'Choricatire': 4.50,
-  'Chori Frito': 4.50,
+  'Chorifrito': 4.50,
 };
 
 // Precios de carnes
@@ -71,9 +72,9 @@ const PRODUCTS: Record<string, any> = {
     name: 'Perro Caliente Normal',
     category: 'Perros',
     extrasLabel: 'Tipo de Salchicha',
-    sizes: ['Normal'],
+    sizes: ['Pan normal'],
     toppings: ['Queso', 'Papita', 'Zanahoria', 'Cebolla'],
-    extras: ['Catirota', 'CatireHot', 'Chicken', 'Chesse', 'Salchicatire', 'Chistorra', 'Uruguayo', 'Antioqueño', 'Choricatire', 'Chori Frito'],
+    extras: ['Catirota', 'Catire Hot', 'Chicken', 'Cheese Salchicatire', 'Salchicatire', 'Chistorra', 'Urugayo', 'Antioqueno', 'Choricatire', 'Chorifrito'],
     sauces: ['Ketchup', 'Mostaza', 'Mayonesa', 'Salsa de Ajo'],
     rules: { maxExtras: 1, extraMode: 'radio' },
   },
@@ -82,7 +83,7 @@ const PRODUCTS: Record<string, any> = {
     name: 'Perro Caliente Mini',
     category: 'Perros',
     extrasLabel: 'Tipo de Salchicha',
-    sizes: ['Pan mini'],
+    sizes: ['Pan pequeno'],
     toppings: ['Queso', 'Papita', 'Zanahoria', 'Cebolla'],
     extras: ['Mini Frankfurt'],
     sauces: ['Ketchup', 'Mostaza', 'Mayonesa', 'Salsa de Ajo'],
@@ -117,9 +118,9 @@ const PRODUCTS: Record<string, any> = {
     extrasLabel: 'Tipo de Salchicha',
     sizes: ['Junior'],
     toppings: ['Queso gouda'],
-    extras: ['Chesse'],
+    extras: ['Cheese Salchicatire'],
     sauces: ['Ketchup', 'Mostaza', 'Mayonesa', 'Salsa de Ajo'],
-    rules: { maxExtras: 1, forcedExtras: { 'Junior': ['Chesse'] } },
+    rules: { maxExtras: 1, forcedExtras: { 'Junior': ['Cheese Salchicatire'] } },
   },
   salchi_normal: {
     id: 'salchi_normal',
@@ -128,7 +129,7 @@ const PRODUCTS: Record<string, any> = {
     extrasLabel: 'Tipo de Salchicha',
     sizes: ['Normal'],
     toppings: ['Queso gouda'],
-    extras: ['Catirota', 'CatireHot', 'Chicken', 'Chesse', 'Salchicatire', 'Chistorra', 'Uruguayo', 'Antioqueño', 'Choricatire', 'Chori Frito'],
+    extras: ['Catirota', 'Catire Hot', 'Chicken', 'Cheese Salchicatire', 'Salchicatire', 'Chistorra', 'Urugayo', 'Antioqueno', 'Choricatire', 'Chorifrito'],
     sauces: ['Ketchup', 'Mostaza', 'Mayonesa', 'Salsa de Ajo'],
     rules: { maxExtras: 2, lockedExtras: { 'Normal': ['Salchicatire'] }, lockedNote: 'Salchicatire incluida + elige 1 más' },
   },
@@ -141,8 +142,8 @@ const PRODUCTS: Record<string, any> = {
 // Sucursales que NO tienen hamburguesa
 const NO_HAMBURGUESA = [11, 16];
 
-// Sucursales que TIENEN Nestea
-const HAS_NESTEA = [1, 2, 3, 4, 11, 12, 13];
+// Sucursales que TIENEN Nestea: Barrio Obrero, Sambil, Colombia (Prados del Este)
+const HAS_NESTEA = [11, 16, 4];
 
 // Funcion para filtrar productos por sucursal
 const getProductsForBranch = (branchId: number) => {
@@ -195,6 +196,18 @@ export default function BuildOrderScreen() {
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState('');
   const { isDark, colors } = useAppTheme();
+  const { getActivePromotions } = usePromotionStore();
+
+  // Get active promotions for this branch
+  const branchPromotions = useMemo(() => {
+    const active = getActivePromotions();
+    return active.filter(p => {
+      // If no branches specified, promotion applies to all
+      if (!p.applicable_branches || p.applicable_branches.length === 0) return true;
+      // Check if this branch is in the list
+      return p.applicable_branches.includes(branchId);
+    });
+  }, [branchId, getActivePromotions]);
 
   const selectProduct = (product: any) => {
     setSelectedProduct(product);
@@ -318,6 +331,37 @@ export default function BuildOrderScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+        {/* Promociones activas */}
+        {branchPromotions.length > 0 && (
+          <SectionCard title="Promociones">
+            {branchPromotions.map(promo => (
+              <View key={promo.id} style={{
+                backgroundColor: isDark ? '#2D1B1B' : '#FEF2F2',
+                borderRadius: 10,
+                padding: 12,
+                marginBottom: 8,
+                borderLeftWidth: 4,
+                borderLeftColor: '#EC3137',
+              }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary, flex: 1 }}>{promo.name}</Text>
+                  <View style={{ backgroundColor: '#EC3137', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 }}>
+                    <Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>
+                      {promo.discount_type === 'percentage' ? `-${promo.discount_value}%` : `-$${promo.discount_value}`}
+                    </Text>
+                  </View>
+                </View>
+                {promo.description && (
+                  <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 4 }}>{promo.description}</Text>
+                )}
+                {promo.code && (
+                  <Text style={{ fontSize: 11, color: '#EC3137', fontWeight: '600', marginTop: 4 }}>Codigo: {promo.code}</Text>
+                )}
+              </View>
+            ))}
+          </SectionCard>
+        )}
+
         {/* Tamano - Card */}
         {selectedProduct.sizes.length > 0 && (
           <SectionCard title="Tamano">

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Request,
   UseGuards,
@@ -11,6 +12,8 @@ import { AuthService } from './auth.service';
 import { UserService } from 'src/user/user.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { PermissionGuard } from './permission.guard';
+import { CheckPermission } from './permission.decorator';
 import { LogoutDTO, PermissionCheckDTO } from './dto/jwt.dto';
 import { type Request as TypedRequest } from 'src/types';
 import { User } from '@prisma/client';
@@ -52,7 +55,7 @@ export class AuthController {
   async logout(@Body() body: LogoutDTO) {
     const result = await this.authService.logout(body.refreshToken);
     return {
-      message: result.success ? 'Sesión cerrada' : 'No se encontró el token',
+      message: result.success ? 'Sesion cerrada' : 'No se encontro el token',
     };
   }
 
@@ -62,14 +65,14 @@ export class AuthController {
       throw new UnauthorizedException('El token es requerido');
     }
     const info = await this.authService.verifyToken(token);
-    if (!info) throw new UnauthorizedException('Token inválido');
+    if (!info) throw new UnauthorizedException('Token invalido');
     return info;
   }
 
   @Post('/check-permission')
   async checkPermission(@Body() body: PermissionCheckDTO) {
     const info = await this.authService.verifyToken(body.token);
-    if (!info) return { allowed: false, message: 'Token inválido' };
+    if (!info) return { allowed: false, message: 'Token invalido' };
     const roleId = info.role_id;
     if (!roleId) return { allowed: false, message: 'Rol no encontrado' };
     const role = await this.authService.getRoleById(roleId);
@@ -83,19 +86,30 @@ export class AuthController {
   }
 
   // Admin: unlock a user
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @CheckPermission('Users', 'update')
   @Post('/unlock-user')
   async unlockUser(@Body('email') email: string) {
     if (!email) throw new UnauthorizedException('Email requerido');
-    this.authService.unlockUser(email);
+    await this.authService.unlockUser(email);
     return { message: `Usuario ${email} desbloqueado` };
   }
 
   // Admin: get locked users
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @CheckPermission('Users', 'read')
   @Get('/locked-users')
   async getLockedUsers() {
     return this.authService.getLockedUsers();
+  }
+
+  // Admin: unblock a user by email param
+  @Post('unblock/:email')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @CheckPermission('Users', 'update')
+  async unblockUser(@Param('email') email: string) {
+    await this.authService.clearAttempts(email);
+    return { message: `Usuario ${email} desbloqueado exitosamente.` };
   }
 
   @Post('/firebase-sync')
@@ -104,4 +118,5 @@ export class AuthController {
       throw new UnauthorizedException('Firebase token requerido');
     }
     return await this.authService.firebaseSync(firebaseToken);
-  }}
+  }
+}

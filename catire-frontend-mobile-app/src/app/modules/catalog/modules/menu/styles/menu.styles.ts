@@ -1,10 +1,10 @@
 import { StyleSheet } from 'react-native';
-import { theme } from '../../../../../shared/styles/theme';
+import { lightTheme } from '../../../../../shared/styles/theme';
 
-export const styles = StyleSheet.create({
+export const getStyles = (colors: typeof lightTheme.colors) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: colors.background,
   },
   container: {
     flex: 1,
@@ -14,18 +14,18 @@ export const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: '800',
-    color: theme.colors.textPrimary,
+    color: colors.textPrimary,
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: theme.colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 20,
   },
   menuTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: theme.colors.white,
+    color: colors.white,
     marginVertical: 2,
   },
   menuSection: {
@@ -35,11 +35,11 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: theme.colors.primary,
+    backgroundColor: colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderRadius: 12,
-    shadowColor: theme.colors.primary,
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -48,10 +48,10 @@ export const styles = StyleSheet.create({
   accordionIcon: {
     fontSize: 22,
     fontWeight: '600',
-    color: theme.colors.white,
+    color: colors.white,
   },
   accordionContent: {
-    backgroundColor: theme.colors.white,
+    backgroundColor: colors.white,
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
     paddingTop: 12,

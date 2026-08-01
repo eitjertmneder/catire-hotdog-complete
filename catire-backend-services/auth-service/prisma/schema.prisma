@@ -63,6 +63,8 @@ enum Modules {
   Roles
   Orders
   Ingredients
+  Purchases
+  Reviews
 }
 
 model RefreshToken {
@@ -75,4 +77,15 @@ model RefreshToken {
   user       User     @relation(fields: [user_id], references: [id])
 
   @@map("refresh_tokens")
+}
+
+model LoginAttempt {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  count        Int      @default(0)
+  locked_until DateTime?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  @@map("login_attempts")
 }
